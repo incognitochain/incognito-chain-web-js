@@ -4144,14 +4144,16 @@ function () {
       var unspentCoinExceptSpeningCoin = this.cloneInputCoinArray(unspentCoins); // console.log("unspentCoinExceptSpeningCoin getUnspentCoinExceptSpendingCoin before: ", unspentCoinExceptSpeningCoin);
       // console.log(" AAAA account.spendingCoins: ", account.spendingCoins);
 
-      for (var i = 0; i < account.spendingCoins.length; i++) {
-        for (var j = 0; j < account.spendingCoins[i].spendingSNs.length; j++) {
-          // console.log("Spending coin : ", account.spendingCoins)
-          for (var k = 0; k < unspentCoinExceptSpeningCoin.length; k++) {
-            // console.log("FFF account.spendingCoins[i].spendingCoins[j].toString(): ", account.spendingCoins[i].spendingSNs[j].toString());
-            // console.log("FFF unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString(): ", unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString());
-            if (account.spendingCoins[i].spendingSNs[j].toString() === unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString()) {
-              unspentCoinExceptSpeningCoin.splice(k, 1);
+      if (account.spendingCoins) {
+        for (var i = 0; i < account.spendingCoins.length; i++) {
+          for (var j = 0; j < account.spendingCoins[i].spendingSNs.length; j++) {
+            // console.log("Spending coin : ", account.spendingCoins)
+            for (var k = 0; k < unspentCoinExceptSpeningCoin.length; k++) {
+              // console.log("FFF account.spendingCoins[i].spendingCoins[j].toString(): ", account.spendingCoins[i].spendingSNs[j].toString());
+              // console.log("FFF unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString(): ", unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString());
+              if (account.spendingCoins[i].spendingSNs[j].toString() === unspentCoinExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString()) {
+                unspentCoinExceptSpeningCoin.splice(k, 1);
+              }
             }
           }
         }
@@ -4166,13 +4168,15 @@ function () {
       var UTXOExceptSpeningCoin = this.cloneInputCoinArray(unspentCoins);
       var UTXOExceptSpeningCoinStrs = unspentCoinStrs;
 
-      for (var i = 0; i < account.spendingCoins.length; i++) {
-        for (var j = 0; j < account.spendingCoins[i].spendingSNs.length; j++) {
-          // console.log("Spending coin : ", account.spendingCoins)
-          for (var k = 0; k < UTXOExceptSpeningCoin.length; k++) {
-            if (account.spendingCoins[i].spendingSNs[j].toString() === UTXOExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString()) {
-              UTXOExceptSpeningCoin.splice(k, 1);
-              UTXOExceptSpeningCoinStrs.splice(k, 1);
+      if (account.spendingCoins) {
+        for (var i = 0; i < account.spendingCoins.length; i++) {
+          for (var j = 0; j < account.spendingCoins[i].spendingSNs.length; j++) {
+            // console.log("Spending coin : ", account.spendingCoins)
+            for (var k = 0; k < UTXOExceptSpeningCoin.length; k++) {
+              if (account.spendingCoins[i].spendingSNs[j].toString() === UTXOExceptSpeningCoin[k].coinDetails.serialNumber.compress().toString()) {
+                UTXOExceptSpeningCoin.splice(k, 1);
+                UTXOExceptSpeningCoinStrs.splice(k, 1);
+              }
             }
           }
         }
@@ -8974,37 +8978,38 @@ function () {
       _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee17() {
-        var i, j, response;
+        var update, i, j, response;
         return regeneratorRuntime.wrap(function _callee17$(_context17) {
           while (1) {
             switch (_context17.prev = _context17.next) {
               case 0:
                 console.log("HHHH updating spending list: ");
+                update = false;
                 i = 0;
 
-              case 2:
+              case 3:
                 if (!(i < _this4.MasterAccount.child.length)) {
-                  _context17.next = 16;
+                  _context17.next = 17;
                   break;
                 }
 
                 if (!_this4.MasterAccount.child[i].spendingCoins) {
-                  _context17.next = 13;
+                  _context17.next = 14;
                   break;
                 }
 
                 j = 0;
 
-              case 5:
+              case 6:
                 if (!(j < _this4.MasterAccount.child[i].spendingCoins.length)) {
-                  _context17.next = 13;
+                  _context17.next = 14;
                   break;
                 }
 
-                _context17.next = 8;
+                _context17.next = 9;
                 return Wallet.RpcClient.getTransactionByHash(_this4.MasterAccount.child[i].spendingCoins[j].txID);
 
-              case 8:
+              case 9:
                 response = _context17.sent;
 
                 if (response.err === null && response.isInBlock || response.err != null && response.isInBlock === false && response.isInMempool === false) {
@@ -9013,22 +9018,25 @@ function () {
                   _this4.MasterAccount.child[i].removeObjectFromSpendingCoins(_this4.MasterAccount.child[i].spendingCoins[j].txID);
 
                   console.log("BBBBB this.spendingCoins after update history: ", _this4.MasterAccount.child[i].spendingCoins);
+                  update = true;
                 }
 
-              case 10:
+              case 11:
                 j++;
-                _context17.next = 5;
+                _context17.next = 6;
                 break;
 
-              case 13:
+              case 14:
                 i++;
-                _context17.next = 2;
+                _context17.next = 3;
                 break;
-
-              case 16:
-                _this4.save(_this4.PassPhrase);
 
               case 17:
+                if (update) {
+                  _this4.save(_this4.PassPhrase);
+                }
+
+              case 18:
               case "end":
                 return _context17.stop();
             }
@@ -32613,10 +32621,10 @@ utils.intFromLE = intFromLE;
 /*!********************************************!*\
   !*** ./node_modules/elliptic/package.json ***!
   \********************************************/
-/*! exports provided: _args, _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _spec, _where, author, bugs, dependencies, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
+/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
 /***/ (function(module) {
 
-module.exports = {"_args":[["elliptic@6.4.1","/Users/thaibao/Documents/autonomous/constant-chain-web-js"]],"_from":"elliptic@6.4.1","_id":"elliptic@6.4.1","_inBundle":false,"_integrity":"sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==","_location":"/elliptic","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"elliptic@6.4.1","name":"elliptic","escapedName":"elliptic","rawSpec":"6.4.1","saveSpec":null,"fetchSpec":"6.4.1"},"_requiredBy":["/browserify-sign","/create-ecdh","/privacy-js-lib"],"_resolved":"https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz","_spec":"6.4.1","_where":"/Users/thaibao/Documents/autonomous/constant-chain-web-js","author":{"name":"Fedor Indutny","email":"fedor@indutny.com"},"bugs":{"url":"https://github.com/indutny/elliptic/issues"},"dependencies":{"bn.js":"^4.4.0","brorand":"^1.0.1","hash.js":"^1.0.0","hmac-drbg":"^1.0.0","inherits":"^2.0.1","minimalistic-assert":"^1.0.0","minimalistic-crypto-utils":"^1.0.0"},"description":"EC cryptography","devDependencies":{"brfs":"^1.4.3","coveralls":"^2.11.3","grunt":"^0.4.5","grunt-browserify":"^5.0.0","grunt-cli":"^1.2.0","grunt-contrib-connect":"^1.0.0","grunt-contrib-copy":"^1.0.0","grunt-contrib-uglify":"^1.0.1","grunt-mocha-istanbul":"^3.0.1","grunt-saucelabs":"^8.6.2","istanbul":"^0.4.2","jscs":"^2.9.0","jshint":"^2.6.0","mocha":"^2.1.0"},"files":["lib"],"homepage":"https://github.com/indutny/elliptic","keywords":["EC","Elliptic","curve","Cryptography"],"license":"MIT","main":"lib/elliptic.js","name":"elliptic","repository":{"type":"git","url":"git+ssh://git@github.com/indutny/elliptic.git"},"scripts":{"jscs":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","jshint":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","lint":"npm run jscs && npm run jshint","test":"npm run lint && npm run unit","unit":"istanbul test _mocha --reporter=spec test/index.js","version":"grunt dist && git add dist/"},"version":"6.4.1"};
+module.exports = {"_from":"elliptic@6.4.1","_id":"elliptic@6.4.1","_inBundle":false,"_integrity":"sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==","_location":"/elliptic","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"elliptic@6.4.1","name":"elliptic","escapedName":"elliptic","rawSpec":"6.4.1","saveSpec":null,"fetchSpec":"6.4.1"},"_requiredBy":["/browserify-sign","/create-ecdh","/privacy-js-lib"],"_resolved":"https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz","_shasum":"c2d0b7776911b86722c632c3c06c60f2f819939a","_spec":"elliptic@6.4.1","_where":"/Users/autonomous/Desktop/WORK/constant-chain-web-js/node_modules/privacy-js-lib","author":{"name":"Fedor Indutny","email":"fedor@indutny.com"},"bugs":{"url":"https://github.com/indutny/elliptic/issues"},"bundleDependencies":false,"dependencies":{"bn.js":"^4.4.0","brorand":"^1.0.1","hash.js":"^1.0.0","hmac-drbg":"^1.0.0","inherits":"^2.0.1","minimalistic-assert":"^1.0.0","minimalistic-crypto-utils":"^1.0.0"},"deprecated":false,"description":"EC cryptography","devDependencies":{"brfs":"^1.4.3","coveralls":"^2.11.3","grunt":"^0.4.5","grunt-browserify":"^5.0.0","grunt-cli":"^1.2.0","grunt-contrib-connect":"^1.0.0","grunt-contrib-copy":"^1.0.0","grunt-contrib-uglify":"^1.0.1","grunt-mocha-istanbul":"^3.0.1","grunt-saucelabs":"^8.6.2","istanbul":"^0.4.2","jscs":"^2.9.0","jshint":"^2.6.0","mocha":"^2.1.0"},"files":["lib"],"homepage":"https://github.com/indutny/elliptic","keywords":["EC","Elliptic","curve","Cryptography"],"license":"MIT","main":"lib/elliptic.js","name":"elliptic","repository":{"type":"git","url":"git+ssh://git@github.com/indutny/elliptic.git"},"scripts":{"jscs":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","jshint":"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js","lint":"npm run jscs && npm run jshint","test":"npm run lint && npm run unit","unit":"istanbul test _mocha --reporter=spec test/index.js","version":"grunt dist && git add dist/"},"version":"6.4.1"};
 
 /***/ }),
 
@@ -37442,23 +37450,23 @@ if (Base.base.BasePoint.prototype.derive) {
     console.warn("Overriding existing Base.base.BasePoint.prototype.derive. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 
-// const n = BigInt(P256.n.toString())
+const n = BigInt(P256.n.toString())
 Base.base.BasePoint.prototype.derive = function (seed, derivator) {
     let result = null;
-    try {
+    /*try {
         // if (this.isSafe()) {
-        //     console.time("1.1");
+            console.time("1.1");
             let temp;
             temp = (seed.toRed(N).redAdd(derivator.toRed(N)))
             temp = temp.redInvm().fromRed();
-            // console.timeEnd("1.1");
+            console.timeEnd("1.1");
             result = this.mul(temp)
         // }
     } catch (e) {
         console.log("ERR1", e);
-    }
+    }*/
 
-    /*try {
+    try {
         // if (this.isSafe()) {
         //     console.time("1.2");
             let temp;
@@ -37469,7 +37477,7 @@ Base.base.BasePoint.prototype.derive = function (seed, derivator) {
         // }
     } catch (e) {
         console.log("ERR2", e);
-    }*/
+    }
 
     return result;
 };
