@@ -26,7 +26,7 @@
     "crypto-js": "^3.1.9-1",
     "isomorphic-fetch": "^2.2.1",
     "sha3": "^2.0.7",
-    "yarn": "^1.19.1"
+    "yarn": "^1.22.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
