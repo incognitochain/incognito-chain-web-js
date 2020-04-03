@@ -24,7 +24,7 @@
     "node": "*"
   },
   "devDependencies": {
-    "eslint": "^2.11.1",
+    "eslint": "^6.8.0",
     "jsdoc": "3.4.0"
   }
 }
