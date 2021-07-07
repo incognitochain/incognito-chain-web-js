@@ -97,9 +97,10 @@ async function TestGetBalance() {
       tokenID1,
       //  tokenID2, ETH
     ];
-    await account.getKeyInfo({
+    const keyInfo = await account.getKeyInfo({
       version: privacyVersion,
     });
+    console.log("keyinfo", keyInfo);
     let task = tokenIDs.map((tokenID) =>
       account.getBalance({
         tokenID,
@@ -925,24 +926,31 @@ async function TestLoadWallet() {
     // const mnemonic = newMnemonic();
     // console.log("mnemonic", mnemonic);
     // return;
-    await wallet.import(
-      "romance suspect ostrich amount deer crane false concert present evidence atom short",
-      aesKey,
-      "Masterkey",
-      new StorageServices()
+    // await wallet.import(
+    //   "romance suspect ostrich amount deer crane false concert present evidence atom short",
+    //   aesKey,
+    //   "Masterkey",
+    //   new StorageServices()
+    // );
+    // await wallet.save(aesKey, false);
+    // await wallet.loadWallet({
+    //   password: passphrase,
+    //   aesKey,
+    // });
+    // const account = await wallet.createNewAccount("PHAT");
+    const account = await createAccountByPrivateKey(
+      "112t8rneQvmymBMxTEs1LzpfN7n122hmwjoZ2NZWtruHUE82bRN14xHSvdWc1Wu3wAoczMMowRC2iifXbZRgiu9GuJLYvRJr7VLuoBfhfF8h"
     );
-    await wallet.save(aesKey, false);
-    await wallet.loadWallet({
-      password: passphrase,
-      aesKey,
-    });
-    const account = await wallet.createNewAccount("PHAT");
     console.log("account", account.name);
-    console.log(
-      "LIST ACCOUNT",
-      wallet.MasterAccount.child.map((account) => account.name)
-    );
-    console.log(await wallet.getMeasureStorageValue());
+    await account.addListFollowingToken({
+      tokenIDs: ["123", "12345678", "1234567"],
+    });
+    let listFollowingTokens = await account.getListFollowingTokens();
+    console.log("listFollowingTokens after add", listFollowingTokens);
+    await account.removeFollowingToken({ tokenID: PRVID });
+    await account.removeFollowingToken({ tokenID: "1234567" });
+    listFollowingTokens = await account.getListFollowingTokens();
+    console.log("listFollowingTokens after remove PRV", listFollowingTokens);
   } catch (error) {
     console.log("TestLoadWallet ERROR", error);
   }
@@ -953,7 +961,7 @@ async function TestLoadWallet() {
 async function MainRoutine() {
   console.log("BEGIN WEB WALLET TEST");
   await setup();
-  return await TestLoadWallet();
+  // return await TestLoadWallet();
   // return await TestGetTxsHistory();
   // return TestGetBurnerAddress();
   // return await TestImportAccount();
