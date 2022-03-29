@@ -8,8 +8,8 @@ import (
 
 type WithdrawLiquidityRequest struct {
 	metadataCommon.MetadataBase
-	poolPairID   string
-	nftID        string
+	poolPairID string
+	AccessOption
 	otaReceivers map[string]string
 	shareAmount  uint64
 }
@@ -23,7 +23,7 @@ func NewWithdrawLiquidityRequest() *WithdrawLiquidityRequest {
 }
 
 func NewWithdrawLiquidityRequestWithValue(
-	poolPairID, nftID string, otaReceivers map[string]string,
+	poolPairID string, accessOption AccessOption, otaReceivers map[string]string,
 	shareAmount uint64,
 ) *WithdrawLiquidityRequest {
 	return &WithdrawLiquidityRequest{
@@ -31,7 +31,7 @@ func NewWithdrawLiquidityRequestWithValue(
 			Type: metadataCommon.Pdexv3WithdrawLiquidityRequestMeta,
 		},
 		poolPairID:   poolPairID,
-		nftID:        nftID,
+		AccessOption: accessOption,
 		otaReceivers: otaReceivers,
 		shareAmount:  shareAmount,
 	}
@@ -39,14 +39,14 @@ func NewWithdrawLiquidityRequestWithValue(
 
 func (request *WithdrawLiquidityRequest) MarshalJSON() ([]byte, error) {
 	data, err := json.Marshal(struct {
-		PoolPairID   string            `json:"PoolPairID"`
-		NftID        string            `json:"NftID"`
+		PoolPairID string `json:"PoolPairID"`
+		AccessOption
 		OtaReceivers map[string]string `json:"OtaReceivers"`
 		ShareAmount  uint64            `json:"ShareAmount"`
 		metadataCommon.MetadataBase
 	}{
 		PoolPairID:   request.poolPairID,
-		NftID:        request.nftID,
+		AccessOption: request.AccessOption,
 		OtaReceivers: request.otaReceivers,
 		ShareAmount:  request.shareAmount,
 		MetadataBase: request.MetadataBase,
@@ -59,8 +59,8 @@ func (request *WithdrawLiquidityRequest) MarshalJSON() ([]byte, error) {
 
 func (request *WithdrawLiquidityRequest) UnmarshalJSON(data []byte) error {
 	temp := struct {
-		PoolPairID   string                      `json:"PoolPairID"`
-		NftID        string                      `json:"NftID"`
+		PoolPairID string `json:"PoolPairID"`
+		AccessOption
 		OtaReceivers map[string]string           `json:"OtaReceivers"`
 		ShareAmount  metadataCommon.Uint64Reader `json:"ShareAmount"`
 		metadataCommon.MetadataBase
@@ -70,7 +70,7 @@ func (request *WithdrawLiquidityRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	request.poolPairID = temp.PoolPairID
-	request.nftID = temp.NftID
+	request.AccessOption = temp.AccessOption
 	request.otaReceivers = temp.OtaReceivers
 	request.shareAmount = uint64(temp.ShareAmount)
 	request.MetadataBase = temp.MetadataBase
@@ -87,8 +87,4 @@ func (request *WithdrawLiquidityRequest) OtaReceivers() map[string]string {
 
 func (request *WithdrawLiquidityRequest) ShareAmount() uint64 {
 	return request.shareAmount
-}
-
-func (request *WithdrawLiquidityRequest) NftID() string {
-	return request.nftID
 }

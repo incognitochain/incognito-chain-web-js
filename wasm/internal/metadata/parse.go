@@ -131,7 +131,6 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 
 	err = json.Unmarshal(raw, &md)
 	if err != nil {
-		println(err.Error())
 		return nil, err
 	}
 	return md, nil

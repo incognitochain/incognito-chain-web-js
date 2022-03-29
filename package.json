@@ -5,7 +5,7 @@
   "main": "build-node/inc.js",
   "module": "build/wallet.js",
   "scripts": {
-    "start": "yarn build:wasm; node --experimental-repl-await --eval \"const Inc = require('.'); const inc = new Inc.SimpleWallet(); Inc.init()\" -i",
+    "start": "yarn build:wasm; node --experimental-repl-await -r ./lib/env/debug/preload",
     "start:dev": "yarn test-account && yarn build",
     "build:wasm": "cd wasm && ./build.sh && cd ..",
     "build:watch": "webpack --config webpack.config.js --watch",
@@ -20,7 +20,9 @@
     "run-test": "clear && node ./test/wallet/accountwallet-test",
     "build:gomobile": "yarn build:wasm && yarn build:gomobile-ios && yarn build:gomobile-android && yarn build",
     "push-code": "git add . && git commit -m 'push code' && git push",
-    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa"
+    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
+    "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
   },
   "repository": {
     "type": "git",

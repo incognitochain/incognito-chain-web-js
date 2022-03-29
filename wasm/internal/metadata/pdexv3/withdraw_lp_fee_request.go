@@ -8,29 +8,15 @@ import (
 
 type WithdrawalLPFeeRequest struct {
 	metadataCommon.MetadataBase
-	PoolPairID string                              `json:"PoolPairID"`
-	NftID      common.Hash                         `json:"NftID"`
-	Receivers  map[common.Hash]privacy.OTAReceiver `json:"Receivers"`
-}
-
-type WithdrawalLPFeeContent struct {
-	PoolPairID string                       `json:"PoolPairID"`
-	NftID      common.Hash                  `json:"NftID"`
-	TokenID    common.Hash                  `json:"TokenID"`
-	Receivers  map[common.Hash]ReceiverInfo `json:"Receivers"`
-	TxReqID    common.Hash                  `json:"TxReqID"`
-	ShardID    byte                         `json:"ShardID"`
-}
-
-type WithdrawalLPFeeStatus struct {
-	Status    int                          `json:"Status"`
-	Receivers map[common.Hash]ReceiverInfo `json:"Receivers"`
+	PoolPairID string `json:"PoolPairID"`
+	AccessOption
+	Receivers map[common.Hash]privacy.OTAReceiver `json:"Receivers"`
 }
 
 func NewPdexv3WithdrawalLPFeeRequest(
 	metaType int,
 	pairID string,
-	nftID common.Hash,
+	accessOption AccessOption,
 	receivers map[common.Hash]privacy.OTAReceiver,
 ) (*WithdrawalLPFeeRequest, error) {
 	metadataBase := metadataCommon.NewMetadataBase(metaType)
@@ -38,7 +24,7 @@ func NewPdexv3WithdrawalLPFeeRequest(
 	return &WithdrawalLPFeeRequest{
 		MetadataBase: *metadataBase,
 		PoolPairID:   pairID,
-		NftID:        nftID,
+		AccessOption: accessOption,
 		Receivers:    receivers,
 	}, nil
 }
