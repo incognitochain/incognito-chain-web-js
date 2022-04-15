@@ -6,7 +6,6 @@ const {
     StorageServices,
     PDexV3,
 } = require("../../");
-const { PRIVATE_ACCOUNTS } = require("./setup.constants");
 
 const TEST_NET = {
     fullNode: 'https://testnet.incognito.org/fullnode',
@@ -45,6 +44,7 @@ const ACCESS_ID         = "00000000000000000000000000000000000000000000000000000
 const PRIVATE_KEY_STR   = "112t8rnXdAqwz4XVnLqfcopFuQbof6n141BPKY1uHfwmyir324SNod9sWSFNXDBSNKXp26SXPhNdVFNyeeqiCs6Tc8yrcsVPaBWrk5auTrNP"
 const DEVICE_ID         = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 const PRIVACY_VERSION   = 2;
+const FeePerTx          = 100;
 
 async function setupWallet({ isCreateWallet = false } = {}) {
     let wallet;
@@ -140,6 +140,7 @@ module.exports = {
     PRIVATE_KEY_STR,
     DEVICE_ID,
     PRIVACY_VERSION,
+    FeePerTx,
     setupWallet,
     setupMulAccounts
 };
