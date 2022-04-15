@@ -71,6 +71,45 @@ async function WithdrawNodeRewards(accounts) {
     }
 }
 
+async function CreateAndSendStakeNodes(accounts) {
+    const logs = []
+    let _input = ''
+    readline.question(
+        `Enter your node name to restake: \n`,
+        input => {
+            _input = input;
+        })
+    if (!_input || !_input.trim()) return;
+    _input = _input.trim();
+    try {
+        for (let i = 0; i <= accounts.length - 1; i++) {
+            const account = accounts[i];
+            const { accountSender, reward, name } = account;
+
+            // Check stake exact account name
+            if (_input.toLowerCase().includes(name.toLowerCase())) {
+                const prvBalance = await accountSender.getBalance({ tokenID: PRV_ID, version: PRIVACY_VERSION });
+                console.log(prvBalance)
+            }
+            // console.log({ reward, name })
+            // if (reward > 0) {
+            //     const tx = await accountSender.createAndSendWithdrawRewardTx({
+            //         transfer: { fee: FeePerTx, tokenID: PRV_ID },
+            //         extra: { version: PRIVACY_VERSION },
+            //     });
+            //     logs.push({
+            //         reward,
+            //         name,
+            //         tx
+            //     })
+            // }
+        }
+        console.log(logs);
+    } catch (error) {
+        console.log('WithdrawNodeRewards error: ', error)
+    }
+}
+
 async function ActionsWithNode(accounts) {
     const readline = require('readline').createInterface({
         input: process.stdin,
@@ -80,7 +119,7 @@ async function ActionsWithNode(accounts) {
     let params;
     console.log('\n======================== \n')
     readline.question(
-        `What do you want to do? \n1: Withdraw all rewards \n2: Send to main account\n3: Cancel\n\n========================\n`,
+        `What do you want to do? \n1: Withdraw all rewards \n2: Stake your node\n3: Cancel\n\n========================\n`,
         action => {
             switch (action) {
                 case '1':
@@ -88,6 +127,7 @@ async function ActionsWithNode(accounts) {
                     params = accounts;
                     break;
                 case '2':
+                    fn = CreateAndSendStakeNodes;
                     params = accounts;
                     console.log('SANG TEST::: 2')
                     break;
