@@ -6,6 +6,7 @@ const {
     StorageServices,
     PDexV3,
 } = require("../../");
+const { PRIVATE_ACCOUNTS } = require("./setup.constants");
 
 const TEST_NET = {
     fullNode: 'https://testnet.incognito.org/fullnode',
@@ -45,20 +46,24 @@ const PRIVATE_KEY_STR   = "112t8rnXdAqwz4XVnLqfcopFuQbof6n141BPKY1uHfwmyir324SNo
 const DEVICE_ID         = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 const PRIVACY_VERSION   = 2;
 
-async function setupWallet() {
+async function setupWallet({ isCreateWallet = false } = {}) {
     let wallet;
     let accountSender;
     let pDexV3Instance = new PDexV3();
 
-    /**---> Init wallet <---*/
+    /**---> Loading.... wasm <---*/
     await init();
-    wallet = new Wallet();
-    wallet = await wallet.init(
-        "password",
-        new StorageServices(),
-        "Master",
-        "Anon"
-    );
+
+    /**---> Init wallet <---*/
+    if (isCreateWallet) {
+        wallet = new Wallet();
+        wallet = await wallet.init(
+            "password",
+            new StorageServices(),
+            "Master",
+            "Anon"
+        );
+    }
 
     /**---> Get accessToken <---*/
     const data = { DeviceID: DEVICE_ID };
@@ -91,6 +96,48 @@ async function setupWallet() {
     }
 }
 
+async function importAccount({ name, privateKey, authToken }) {
+    let accountSender;
+    try {
+        accountSender = new AccountWallet(Wallet);
+        accountSender.setRPCCoinServices(SERVICE.coinService);
+        accountSender.setRPCClient(SERVICE.fullNode);
+        accountSender.setRPCTxServices(SERVICE.pubsubService);
+        accountSender.setRPCRequestServices(SERVICE.requestService);
+        accountSender.setAuthToken(authToken);
+        accountSender.setRPCApiServices(SERVICE.apiService, authToken);
+        await accountSender.setKey(privateKey);
+    } catch (error) {
+        console.log('import account error: ', error);
+    }
+    return {
+        name,
+        accountSender,
+    }
+}
+
+async function setupMulAccounts({ accounts = [] }) {
+    /**---> Loading.... wasm <---*/
+    await init();
+
+    console.log('SANG TEST:::: ', accounts)
+
+
+
+    /**---> Get accessToken <---*/
+    const data = { DeviceID: DEVICE_ID };
+    const authTokenDt = await Axios.post(`${SERVICE.apiService}/auth/new-token`, data);
+    const authToken = authTokenDt.data.Result.Token;
+    console.log("AccessToken: ", authToken);
+
+    /**---> Config account <---*/
+    const tasks = accounts.map(
+        ({ name, privateKey }) =>
+            importAccount({ name, privateKey, authToken }));
+    const senders = await Promise.all(tasks)
+    return senders;
+}
+
 module.exports = {
     PRV_ID,
     ACCESS_ID,
@@ -98,5 +145,6 @@ module.exports = {
     PRIVATE_KEY_STR,
     DEVICE_ID,
     PRIVACY_VERSION,
-    setupWallet
+    setupWallet,
+    setupMulAccounts
 };
