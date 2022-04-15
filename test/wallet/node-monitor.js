@@ -26,7 +26,6 @@ async function GetNodeRewards() {
                 await getNodeReward(PaymentAddress)
             ])
             console.log("=====> " + name);
-            console.log(status)
             console.log({
                 Status: status.Status,
                 Role: status.Role,
