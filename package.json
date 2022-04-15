@@ -22,7 +22,9 @@
     "push-code": "git add . && git commit -m 'push code' && git push",
     "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
     "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
-    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test",
+    "test-node": "clear && yarn build && node ./test/wallet/node-monitor",
+    "run-test-node": "clear && node ./test/wallet/node-monitor"
   },
   "repository": {
     "type": "git",

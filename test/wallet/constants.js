@@ -38,7 +38,7 @@ const NEXT_OTA = {
     shardCount: 2,
 }
 
-const SERVICE = NEXT_OTA;
+const SERVICE = MAIN_NET;
 
 const PRV_ID            = "0000000000000000000000000000000000000000000000000000000000000004";
 const ACCESS_ID         = "0000000000000000000000000000000000000000000000000000000000000007";
@@ -120,22 +120,17 @@ async function setupMulAccounts({ accounts = [] }) {
     /**---> Loading.... wasm <---*/
     await init();
 
-    console.log('SANG TEST:::: ', accounts)
-
-
-
     /**---> Get accessToken <---*/
     const data = { DeviceID: DEVICE_ID };
     const authTokenDt = await Axios.post(`${SERVICE.apiService}/auth/new-token`, data);
     const authToken = authTokenDt.data.Result.Token;
-    console.log("AccessToken: ", authToken);
 
     /**---> Config account <---*/
     const tasks = accounts.map(
         ({ name, privateKey }) =>
             importAccount({ name, privateKey, authToken }));
     const senders = await Promise.all(tasks)
-    return senders;
+    return { senders, authToken };
 }
 
 module.exports = {

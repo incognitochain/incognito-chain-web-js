@@ -1,42 +1,50 @@
 const {
-    PRV_ID,
-    ACCESS_ID,
-    PRIVACY_VERSION,
-    setupWallet
+    setupMulAccounts,
 } = require("./constants")
-
-let wallet;
-let accountSender;
-let pDexV3Instance;
+const { PRIVATE_ACCOUNTS } = require("./setup.constants");
+const bn = require('bn.js')
+const { getNodeStatus, getNodeReward } = require("./node-service");
+let senders;
+let authToken;
 
 async function setup() {
-    const data = await setupWallet();
-    wallet = data.wallet;
-    accountSender = data.accountSender;
-    pDexV3Instance = data.pDexV3Instance;
+    const data = await setupMulAccounts({ accounts: PRIVATE_ACCOUNTS });
+    senders = data.senders;
+    authToken = data.authToken;
 }
 
-async function TestGetBalance() {
+async function humanAmount({ amount, pDecimal = 9 } = {}) {
+    return new bn(amount).div((new bn(1)).pow(new bn(pDecimal))).toString();
+}
+
+async function GetNodeRewards() {
     try {
-        const tokenIDs = [
-            PRV_ID,
-        ];
-        let task = tokenIDs.map((tokenID) =>
-            accountSender.getBalance({
-                tokenID,
-                version: PRIVACY_VERSION,
+        const tasks = senders.map(async ({ accountSender, name }) => {
+            const { BLSPublicKey, PaymentAddress } = await accountSender.getDeserializeInformation();
+            const [status, reward] = await Promise.all([
+                await getNodeStatus(BLSPublicKey),
+                await getNodeReward(PaymentAddress)
+            ])
+            console.log("=====> " + name);
+            console.log({
+                Status: status.Status,
+                Role: status.Role,
+                NextEventMsg: status.NextEventMsg,
+                IsOldVersion: status.IsOldVersion,
+                Reward: humanAmount({ amount: reward, pDecimal: 9 })
             })
-        );
-        console.log("BALANCE", await Promise.all(task));
-    } catch (e) {
-        console.log("TestGetBalance error: ", e);
+        })
+
+        await Promise.all(tasks)
+    } catch (error) {
+        console.log('GetNodeRewards error: ', error);
     }
 }
 
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
-    await TestGetBalance();
+    await GetNodeRewards();
 }
 
 RunTest()
