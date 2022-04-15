@@ -49,7 +49,7 @@ async function GetNodeRewards() {
 async function WithdrawNodeRewards(accounts) {
     const logs = []
     try {
-        for (let i = 0; i < accounts.length - 1; i++) {
+        for (let i = 0; i <= accounts.length - 1; i++) {
             const account = accounts[i];
             const { accountSender, reward, name } = account;
             console.log({ reward, name })
