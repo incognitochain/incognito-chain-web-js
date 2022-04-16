@@ -4,7 +4,7 @@ const {
     FeePerTx,
     PRV_ID,
 } = require("./constants")
-const { PRIVATE_ACCOUNTS } = require("./setup.constants");
+const { PRIVATE_ACCOUNTS, MAIN_ADDRESS } = require("./setup.constants");
 const { getNodeStatus, getNodeReward } = require("./node-service");
 const bn = require("bn.js");
 let senders;
@@ -20,6 +20,7 @@ const logger = class {
     static warn(message, ...optionalParams) { console.warn(LCWARN, message, ...optionalParams) }
     static info(message, ...optionalParams) { console.info(LCINFO, message, ...optionalParams) }
     static success(message, ...optionalParams) { console.info(LCSUCCESS, message, ...optionalParams) }
+    static log(message, ...optionalParams) { console.log(message, ...optionalParams) }
 }
 
 async function setup() {
@@ -117,12 +118,12 @@ async function CreateAndSendStakeNodes(accounts) {
 
     if (counter === 0) {
         logger.warn('hmmm, look like all nodes have been staked');
-        return;
+        return readline.close();
     }
     const logs = []
     let _input = '';
     readline.question(
-        `Enter your node name to restake: \n`,
+        `Enter your node name to restake: \n Eg: Node1 Node2 ... \n`,
         async input => {
             console.log()
             _input = input;
@@ -155,6 +156,53 @@ async function CreateAndSendStakeNodes(accounts) {
         })
 }
 
+async function CreateAndSendToMainAccount(accounts) {
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    })
+    const logs = []
+    logger.warn(`\nDo you want to send to: \n`);
+    logger.info(`${MAIN_ADDRESS} \n`);
+    logger.log(`1: Accept \n`);
+    logger.log(`2: Cancel \n`);
+    readline.question(
+        ``,
+        async action => {
+            if (action === '1') {
+                for (let i = 0; i <= accounts.length - 1; i++) {
+                    const account = accounts[i];
+                    const { accountSender, name } = account;
+                    const prvBalance = await accountSender.getBalance({
+                        tokenID: PRV_ID,
+                        version: PRIVACY_VERSION
+                    });
+                    const transferAmount = new bn(prvBalance).sub(new bn(FeePerTx * 2)).toString();
+                    const prvPayments = [{
+                        PaymentAddress: MAIN_ADDRESS,
+                        Amount: transferAmount,
+                    }]
+                    const tx = await accountSender.createAndSendNativeToken({
+                        transfer: {
+                            prvPayments,
+                            fee: FeePerTx
+                        }
+                    });
+                    logs.push({
+                        name,
+                        tx
+                    })
+                }
+            }
+            if (logs.length > 0) {
+                logger.info(logs);
+            } else {
+                logger.warn('Nothing to show');
+            }
+            readline.close()
+        })
+}
+
 async function ActionsWithNode(accounts) {
     const readline = require('readline').createInterface({
         input: process.stdin,
@@ -166,7 +214,8 @@ async function ActionsWithNode(accounts) {
     logger.info('What do you want to do?');
     console.log('1: Withdraw all rewards');
     console.log('2: Stake your node');
-    console.log('3: Cancel')
+    console.log('3: Send to main account');
+    console.log('4: Cancel')
     console.log('\n========================\n')
     readline.question(
         ``,
@@ -179,6 +228,11 @@ async function ActionsWithNode(accounts) {
                 case '2':
                     readline.close()
                     fn = CreateAndSendStakeNodes;
+                    params = accounts;
+                    break;
+                case '3':
+                    readline.close()
+                    fn = CreateAndSendToMainAccount;
                     params = accounts;
                     break;
                 default:
