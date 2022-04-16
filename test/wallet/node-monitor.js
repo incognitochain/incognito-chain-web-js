@@ -10,6 +10,18 @@ const bn = require("bn.js");
 let senders;
 let authToken;
 
+const LCERROR = '\x1b[31m%s\x1b[0m'; //red
+const LCWARN = '\x1b[33m%s\x1b[0m'; //yellow
+const LCINFO = '\x1b[36m%s\x1b[0m'; //cyan
+const LCSUCCESS = '\x1b[32m%s\x1b[0m'; //green
+
+const logger = class {
+    static error(message, ...optionalParams) { console.error(LCERROR, message, ...optionalParams) }
+    static warn(message, ...optionalParams) { console.warn(LCWARN, message, ...optionalParams) }
+    static info(message, ...optionalParams) { console.info(LCINFO, message, ...optionalParams) }
+    static success(message, ...optionalParams) { console.info(LCSUCCESS, message, ...optionalParams) }
+}
+
 async function setup() {
     const data = await setupMulAccounts({ accounts: PRIVATE_ACCOUNTS });
     senders = data.senders;
@@ -25,7 +37,7 @@ async function GetNodeRewards() {
                 await getNodeStatus(BLSPublicKey),
                 await getNodeReward(PaymentAddress)
             ])
-            console.log("=====> " + name);
+            logger.info(`=====> ${name}`);
             console.log({
                 Status: status.Status,
                 Role: status.Role,
@@ -44,6 +56,17 @@ async function GetNodeRewards() {
             }
         })
         rewards = await Promise.all(tasks)
+
+        for (let i = 0; i <= rewards.length - 1; i++) {
+            const account = rewards[i];
+            const { autoStake, name, isSlashed } = account;
+            if (!autoStake || isSlashed) {
+                if (i === 0) {
+                    console.log('\n========================')
+                }
+                logger.warn(`Unstaked name ===> ${name}`);
+            }
+        }
     } catch (error) {
         console.log('GetNodeRewards error: ', error);
     }
@@ -80,12 +103,21 @@ async function CreateAndSendStakeNodes(accounts) {
         input: process.stdin,
         output: process.stdout
     })
+    let counter = 0;
     for (let i = 0; i <= accounts.length - 1; i++) {
         const account = accounts[i];
         const { autoStake, name } = account;
         if (!autoStake) {
-            console.log('Unstaked name ===> ', name)
+            logger.error(`Unstaked =====> ${name}`);
+            ++counter;
         }
+    }
+
+    console.log('\n========================\n')
+
+    if (counter === 0) {
+        logger.warn('hmmm, look like all nodes have been staked');
+        return;
     }
     const logs = []
     let _input = '';
@@ -131,7 +163,7 @@ async function ActionsWithNode(accounts) {
     let fn;
     let params;
     console.log('\n========================\n')
-    console.log('What do you want to do?');
+    logger.info('What do you want to do?');
     console.log('1: Withdraw all rewards');
     console.log('2: Stake your node');
     console.log('3: Cancel')
@@ -165,7 +197,7 @@ async function RunNodeScript() {
 }
 
 async function RunTest() {
-    console.log("BEGIN WEB PDEX3 TEST");
+    console.log("BEGIN START NODE MONITOR");
     await setup();
     await RunNodeScript();
 }
