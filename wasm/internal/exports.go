@@ -224,6 +224,40 @@ func DecryptCoin(paramStr string) (string, error) {
 	return string(resJson), nil
 }
 
+// DecryptCoinList supports v2 coins only
+func DecryptCoinList(paramStr string) (string, error) {
+	var err error
+	temp := &struct {
+		CoinList []transaction.CoinData
+		KeySet   string
+	}{}
+	err = json.Unmarshal([]byte(paramStr), temp)
+	if err != nil {
+		return "", err
+	}
+	tempKw, err := wallet.Base58CheckDeserialize(temp.KeySet)
+	if err != nil {
+		return "", err
+	}
+	var resultCoins []transaction.CoinData
+	for i, _ := range temp.CoinList {
+		c, _, err := temp.CoinList[i].ToCoin()
+		if err != nil {
+			return "", err
+		}
+		_, err = c.Decrypt(&tempKw.KeySet)
+		if err == nil {
+			resultCoins = append(resultCoins, transaction.GetCoinData(c))
+		} // coins that fail Decrypt are considered unowned
+	}
+
+	resJson, err := json.Marshal(resultCoins)
+	if err != nil {
+		return "", fmt.Errorf("marshal-coin-list error %v", err)
+	}
+	return string(resJson), nil
+}
+
 func CreateCoin(paramStr string) (string, error) {
 	var err error
 	temp := &struct {

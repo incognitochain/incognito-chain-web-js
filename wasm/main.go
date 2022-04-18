@@ -15,6 +15,7 @@ func main() {
 
 	gobridge.RegisterCallback("newKeySetFromPrivate", internal.NewKeySetFromPrivate)
 	gobridge.RegisterCallback("decryptCoin", internal.DecryptCoin)
+	gobridge.RegisterCallback("decryptCoinList", internal.DecryptCoinList)
 	gobridge.RegisterCallback("createCoin", internal.CreateCoin)
 	gobridge.RegisterCallback("generateBLSKeyPairFromSeed", internal.GenerateBLSKeyPairFromSeed)
 	gobridge.RegisterCallback("hybridEncrypt", internal.HybridEncrypt)
