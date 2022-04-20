@@ -138,18 +138,14 @@ module.exports = (env, argv) => {
     name: "wallet-web",
     devtool: "source-map",
     entry: {
-      "wallet": "./lib/wallet-web.js",
+      "wallet": ["./lib/wallet-web.js"],
     },
     output: {
       path: path.resolve(__dirname),
       filename: "build/web/[name].js",
-      library: "",
-      libraryTarget: "umd",
+      library: "wallet",
     },
     target: "web",
-    node: {
-      fs: "empty",
-    },
     module: {
       defaultRules: [
         {
@@ -167,13 +163,21 @@ module.exports = (env, argv) => {
           exclude: /node_modules/,
           loader: "babel-loader",
           options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: ["@babel/preset-env"],
+            plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+            presets: [
+              ["@babel/preset-env", {
+                useBuiltIns: "entry",
+                corejs: "3.10.2"
+              }],
+            ],
           },
         },
         {
           test: /\.wasm$/,
-          loader: 'wasm-loader'
+          loader: 'file-loader',
+          options: {
+            name: "build/web/privacy.wasm"
+          }
         },
       ],
     },

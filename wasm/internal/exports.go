@@ -247,7 +247,9 @@ func DecryptCoinList(paramStr string) (string, error) {
 		}
 		_, err = c.Decrypt(&tempKw.KeySet)
 		if err == nil {
-			resultCoins = append(resultCoins, transaction.GetCoinData(c))
+			resultCoin := transaction.GetCoinData(c)
+			resultCoin.Index = temp.CoinList[i].Index
+			resultCoins = append(resultCoins, resultCoin)
 		} // coins that fail Decrypt are considered unowned
 	}
 

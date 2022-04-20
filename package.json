@@ -40,6 +40,7 @@
     "binary-sorted-array": "^1.0.4",
     "bip39": "^3.0.3",
     "crypto-js": "^3.1.9-1",
+    "dotenv": "^16.0.0",
     "hdkey": "^2.0.1",
     "lodash": "^4.17.20",
     "regenerator-runtime": "^0.13.7",
@@ -57,14 +58,14 @@
     "chai-as-promised": "^7.1.1",
     "chai-bn": "^0.2.1",
     "core-js": "^3.10.2",
+    "file-loader": "^6.2.0",
     "fs": "0.0.1-security",
     "lodash-webpack-plugin": "^0.11.6",
     "merkle-patricia-tree": "^4.0.0",
     "mocha": "^8.3.2",
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "wasm-loader": "^1.3.0"
+    "webpack-cli": "^3.2.3"
   },
   "mocha": {
     "timeout": "1200000"
