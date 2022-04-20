@@ -23,7 +23,9 @@
     "push-code": "git add . && git commit -m 'push code' && git push",
     "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
     "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
-    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test",
+    "test-unified-token": "clear && yarn build && node ./test/wallet/unifiedToken-test.js",
+    "run-test-unified-token": "clear && node ./test/wallet/unifiedToken-test.js"
   },
   "repository": {
     "type": "git",

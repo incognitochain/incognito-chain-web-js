@@ -34,11 +34,21 @@ const NEXT_OTA = {
     portalService: 'https://api-portalv4.incognito.org'
 }
 
-const SERVICE = NEXT_OTA;
+const UNIFIED_DEV_TEST = {
+  fullNode: "http://51.89.21.38:11334",
+  coinService: "http://51.89.21.38:6002",
+  pubsubService: "http://51.89.21.38:6004",
+  requestService: "http://51.89.21.38:6002",
+  apiService: "https://staging-api-service.incognito.org",
+  portalService: "http://139.162.55.124:8010",
+};
+
+const SERVICE = UNIFIED_DEV_TEST;
 
 const PRV_ID            = "0000000000000000000000000000000000000000000000000000000000000004";
 const ACCESS_ID         = "0000000000000000000000000000000000000000000000000000000000000007";
-const PRIVATE_KEY_STR   = "112t8rnXdAqwz4XVnLqfcopFuQbof6n141BPKY1uHfwmyir324SNod9sWSFNXDBSNKXp26SXPhNdVFNyeeqiCs6Tc8yrcsVPaBWrk5auTrNP"
+const PRIVATE_KEY_STR =
+  "112t8rnXKbJujafmPN2au6XDhb8kSdgWc2y6e59oPG4LpDxKXQ9wztBroanNB6gm4QgzNJA36J4MMGmjwP1dUVBn1EH8YcRvG4pxehYoY8aY";
 const DEVICE_ID         = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 const PRIVACY_VERSION   = 2;
 
