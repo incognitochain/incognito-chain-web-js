@@ -2,19 +2,18 @@ package common
 
 // for common
 const (
-	EmptyString           = ""
-	ZeroByte              = byte(0x00)
-	DateOutputFormat      = "2006-01-02T15:04:05.999999"
-	BigIntSize            = 32 // bytes
-	CheckSumLen           = 4  // bytes
-	AESKeySize            = 32 // bytes
-	Int32Size             = 4  // bytes
-	Uint32Size            = 4  // bytes
-	Uint64Size            = 8  // bytes
-	HashSize              = 32 // bytes
-	MaxHashStringSize     = HashSize * 2
-	Base58Version         = 0
-	EncodeCoinsWithBase64 = true
+	EmptyString       = ""
+	ZeroByte          = byte(0x00)
+	DateOutputFormat  = "2006-01-02T15:04:05.999999"
+	BigIntSize        = 32 // bytes
+	CheckSumLen       = 4  // bytes
+	AESKeySize        = 32 // bytes
+	Int32Size         = 4  // bytes
+	Uint32Size        = 4  // bytes
+	Uint64Size        = 8  // bytes
+	HashSize          = 32 // bytes
+	MaxHashStringSize = HashSize * 2
+	Base58Version     = 0
 )
 
 // size data for incognito key and signature
@@ -63,11 +62,12 @@ var (
 
 // special token ids (aka. PropertyID in custom token)
 var (
-	PRVCoinID             = Hash{4} // To send PRV in custom token
-	PRVCoinName           = "PRV"   // To send PRV in custom token
-	ConfidentialAssetID   = Hash{5}
-	ConfidentialAssetName = "CA"
-	MaxShardNumber        = 2 //programmatically config based on networkID
+	PRVCoinID               = Hash{4} // To send PRV in custom token
+	PRVCoinName             = "PRV"   // To send PRV in custom token
+	ConfidentialAssetID     = Hash{5}
+	ConfidentialAssetName   = "CA"
+	MaxShardNumber          = 2 //programmatically config based on networkID
+	AllowBase58EncodedCoins = false
 )
 
 // CONSENSUS

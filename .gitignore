@@ -6,6 +6,10 @@
 # Node artifact files
 node_modules/
 dist/
+build-node/1.js
+build-node/2.js
+build-node/3.js
+test/wallet/setup.constants.js
 
 # Compiled Java class files
 *.class

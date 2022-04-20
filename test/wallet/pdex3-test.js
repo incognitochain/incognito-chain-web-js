@@ -77,7 +77,7 @@ async function TestGetNFTData() {
 
 async function TestGetLPHistory() {
     try {
-        const data = await pDexV3Instance.getRemoveLPHistoriesApi({ version: PRIVACY_VERSION });
+        const data = await pDexV3Instance.getWithdrawFeeLPHistories({ version: PRIVACY_VERSION });
         console.log('TestGetLPHistory: ', data);
     } catch (error) {
         console.log('TestGetLPHistory error: ', error);
@@ -114,6 +114,28 @@ async function TestGetOpenOrderHistory() {
     }
 }
 
+async function TestCreateContributeAccessOTA() {
+    try {
+        const tokenIDs = [
+            PRV_ID,
+            '81fda0081019672cd418c3fc0cbd81ef5937a164ac090c8dc41956f5940d863f',
+        ]
+        const PoolID = '0000000000000000000000000000000000000000000000000000000000000004-81fda0081019672cd418c3fc0cbd81ef5937a164ac090c8dc41956f5940d863f-0625bff2b7003e63162b57a056b44e63675e9dc7f8dcb49efb9953366ca29a15';
+        const result = await pDexV3Instance.createContributeTxsWithAccessToken({
+            fee: 100,
+            tokenId1: tokenIDs[0],
+            tokenId2: tokenIDs[1],
+            amount1: 2,
+            amount2: 1,
+            poolPairID: PoolID,
+            amp: 12000
+        });
+        console.log('TestCreateContributeAccessOTA:::: ', result)
+    } catch (e) {
+        console.log('TestCreateContributeAccessOTA error: ', e);
+    }
+}
+
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
@@ -122,9 +144,10 @@ async function RunTest() {
     // await TestGetListShare();
     // await TestGetTxsHistory()
     // await TestGetNFTData();
-    // await TestGetLPHistory();
+    await TestGetLPHistory();
     // await TestGetOrderHistory();
-    await TestGetOpenOrderHistory();
+    // await TestGetOpenOrderHistory();
+    // await TestCreateContributeAccessOTA();
 }
 
 RunTest()

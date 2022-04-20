@@ -73,7 +73,7 @@ async function setup() {
   // senderPrivateKeyStr =
   //   "1139jtfTYJysjtddB4gFs6n3iW8YiDeFKWcKyufRmsb2fsDssj3BWCYXSmNtTR277MqQgHeiXpTWGit9r9mBUJfoyob5besrF9AW9HpLC4Nf";
   account1PrivateKeyStr =
-    "112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or";
+    "";
   // "112t8rniqSuDK8vdvHXGzkDzthVG6tsNtvZpvJEvZc5fUg1ts3GDPLWMZWFNbVEpNHeGx8vPLLoyaJRCUikMDqPFY1VzyRbLmLyWi4YDrS7h";
   account1 = new AccountWallet(Wallet);
   account1.setRPCCoinServices(rpcCoinService);
@@ -97,8 +97,8 @@ async function setup() {
 }
 
 async function TestConvertPUnifiedToken() {
-  let fee = 100;
-  let convertAmount = 1000000;
+  let fee = 20;
+  let convertAmount = 1000000000;
   // Matic (PLG)
   let tokenID = 'dae027b21d8d57114da11209dce8eeb587d01adf59d4fc356a8be5eedc146859';
   let pUnifiedTokenID = 'f5d88e2e3c8f02d6dc1e01b54c90f673d730bef7d941aeec81ad1e1db690961f';
@@ -123,12 +123,20 @@ async function TestConvertPUnifiedToken() {
 }
 
 async function TestUnshieldPUnifiedToken() {
-  let fee = 100;
+  let fee = 20;
   //todo
   let unshieldAmount = 1000000;
   let remoteAddress = '0xF91cEe2DE943733e338891Ef602c962eF4D7Eb81';
   let unshieldingTokenID = 'f5d88e2e3c8f02d6dc1e01b54c90f673d730bef7d941aeec81ad1e1db690961f';
   let networkID = 3;
+  let tokenPayments = [{
+    "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    "amount": 674990
+  }];
+  let prvPayments = [{
+    "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    "amount": 100
+  }];
 
   let burningInfos = [{
       networkID: networkID, 
@@ -140,7 +148,7 @@ async function TestUnshieldPUnifiedToken() {
   try {
     let result = await account1.createAndSendBurnUnifiedTokenRequestTx (
       {
-        transfer: {fee, tokenID: unshieldingTokenID},
+        transfer: {fee, tokenID: unshieldingTokenID, prvPayments, tokenPayments},
         extra: {
             burningInfos: burningInfos,
             txHashHandler: null,

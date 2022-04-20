@@ -1,10 +1,5 @@
-const chai = require('chai');
-const expect = chai.expect;
-const chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
-const bn = require('bn.js');
-const Inc = require('..');
-const { setup } = require('./setup');
+const inc = require('..');
+const { setup, expect, bn } = require('./setup');
 
 let loadLegacyTests = (...filenames) => async function() {
     // require = require("esm")(module);
@@ -19,13 +14,9 @@ describe('Basic Tests for Web-js module', async function() {
     before(setup());
     before(loadLegacyTests('./wallet/basic-test', './wallet/wallet-test', './wallet/hdwallet-test', './committeekey-test', './identicon-test', './rpc/rpc-test', './privacy/hybridenc-test', './privacy/utils-test'));
     describe('Legacy tests', async function() {
-        it('main flow', async function() {
-            await this.legacyTests.AccountWalletTestSetup(this.transactors[0]);
+        it.skip('main flow', async function() {
+            await this.legacyTests.AccountWalletTestSetup(senders[0]);
             await this.legacyTests.MainRoutine();
-        });
-        it('PDex flow', async function() {
-            await this.legacyTests.AccountWalletTestSetup(this.transactors[1]);
-            await this.legacyTests.PDERoutine();
         });
         it.skip('Defrag flow', async function() {
             await this.legacyTests.DefragmentRoutine();
@@ -42,10 +33,10 @@ describe('Basic Tests for Web-js module', async function() {
             await this.legacyTests.TestBLSPubKey();
         })
         it('RPC tests (to Incognito node)', async function() {
-            await this.legacyTests.TestIdenticon();
-            await this.legacyTests.TestGetBurningAddress();
-            await this.legacyTests.TestGetListPrivacyToken();
-            await this.legacyTests.TestGetExchangeRatePToken();
+            await this.legacyTests.TestIdenticon(inc.rpc);
+            await this.legacyTests.TestGetBurningAddress(inc.rpc);
+            await this.legacyTests.TestGetListPrivacyToken(inc.rpc);
+            await this.legacyTests.TestGetExchangeRatePToken(inc.rpc);
         })
         it('Privacy function tests', async function() {
             await this.legacyTests.TestHybridEncryption();

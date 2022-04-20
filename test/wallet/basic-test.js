@@ -1,5 +1,4 @@
-const { Wallet, Transactor : AccountWallet, types, constants, utils } = require('../../');
-const { KeyWallet, RpcClient } = types;
+const { Wallet, Transactor : AccountWallet, constants, utils, KeyWallet, RpcClient } = require('../../');
 const { PaymentAddressType, PRVIDSTR, ENCODE_VERSION } = constants;
 const { base58CheckEncode : checkEncode } = utils;
 
@@ -51,7 +50,7 @@ async function TestGetBalance() {
     // create and send PRV
     try {
         // accountSender.useCoinsService = true;
-        let balance = await accountSender.getBalance(null);
+        let balance = await accountSender.getBalance();
         console.log("balance: ", balance.toString());
     } catch (e) {
         console.log("Error when get balance: ", e);

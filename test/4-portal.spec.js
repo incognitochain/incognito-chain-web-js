@@ -4,21 +4,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const bn = require('bn.js');
 chai.use(require('chai-bn')(bn));
-const Inc = require('..');
-
-let setup = () => async function() {
-    await Inc.init();
-    this.inc = new Inc.SimpleWallet();
-
-    const providers = ['http://127.0.0.1:9334']
-    const privkeys = ['112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or', '112t8rnZDRztVgPjbYQiXS7mJgaTzn66NvHD7Vus2SrhSAY611AzADsPFzKjKQCKWTgbkgYrCPo9atvSMoCf9KT23Sc7Js9RKhzbNJkxpJU6', '112t8rne7fpTVvSgZcSgyFV23FYEv3sbRRJZzPscRcTo8DsdZwstgn6UyHbnKHmyLJrSkvF13fzkZ4e8YD5A2wg8jzUZx6Yscdr4NuUUQDAt'];
-    this.transactors = await Promise.all(privkeys.map((k, i) => {
-        this.inc.setProvider(providers[i]);
-        return this.inc.NewTransactor(k);
-    }));
-    this.transactors.map(_t => _t.useCoinsService = false);
-    this.inc.setProvider(providers[0]);
-}
+const { setup } = require('./setup');
 
 let generateBTCShieldingAddress = (incAddress, chainName) => async function() {
     console.log("Generate BTC Shielding Address For Inc Payment Address:", incAddress)
@@ -41,7 +27,7 @@ let sendUnshieldingRequest = (tokenID, unshieldAmount, remoteAddress) => async f
     }
 }
 
-describe('Portal V4 Tests', async function() {
+describe.skip('Portal V4 Tests', async function() {
     before(setup())
     let incAddress = '12svfkP6w5UDJDSCwqH978PvqiqBxKmUnA9em9yAYWYJVRv7wuXY1qhhYpPAm4BDz2mLbFrRmdK3yRhnTqJCZXKHUmoi7NV83HCH2YFpctHNaDdkSiQshsjw2UFUuwdEvcidgaKmF3VJpY5f8RdN'
     let chainName = 'testnet'

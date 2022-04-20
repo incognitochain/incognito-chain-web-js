@@ -1,5 +1,4 @@
-const { Wallet, Transactor : AccountWallet, types, constants, utils } = require('../../');
-const { KeyWallet } = types;
+const { Wallet, Transactor : AccountWallet, types, constants, utils, KeyWallet } = require('../../');
 const { PaymentAddressType, PRVIDSTR, ENCODE_VERSION } = constants;
 const { base58CheckEncode: checkEncode, base58CheckDecode: checkDecode, hybridEncryption, hybridDecryption, base64Decode, bytesToString, stringToBytes } = utils;
 
@@ -11,8 +10,7 @@ const { base58CheckEncode: checkEncode, base58CheckDecode: checkDecode, hybridEn
 async function TestHybridEncryption() {
   // sender key (private key)
   let senderPrivateKeyStr = "112t8rnXDS4cAjFVgCDEw4sWGdaqQSbKLRH1Hu4nUPBFPJdn29YgUei2KXNEtC8mhi1sEZb1V3gnXdAXjmCuxPa49rbHcH9uNaf85cnF3tMw";
-  let accountSender = new AccountWallet(Wallet);
-  await accountSender.setKey(senderPrivateKeyStr)
+  let accountSender = await NewTransactor(senderPrivateKeyStr);
   let publicKeyBytes = accountSender.key.KeySet.PaymentAddress.Tk;
   let msg = [1, 2, 3, 4, 5, 6];
   let ciphertext = await hybridEncryption(publicKeyBytes, msg);

@@ -500,6 +500,21 @@ func SetShardCount(_ string, num int64) (string, error) {
 	return "", nil
 }
 
+func SetConfigs(args string) (bool, error) {
+	raw := []byte(args)
+	var cfg struct {
+		AllowBase58EncodedCoins bool `json:"allowBase58"`
+		MaxShardNumber          int  `json:"shardCount"`
+	}
+	err := json.Unmarshal(raw, &cfg)
+	if err != nil {
+		return false, fmt.Errorf("cannot unmarshal configs %s - %v", cfg, err)
+	}
+	common.MaxShardNumber = cfg.MaxShardNumber
+	common.AllowBase58EncodedCoins = cfg.AllowBase58EncodedCoins
+	return true, nil
+}
+
 func GenerateBTCMultisigAddress(args string) (string, error) {
 	var params struct {
 		MasterPubKeys   [][]byte

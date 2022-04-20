@@ -57,6 +57,8 @@ FOUNDATION_EXPORT NSString* _Nonnull GomobileRandomScalars(NSString* _Nullable a
 
 FOUNDATION_EXPORT NSString* _Nonnull GomobileScalarMultBase(NSString* _Nullable args, NSError* _Nullable* _Nullable error);
 
+FOUNDATION_EXPORT BOOL GomobileSetConfigs(NSString* _Nullable args, BOOL* _Nullable ret0_, NSError* _Nullable* _Nullable error);
+
 FOUNDATION_EXPORT NSString* _Nonnull GomobileSetShardCount(NSString* _Nullable p0, int64_t num, NSError* _Nullable* _Nullable error);
 
 FOUNDATION_EXPORT NSString* _Nonnull GomobileSignPoolWithdraw(NSString* _Nullable args, NSError* _Nullable* _Nullable error);

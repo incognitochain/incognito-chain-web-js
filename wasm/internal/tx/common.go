@@ -356,14 +356,12 @@ type encodedBytes []byte
 
 func (b encodedBytes) MarshalJSON() ([]byte, error) {
 	var res string
+	// empty slice -> empty string
 	if len([]byte(b)) == 0 {
 		res = ""
 	} else {
-		if common.EncodeCoinsWithBase64 {
-			res = Base64Encoding.EncodeToString(b)
-		} else {
-			res = Base58Encoding.Encode(b, common.ZeroByte)
-		}
+		// always encode to base64
+		res = Base64Encoding.EncodeToString(b)
 	}
 	return json.Marshal(res)
 }
@@ -374,15 +372,18 @@ func (b *encodedBytes) UnmarshalJSON(src []byte) error {
 		*b = encodedBytes([]byte{})
 		return nil
 	}
-	if common.EncodeCoinsWithBase64 {
-		res, err := Base64Encoding.DecodeString(theStr)
-		*b = res
-		return err
-	} else {
+	if common.AllowBase58EncodedCoins {
+		// AllowBase58EncodedCoins: accept base58 OR base64
 		res, _, err := Base58Encoding.Decode(theStr)
-		*b = res
-		return err
+		if err == nil {
+			*b = res
+			return nil
+		}
 	}
+
+	res, err := Base64Encoding.DecodeString(theStr)
+	*b = res
+	return err
 }
 
 func (b encodedBytes) IsBlank() bool {

@@ -47,6 +47,7 @@ func main() {
 	gobridge.RegisterCallback("verifySentTx", internal.VerifySentTx)
 	gobridge.RegisterCallback("verifyReceivedTx", internal.VerifyReceivedTx)
 	gobridge.RegisterCallback("setShardCount", internal.SetShardCount)
+	gobridge.RegisterCallback("setCfg", internal.SetConfigs)
 	gobridge.RegisterCallback("createOTAReceiver", internal.CreateOTAReceiver)
 	// not applicable
 	// gobridge.RegisterCallback("deriveSerialNumber", internal.DeriveSerialNumber)

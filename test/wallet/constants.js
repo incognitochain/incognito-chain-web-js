@@ -6,6 +6,7 @@ const {
     StorageServices,
     PDexV3,
 } = require("../../");
+const { PRIVATE_ACCOUNTS } = require("./setup.constants");
 
 const TEST_NET = {
     fullNode: 'https://testnet.incognito.org/fullnode',
@@ -13,7 +14,8 @@ const TEST_NET = {
     pubsubService: 'https://api-coinservice-staging.incognito.org/txservice',
     requestService: 'https://api-coinservice-staging.incognito.org',
     apiService: 'https://staging-api-service.incognito.org',
-    portalService: 'http://51.161.119.66:8020'
+    portalService: 'http://51.161.119.66:8020',
+    shardCount: 7,
 }
 
 const MAIN_NET = {
@@ -22,7 +24,8 @@ const MAIN_NET = {
     pubsubService: 'https://api-coinservice.incognito.org/txservice',
     requestService: 'https://api-coinservice.incognito.org',
     apiService: 'https://api-service.incognito.org',
-    portalService: 'https://api-portalv4.incognito.org'
+    portalService: 'https://api-portalv4.incognito.org',
+    shardCount: 7,
 }
 
 const NEXT_OTA = {
@@ -31,7 +34,8 @@ const NEXT_OTA = {
     pubsubService: 'http://51.89.21.38:4096',
     requestService: 'http://51.89.21.38:4095',
     apiService: 'https://staging-api-service.incognito.org',
-    portalService: 'https://api-portalv4.incognito.org'
+    portalService: 'https://api-portalv4.incognito.org',
+    shardCount: 2,
 }
 
 const UNIFIED_DEV_TEST = {
@@ -52,20 +56,24 @@ const PRIVATE_KEY_STR =
 const DEVICE_ID         = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 const PRIVACY_VERSION   = 2;
 
-async function setupWallet() {
+async function setupWallet({ isCreateWallet = false } = {}) {
     let wallet;
     let accountSender;
     let pDexV3Instance = new PDexV3();
 
-    /**---> Init wallet <---*/
+    /**---> Loading.... wasm <---*/
     await init();
-    wallet = new Wallet();
-    wallet = await wallet.init(
-        "password",
-        new StorageServices(),
-        "Master",
-        "Anon"
-    );
+
+    /**---> Init wallet <---*/
+    if (isCreateWallet) {
+        wallet = new Wallet();
+        wallet = await wallet.init(
+            "password",
+            new StorageServices(),
+            "Master",
+            "Anon"
+        );
+    }
 
     /**---> Get accessToken <---*/
     const data = { DeviceID: DEVICE_ID };
@@ -98,6 +106,48 @@ async function setupWallet() {
     }
 }
 
+async function importAccount({ name, privateKey, authToken }) {
+    let accountSender;
+    try {
+        accountSender = new AccountWallet(Wallet);
+        accountSender.setRPCCoinServices(SERVICE.coinService);
+        accountSender.setRPCClient(SERVICE.fullNode);
+        accountSender.setRPCTxServices(SERVICE.pubsubService);
+        accountSender.setRPCRequestServices(SERVICE.requestService);
+        accountSender.setAuthToken(authToken);
+        accountSender.setRPCApiServices(SERVICE.apiService, authToken);
+        await accountSender.setKey(privateKey);
+    } catch (error) {
+        console.log('import account error: ', error);
+    }
+    return {
+        name,
+        accountSender,
+    }
+}
+
+async function setupMulAccounts({ accounts = [] }) {
+    /**---> Loading.... wasm <---*/
+    await init();
+
+    console.log('SANG TEST:::: ', accounts)
+
+
+
+    /**---> Get accessToken <---*/
+    const data = { DeviceID: DEVICE_ID };
+    const authTokenDt = await Axios.post(`${SERVICE.apiService}/auth/new-token`, data);
+    const authToken = authTokenDt.data.Result.Token;
+    console.log("AccessToken: ", authToken);
+
+    /**---> Config account <---*/
+    const tasks = accounts.map(
+        ({ name, privateKey }) =>
+            importAccount({ name, privateKey, authToken }));
+    const senders = await Promise.all(tasks)
+    return senders;
+}
+
 module.exports = {
     PRV_ID,
     ACCESS_ID,
@@ -105,5 +155,6 @@ module.exports = {
     PRIVATE_KEY_STR,
     DEVICE_ID,
     PRIVACY_VERSION,
-    setupWallet
+    setupWallet,
+    setupMulAccounts
 };

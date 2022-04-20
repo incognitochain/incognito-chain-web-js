@@ -1,5 +1,4 @@
-const { Wallet, Transactor : AccountWallet, types, constants, utils } = require('../../');
-const { RpcClient, DefaultStorage } = types;
+const { Wallet, Transactor : AccountWallet, constants, utils, RpcClient, DefaultStorage } = require('../../');
 const { getShardIDFromLastByte } = utils;
 // const rpcClient = new RpcClient("http://test-node.incognito.org");
 
@@ -10,7 +9,7 @@ async function TestInitWallet() {
   // wallet.save("12345678")
 
   let wallet2 = new Wallet()
-  await wallet2.init("1", new DefaultStorage(), 1, "Wallet")
+  await wallet2.init("1", new DefaultStorage(),"Wallet1", "acc1")
   // wallet2.Storage = storage
   // await wallet2.loadWallet("12345678")
 
@@ -55,7 +54,7 @@ async function TestImportWallet() {
 async function TestImportAccount(){
   let passphrase = "1";
   let wallet = new Wallet();
-  await wallet.init(passphrase, new DefaultStorage(), 1, "Wallet")
+  await wallet.init(passphrase, new DefaultStorage(), "Wallet", "acc1")
 
   await wallet.importAccount("112t8rne7fpTVvSgZcSgyFV23FYEv3sbRRJZzPscRcTo8DsdZwstgn6UyHbnKHmyLJrSkvF13fzkZ4e8YD5A2wg8jzUZx6Yscdr4NuUUQDAt", "Hien", passphrase);
 
