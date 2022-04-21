@@ -65,17 +65,15 @@ module.exports = (env, argv) => {
       fs: "empty",
     },
     module: {
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: "babel-loader",
-          options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: ["@babel/preset-env"],
-          },
+      rules: [{
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
+          presets: ["@babel/preset-env"],
         },
-      ],
+      }, ],
     },
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({
@@ -99,36 +97,31 @@ module.exports = (env, argv) => {
     },
     target: "node",
     module: {
-      defaultRules: [
-        {
-          type: "javascript/auto",
-          resolve: {}
+      defaultRules: [{
+        type: "javascript/auto",
+        resolve: {}
+      }, {
+        test: /\.json$/i,
+        type: "json"
+      }],
+      rules: [{
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
+          presets: [
+            ["@babel/preset-env", {
+              "targets": {
+                "node": "12"
+              }
+            }],
+          ],
         },
-        {
-          test: /\.json$/i,
-          type: "json"
-        }
-      ],
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: "babel-loader",
-          options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: [
-              ["@babel/preset-env", {
-                "targets": {
-                  "node": "12"
-              }}],
-            ],
-          },
-        },
-        {
-          test: /\.wasm$/,
-          loader: 'wasm-loader'
-        },
-      ],
+      }, {
+        test: /\.wasm$/,
+        loader: 'wasm-loader'
+      }, ],
     },
     ...(isProduction ? prodConfig : devConfig),
     ...aliasConfig,
@@ -141,26 +134,27 @@ module.exports = (env, argv) => {
       "wallet": ["./lib/wallet-web.js"],
     },
     output: {
-      path: path.resolve(__dirname),
-      filename: "build/web/[name].js",
-      library: "wallet",
+      path: path.resolve(__dirname, "build/web"),
+      publicPath: "/scripts/",
+      library: "wallet"
     },
     target: "web",
     module: {
-      defaultRules: [
-        {
-          type: "javascript/auto",
-          resolve: {}
-        },
-        {
-          test: /\.json$/i,
-          type: "json"
-        }
-      ],
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
+      defaultRules: [{
+        type: "javascript/auto",
+        resolve: {}
+      }, {
+        test: /\.json$/i,
+        type: "json"
+      }],
+      rules: [{
+        test: /\.worker\.js$/i,
+        use: [{
+          loader: "worker-loader",
+          options: {
+            publicPath: "/scripts/"
+          }
+        }, {
           loader: "babel-loader",
           options: {
             plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
@@ -171,15 +165,29 @@ module.exports = (env, argv) => {
               }],
             ],
           },
+        }, ],
+      }, {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+          presets: [
+            ["@babel/preset-env", {
+              useBuiltIns: "entry",
+              corejs: "3.10.2"
+            }],
+          ],
         },
-        {
-          test: /\.wasm$/,
-          loader: 'file-loader',
-          options: {
-            name: "build/web/privacy.wasm"
-          }
-        },
-      ],
+      }, {
+        test: /\.wasm$/,
+        loader: 'file-loader',
+        options: {
+          name: "privacy.wasm",
+          outputPath: "wasm/",
+          emitFile: false
+        }
+      }, ],
     },
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({
