@@ -13,6 +13,10 @@ type Point struct {
 	key C25519.Key
 }
 
+func NewPoint(k C25519.Key) *Point {
+	return &Point{key: k}
+}
+
 func RandomPoint() *Point {
 	sc := RandomScalar()
 	return new(Point).ScalarMultBase(sc)

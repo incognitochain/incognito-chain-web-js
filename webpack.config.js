@@ -72,6 +72,7 @@ module.exports = (env, argv) => {
         options: {
           plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
           presets: ["@babel/preset-env"],
+          ignore: [/wasm_exec|sjcl/],
         },
       }, ],
     },
@@ -117,6 +118,7 @@ module.exports = (env, argv) => {
               }
             }],
           ],
+          ignore: [/wasm_exec|sjcl/],
         },
       }, {
         test: /\.wasm$/,
@@ -164,6 +166,7 @@ module.exports = (env, argv) => {
                 corejs: "3.10.2"
               }],
             ],
+            ignore: [/wasm_exec|sjcl/],
           },
         }, ],
       }, {
@@ -178,6 +181,7 @@ module.exports = (env, argv) => {
               corejs: "3.10.2"
             }],
           ],
+          ignore: [/wasm_exec|sjcl/],
         },
       }, {
         test: /\.wasm$/,
