@@ -1,4 +1,4 @@
-package gomobile
+package tx
 
 import (
     "encoding/json"
@@ -10,7 +10,7 @@ import (
 
 // DeserializeTransactionJSON parses a transaction from raw JSON into a TxChoice object.
 // It covers all transaction types.
-func extractTxProof(data json.RawMessage) (*privacy.ProofV2, error) {
+func ExtractTxProof(data json.RawMessage) (*privacy.ProofV2, error) {
     var holder struct {
         Proof       *privacy.ProofV2 `json:"Proof,omitempty"`
         TxTokenData string           `json:"PrivacyCustomTokenData,omitempty"`
@@ -35,7 +35,7 @@ func extractTxProof(data json.RawMessage) (*privacy.ProofV2, error) {
     return nil, errors.New("Cannot extract proof : unrecognized transaction format")
 }
 
-func getSentCoinIndex(proof privacy.ProofV2, seal privacy.SenderSeal, paymentAddress privacy.PaymentAddress) (int64, error) {
+func GetSentCoinIndex(proof privacy.ProofV2, seal privacy.SenderSeal, paymentAddress privacy.PaymentAddress) (int64, error) {
     publicOTA := paymentAddress.GetOTAPublicKey()
     publicSpend := paymentAddress.GetPublicSpend()
     rK := (&privacy.Point{}).ScalarMult(publicOTA, seal.GetR())
@@ -54,9 +54,7 @@ func getSentCoinIndex(proof privacy.ProofV2, seal privacy.SenderSeal, paymentAdd
     return -1, nil
 }
 
-const MAX_TRIES_OTA int = 50000
-
-func getReceivedCoinIndex(proof privacy.ProofV2, otaKey privacy.OTAKey) (int64, error) {
+func GetReceivedCoinIndex(proof privacy.ProofV2, otaKey privacy.OTAKey) (int64, error) {
     otaSecret := otaKey.GetOTASecretKey()
     publicSpend := otaKey.GetPublicSpend()
     if otaSecret == nil || publicSpend == nil {

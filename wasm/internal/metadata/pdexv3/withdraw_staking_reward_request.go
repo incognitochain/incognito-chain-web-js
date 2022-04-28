@@ -8,15 +8,15 @@ import (
 
 type WithdrawalStakingRewardRequest struct {
 	metadataCommon.MetadataBase
-	StakingPoolID string                              `json:"StakingPoolID"`
-	NftID         common.Hash                         `json:"NftID"`
-	Receivers     map[common.Hash]privacy.OTAReceiver `json:"Receivers"`
+	StakingPoolID string `json:"StakingPoolID"`
+	AccessOption
+	Receivers map[common.Hash]privacy.OTAReceiver `json:"Receivers"`
 }
 
 func NewPdexv3WithdrawalStakingRewardRequest(
 	metaType int,
 	stakingToken string,
-	nftID common.Hash,
+	accessOption AccessOption,
 	receivers map[common.Hash]privacy.OTAReceiver,
 ) (*WithdrawalStakingRewardRequest, error) {
 	metadataBase := metadataCommon.NewMetadataBase(metaType)
@@ -24,7 +24,7 @@ func NewPdexv3WithdrawalStakingRewardRequest(
 	return &WithdrawalStakingRewardRequest{
 		MetadataBase:  *metadataBase,
 		StakingPoolID: stakingToken,
-		NftID:         nftID,
+		AccessOption:  accessOption,
 		Receivers:     receivers,
 	}, nil
 }

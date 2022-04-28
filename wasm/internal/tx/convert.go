@@ -1,21 +1,13 @@
-package gomobile
+package tx
 
-import(
-	// "encoding/base64"
-	// "encoding/json"
-	// "math/big"
-	// "fmt"
-	// "strconv"
+import (
 	"time"
 
-	// "github.com/pkg/errors"
 	"incognito-chain/common"
-	// "incognito-chain/common/base58"
 	"incognito-chain/privacy"
 	"incognito-chain/privacy/privacy_v1/schnorr"
 	"incognito-chain/privacy/privacy_v1/zeroknowledge/serialnumbernoprivacy"
 	"incognito-chain/privacy/privacy_v2"
-
 )
 
 func SignNoPrivacy(privKey *privacy.PrivateKey, hashedMessage []byte) (signatureBytes []byte, sigPubKey []byte, err error) {
@@ -32,7 +24,7 @@ func SignNoPrivacy(privKey *privacy.PrivateKey, hashedMessage []byte) (signature
 	return signatureBytes, sigPubKey, nil
 }
 
-func initializeTxConversion(tx *Tx, params *TxPrivacyInitParams, paymentsPtr *[]printedPaymentInfo) error {
+func initializeTxConversion(tx *Tx, params *TxParams, paymentsPtr *[]PaymentReader) error {
 	var err error
 	// Get Keyset from param
 	skBytes := *params.SenderSK
@@ -43,7 +35,7 @@ func initializeTxConversion(tx *Tx, params *TxPrivacyInitParams, paymentsPtr *[]
 	tx.Type = common.TxConversionType
 	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
 	// non-zero means it was set before
-	if tx.LockTime==0{
+	if tx.LockTime == 0 {
 		tx.LockTime = time.Now().Unix()
 	}
 	tx.Info = params.Info
@@ -56,18 +48,17 @@ func initializeTxConversion(tx *Tx, params *TxPrivacyInitParams, paymentsPtr *[]
 
 func getOutputcoinsFromPaymentInfo(paymentInfos []*privacy.PaymentInfo, tokenID *common.Hash) ([]*privacy.CoinV2, error) {
 	var err error
-	isPRV := (tokenID==nil) || (*tokenID==common.PRVCoinID)
+	isPRV := (tokenID == nil) || (*tokenID == common.PRVCoinID)
 	c := make([]*privacy.CoinV2, len(paymentInfos))
-	// println("token is", tokenID.String())
 	for i := 0; i < len(paymentInfos); i += 1 {
-		if isPRV{
+		if isPRV {
 			c[i], _, err = privacy.NewCoinFromPaymentInfo(paymentInfos[i])
 			if err != nil {
 				return nil, err
 			}
-		}else{
+		} else {
 			createdCACoin, _, _, err := privacy.NewCoinCA(paymentInfos[i], tokenID)
-			if err!=nil{
+			if err != nil {
 				return nil, err
 			}
 			createdCACoin.SetPlainTokenID(tokenID)
@@ -77,7 +68,7 @@ func getOutputcoinsFromPaymentInfo(paymentInfos []*privacy.PaymentInfo, tokenID 
 	return c, nil
 }
 
-func proveConversionAsm(tx *Tx, params *TxPrivacyInitParams) error {
+func proveConversion(tx *Tx, params *TxParams) error {
 	lenInputs := len(params.InputCoins)
 	inputCoins := params.InputCoins
 	var err error
@@ -99,38 +90,37 @@ func proveConversionAsm(tx *Tx, params *TxPrivacyInitParams) error {
 	if tx.Sig, tx.SigPubKey, err = SignNoPrivacy(params.SenderSK, tx.Hash()[:]); err != nil {
 		return err
 	}
-	// println("After creation, converted output coin is")
-	// ci := GetCoinInter(outputCoins[0])
-	// jsb, _ := json.Marshal(ci)
-	// println(string(jsb))
 	return nil
 }
 
-func InitConversionASM(tx *Tx, params *InitParamsAsm, theirTime int64) error {
-	gParams := params.GetGenericParams()
+func Convert(tx *Tx, params *ExtendedParams, theirTime int64) error {
+	gParams, err := params.GetGenericParams()
+	if err != nil {
+		return err
+	}
 	if err := initializeTxConversion(tx, gParams, &params.PaymentInfo); err != nil {
 		return err
 	}
-	if theirTime>0{
+	if theirTime > 0 {
 		tx.LockTime = theirTime
 	}
-	if err := proveConversionAsm(tx, gParams); err != nil {
+	if err := proveConversion(tx, gParams); err != nil {
 		return err
 	}
-	// jsb, _ := json.Marshal(tx)
-	// utils.Logger.Log.Infof("Init conversion complete ! -> %s", string(jsb))
-
 	return nil
 }
 
-func (txToken *TxToken) initTokenConversion(txNormal *Tx, params *InitParamsAsm) error {
+func (txToken *TxToken) initTokenConversion(txNormal *Tx, params *ExtendedParams) error {
 	txToken.TokenData.Type = CustomTokenTransfer
 	txToken.TokenData.PropertyName = ""
 	txToken.TokenData.PropertySymbol = ""
 	txToken.TokenData.Mintable = false
 	propertyID, _ := common.TokenStringToHash(params.TokenParams.TokenID)
 	txToken.TokenData.PropertyID = *propertyID
-	temp := params.TokenParams.GetCompatTokenParams()
+	temp, err := params.TokenParams.GetTokenParams()
+	if err != nil {
+		return err
+	}
 	txConvertParams := NewTxParams(
 		&params.SenderSK,
 		temp.Receiver,
@@ -141,22 +131,18 @@ func (txToken *TxToken) initTokenConversion(txNormal *Tx, params *InitParamsAsm)
 		nil,
 		params.Info,
 	)
-	
+
 	if err := initializeTxConversion(txNormal, txConvertParams, &params.TokenParams.TokenPaymentInfo); err != nil {
 		return err
 	}
 	txNormal.Type = TxTokenConversionType
-	if err := proveConversionAsm(txNormal, txConvertParams); err != nil {
+	if err := proveConversion(txNormal, txConvertParams); err != nil {
 		return err
 	}
-	// if err := InitConversion(txNormal, txConvertParams); err != nil {
-	// 	return utils.NewTransactionErr(utils.PrivacyTokenInitTokenDataError, err)
-	// }
-	err := txToken.SetTxNormal(txNormal)
-	return err
+	return txToken.SetTxNormal(txNormal)
 }
 
-func (txToken *TxToken) initPRVFeeConversion(feeTx *Tx, params *InitParamsAsm) ([]privacy.PlainCoin, []uint64, []*privacy.CoinV2, error) {
+func (txToken *TxToken) initPRVFeeConversion(feeTx *Tx, params *ExtendedParams) ([]privacy.PlainCoin, []uint64, []*privacy.CoinV2, error) {
 	feeTx.Version = 2
 	feeTx.Type = common.TxTokenConversionType
 	inps, inputIndexes, outs, err := feeTx.provePRV(params)
@@ -167,15 +153,18 @@ func (txToken *TxToken) initPRVFeeConversion(feeTx *Tx, params *InitParamsAsm) (
 	return inps, inputIndexes, outs, nil
 }
 
-func InitTokenConversionASM(txToken *TxToken, params *InitParamsAsm, theirTime int64) error {
+func ConvertToken(txToken *TxToken, params *ExtendedParams, theirTime int64) error {
 	params.HasPrivacy = false
-	txPrivacyParams := params.GetGenericParams()
+	txPrivacyParams, err := params.GetGenericParams()
+	if err != nil {
+		return err
+	}
 	// Init tx and params (tx and params will be changed)
 	tx := &Tx{}
 	if err := tx.initializeTxAndParams(txPrivacyParams, &params.PaymentInfo); err != nil {
 		return err
 	}
-	if theirTime>0{
+	if theirTime > 0 {
 		tx.LockTime = theirTime
 	}
 	// Init PRV Fee
@@ -189,13 +178,13 @@ func InitTokenConversionASM(txToken *TxToken, params *InitParamsAsm, theirTime i
 		return err
 	}
 	tdh, err := txToken.TokenData.Hash()
-	if err!=nil{
+	if err != nil {
 		return err
 	}
-	
+
 	message := common.HashH(append(txToken.Tx.Hash()[:], tdh[:]...))
 	err = txToken.Tx.sign(inps, inputIndexes, outs, params, message[:])
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 	return nil
