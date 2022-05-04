@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo "GOOS=js GOARCH=wasm go build -o ./build/privacy.wasm *.go"
-GOOS=js GOARCH=wasm go build -o ../privacy.wasm *.go
+echo "GOOS=js GOARCH=wasm go1.18.1 build -o ./build/privacy.wasm *.go"
+GOOS=js GOARCH=wasm go1.18.1 build -o ../privacy.wasm *.go
 
 # compress the binary. Takes a couple minutes
 # pushd build

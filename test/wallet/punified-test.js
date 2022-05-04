@@ -51,11 +51,8 @@ const rpcApiService =
 const deviceID = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 let wallet;
 let account1PrivateKeyStr;
-let senderKeyWallet;
 let account1;
 let account1PaymentAddressStr;
-let receiverPaymentAddrStr;
-let receiverPaymentAddrStr2;
 
 const PRVID =
   "0000000000000000000000000000000000000000000000000000000000000004";
@@ -70,11 +67,8 @@ async function setup() {
     "Master",
     "Anon"
   );
-  // senderPrivateKeyStr =
-  //   "1139jtfTYJysjtddB4gFs6n3iW8YiDeFKWcKyufRmsb2fsDssj3BWCYXSmNtTR277MqQgHeiXpTWGit9r9mBUJfoyob5besrF9AW9HpLC4Nf";
   account1PrivateKeyStr =
     "";
-  // "112t8rniqSuDK8vdvHXGzkDzthVG6tsNtvZpvJEvZc5fUg1ts3GDPLWMZWFNbVEpNHeGx8vPLLoyaJRCUikMDqPFY1VzyRbLmLyWi4YDrS7h";
   account1 = new AccountWallet(Wallet);
   account1.setRPCCoinServices(rpcCoinService);
   account1.setRPCClient(rpcClient);
@@ -98,7 +92,7 @@ async function setup() {
 
 async function TestConvertPUnifiedToken() {
   let fee = 20;
-  let convertAmount = 1000000000;
+  let convertAmount = 100000000;
   // Matic (PLG)
   let tokenID = 'dae027b21d8d57114da11209dce8eeb587d01adf59d4fc356a8be5eedc146859';
   let pUnifiedTokenID = 'f5d88e2e3c8f02d6dc1e01b54c90f673d730bef7d941aeec81ad1e1db690961f';
@@ -165,8 +159,8 @@ async function TestUnshieldPUnifiedToken() {
 async function RunPUnifiedTokenTests() {
     await setup();
 
-    // TestConvertPUnifiedToken();
-    TestUnshieldPUnifiedToken();
+    TestConvertPUnifiedToken();
+    // TestUnshieldPUnifiedToken();
 }
 
 RunPUnifiedTokenTests()
