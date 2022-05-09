@@ -239,15 +239,17 @@ func CreateCoin(paramStr string) (string, error) {
 		return "", err
 	}
 	var c *privacy.CoinV2
+	cpr := privacy.NewCoinParams().FromPaymentInfo(pInf)
+	cpr.CoinPrivacyType = privacy.CoinPrivacyTypeMint
 	if len(temp.TokenID) == 0 {
-		c, _, err = privacy.NewCoinFromPaymentInfo(pInf)
+		c, _, err = privacy.NewCoinFromPaymentInfo(cpr)
 		if err != nil {
 			return "", fmt.Errorf("gen-coin error - %v", err)
 		}
 	} else {
 		var tokenID common.Hash
 		tokenID, _ = transaction.TokenIDFromString(temp.TokenID)
-		c, _, _, err = privacy.NewCoinCA(pInf, &tokenID)
+		c, _, _, err = privacy.NewCoinCA(cpr, &tokenID)
 		if err != nil {
 			return "", fmt.Errorf("gen-coin error - %v", err)
 		}
