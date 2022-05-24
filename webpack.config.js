@@ -155,7 +155,7 @@ module.exports = (env, argv) => {
         use: [{
           loader: "worker-loader",
           options: {
-            publicPath: "/scripts/"
+            publicPath: "/assets/"
           }
         }, {
           loader: "babel-loader",
@@ -189,7 +189,7 @@ module.exports = (env, argv) => {
         loader: 'file-loader',
         options: {
           name: "privacy.wasm",
-          outputPath: "wasm/",
+          outputPath: "",
           emitFile: false
         }
       }, ],
