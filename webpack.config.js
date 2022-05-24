@@ -94,7 +94,7 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, "build-node"),
       filename: "[name].js",
       library: "",
-      libraryTarget: "commonjs2",
+      libraryTarget: "umd",
     },
     target: "node",
     module: {
@@ -138,7 +138,8 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, "build/web"),
       publicPath: "/scripts/",
-      library: "wallet"
+      library: "wallet",
+      libraryTarget: "umd",
     },
     target: "web",
     module: {
