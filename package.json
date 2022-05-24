@@ -22,7 +22,8 @@
     "push-code": "git add . && git commit -m 'push code' && git push",
     "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
     "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
-    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test",
+    "build-web": "webpack --config webpack.config.js --mode production --config-name wallet-web"
   },
   "repository": {
     "type": "git",
