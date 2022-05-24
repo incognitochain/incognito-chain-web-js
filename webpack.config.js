@@ -159,7 +159,7 @@ module.exports = (env, argv) => {
         }, {
           loader: "babel-loader",
           options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
             presets: [
               ["@babel/preset-env", {
                 useBuiltIns: "entry",
@@ -174,7 +174,7 @@ module.exports = (env, argv) => {
         exclude: /node_modules/,
         loader: "babel-loader",
         options: {
-          plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
           presets: [
             ["@babel/preset-env", {
               useBuiltIns: "entry",
