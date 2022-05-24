@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Constant-chain Javascript API",
   "main": "build-node/inc.js",
-  "module": "build/wallet.js",
+  "module": "build/web/wallet.js",
   "scripts": {
     "start": "yarn build:wasm; node --experimental-repl-await -r ./inc.config",
     "start:dev": "yarn test-account && yarn build",
