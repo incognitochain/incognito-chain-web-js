@@ -137,7 +137,7 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, "build/web"),
-      publicPath: "/scripts/",
+      publicPath: "/assets/",
       library: "wallet",
       libraryTarget: "umd",
     },
