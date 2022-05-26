@@ -251,10 +251,18 @@ func DecryptCoinList(paramStr string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		_, err = c.Decrypt(&tempKw.KeySet)
+		// coins that have KeyImage are already decrypted
+		if c.GetKeyImage() == nil {
+			_, err = c.Decrypt(&tempKw.KeySet)
+		}
 		if err == nil {
 			resultCoin := transaction.GetCoinData(c)
-			resultCoin.TokenID = transaction.GetTokenID(c, &tempKw.KeySet, rawAssetTags)
+			if temp.CoinList[i].TokenID != nil && *temp.CoinList[i].TokenID != common.ConfidentialAssetID {
+				resultCoin.TokenID = temp.CoinList[i].TokenID
+			} else {
+				// find tokenID using the token list
+				resultCoin.TokenID = transaction.GetTokenID(c, &tempKw.KeySet, rawAssetTags)
+			}
 			resultCoin.Index = temp.CoinList[i].Index
 			resultCoins = append(resultCoins, resultCoin)
 		} // coins that fail Decrypt are considered unowned
