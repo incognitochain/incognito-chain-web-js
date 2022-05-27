@@ -95,8 +95,8 @@ func (coin *CoinV2) SetPlainTokenID(tokenID *common.Hash) error{
 }
 
 // for confidential asset only
-func NewCoinCA(info *key.PaymentInfo, tokenID *common.Hash) (*CoinV2, *operation.Point, *SenderSeal, error) {
-	receiverPublicKey, err := new(operation.Point).FromBytesS(info.PaymentAddress.Pk)
+func NewCoinCA(p *CoinParams, tokenID *common.Hash) (*CoinV2, *operation.Point, *SenderSeal, error) {
+	receiverPublicKey, err := new(operation.Point).FromBytesS(p.PaymentAddress.Pk)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot parse outputCoinV2 from PaymentInfo when parseByte PublicKey, error %v ", err)
 		return nil, nil, nil, errors.New(errStr)
@@ -106,15 +106,15 @@ func NewCoinCA(info *key.PaymentInfo, tokenID *common.Hash) (*CoinV2, *operation
 
 	c := new(CoinV2).Init()
 	// Amount, Randomness, SharedRandom is transparency until we call concealData
-	c.SetAmount(new(operation.Scalar).FromUint64(info.Amount))
+	c.SetAmount(new(operation.Scalar).FromUint64(p.Amount))
 	c.SetRandomness(operation.RandomScalar())
 	c.SetSharedRandom(operation.RandomScalar()) // r
 	c.SetSharedConcealRandom(operation.RandomScalar())
-	c.SetInfo(info.Message)
+	c.SetInfo(p.Message)
 
 	// If this is going to burning address then dont need to create ota
-	if wallet.IsPublicKeyBurningAddress(info.PaymentAddress.Pk) {
-		publicKey, err := new(operation.Point).FromBytesS(info.PaymentAddress.Pk)
+	if wallet.IsPublicKeyBurningAddress(p.PaymentAddress.Pk) {
+		publicKey, err := new(operation.Point).FromBytesS(p.PaymentAddress.Pk)
 		if err != nil {
 			panic("Something is wrong with info.paymentAddress.pk, burning address should be a valid point")
 		}
@@ -128,8 +128,8 @@ func NewCoinCA(info *key.PaymentInfo, tokenID *common.Hash) (*CoinV2, *operation
 
 	// Increase index until have the right shardID
 	index := uint32(0)
-	publicOTA := info.PaymentAddress.GetOTAPublicKey() //For generating one-time-address
-	publicSpend := info.PaymentAddress.GetPublicSpend() //General public key
+	publicOTA := p.PaymentAddress.GetOTAPublicKey() //For generating one-time-address
+	publicSpend := p.PaymentAddress.GetPublicSpend() //General public key
 	//publicView := info.PaymentAddress.GetPublicView() //For generating asset tag and concealing output coin
 
 	rK := new(operation.Point).ScalarMult(publicOTA, c.GetSharedRandom())
@@ -142,11 +142,8 @@ func NewCoinCA(info *key.PaymentInfo, tokenID *common.Hash) (*CoinV2, *operation
 		publicKey := new(operation.Point).Add(HrKG, publicSpend)
 		c.SetPublicKey(publicKey)
 
-		currentShardID, err := c.GetShardID()
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		if currentShardID == targetShardID {
+		senderShardID, recvShardID, coinPrivacyType, _ := DeriveShardInfoFromCoin(publicKey.ToBytesS())
+		if recvShardID == int(targetShardID) && senderShardID == p.SenderShardID && coinPrivacyType == p.CoinPrivacyType {
 			otaSharedRandomPoint := new(operation.Point).ScalarMultBase(c.GetSharedRandom())
 			concealSharedRandomPoint := new(operation.Point).ScalarMultBase(c.GetSharedConcealRandom())
 			c.SetTxRandomDetail(concealSharedRandomPoint, otaSharedRandomPoint, index)

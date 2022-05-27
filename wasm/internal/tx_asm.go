@@ -651,11 +651,14 @@ func generateMlsagRing(inputCoins []privacy.PlainCoin, inputIndexes []uint64, ou
 func (tx *Tx) proveAsm(params *InitParamsAsm) (*privacy.SenderSeal, error) {
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
+	var senderKeySet incognitokey.KeySet
+	senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	// currently support returning the 1st SenderSeal only
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _, payInf := range params.PaymentInfo{
 		temp, _ := payInf.To()
-		c, seal, err := privacy.NewCoinFromPaymentInfo(temp)
+		c, seal, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))
 		if senderSealToExport == nil {
 			senderSealToExport = seal
 		}

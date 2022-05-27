@@ -8,6 +8,7 @@ import(
 
 	"github.com/pkg/errors"
 	"incognito-chain/common"
+	"incognito-chain/key/incognitokey"
 
 	"incognito-chain/privacy"
 	"incognito-chain/privacy/privacy_v2/mlsag"
@@ -409,9 +410,12 @@ func (tx *Tx) proveCA(params_compat *TxPrivacyInitParams, params_token *TokenInn
 	var numOfCoinsBurned uint = 0
 	var isBurning bool = false
 	var tid common.Hash = *params_compat.TokenID
+	var senderKeySet incognitokey.KeySet
+	_ = senderKeySet.InitFromPrivateKey(params_compat.SenderSK)
+	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _,inf := range params_compat.PaymentInfo{
-		c, sharedSecret, seal, err := privacy.NewCoinCA(inf, &tid)
+		c, sharedSecret, seal, err := privacy.NewCoinCA(privacy.NewCoinParams().From(inf, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer), &tid)
 		if err != nil {
 			return false, nil, err
 		}
@@ -562,9 +566,12 @@ func (txToken *TxToken) initToken(txNormal *Tx, params *InitParamsAsm) (*privacy
 func (tx *Tx) provePRV(params *InitParamsAsm) ([]privacy.PlainCoin, []uint64, []*privacy.CoinV2, error) {
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
+	var senderKeySet incognitokey.KeySet
+	_ = senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	for _, payInf := range params.PaymentInfo{
 		temp, _ := payInf.To()
-		c, _, err := privacy.NewCoinFromPaymentInfo(temp)
+		c, _, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))
 		if err!=nil{
 			return nil, nil, nil, err
 		}
