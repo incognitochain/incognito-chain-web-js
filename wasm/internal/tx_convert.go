@@ -61,12 +61,12 @@ func getOutputcoinsFromPaymentInfo(paymentInfos []*privacy.PaymentInfo, tokenID 
 	// println("token is", tokenID.String())
 	for i := 0; i < len(paymentInfos); i += 1 {
 		if isPRV{
-			c[i], _, err = privacy.NewCoinFromPaymentInfo(paymentInfos[i])
+			c[i], _, err = privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().FromPaymentInfo(paymentInfos[i]))
 			if err != nil {
 				return nil, err
 			}
 		}else{
-			createdCACoin, _, _, err := privacy.NewCoinCA(paymentInfos[i], tokenID)
+			createdCACoin, _, _, err := privacy.NewCoinCA(privacy.NewCoinParams().FromPaymentInfo(paymentInfos[i]), tokenID)
 			if err!=nil{
 				return nil, err
 			}
