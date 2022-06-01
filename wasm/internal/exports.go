@@ -239,7 +239,8 @@ func DecryptCoinList(paramStr string) (string, error) {
 	rawAssetTags := make(map[string]*common.Hash)
 	for _, tokenID := range temp.TokenList {
 		t := privacy.HashToPoint(tokenID[:])
-		rawAssetTags[t.String()] = &tokenID
+		rawAssetTags[t.String()] = &common.Hash{}
+		*rawAssetTags[t.String()] = tokenID
 	}
 	tempKw, err := wallet.Base58CheckDeserialize(temp.KeySet)
 	if err != nil {
