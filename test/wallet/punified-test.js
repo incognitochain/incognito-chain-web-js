@@ -9,6 +9,7 @@ const {
   isPaymentAddress,
   isOldPaymentAddress,
   VerifierTx,
+  setShardNumber,
 } = require("../../");
 const { PaymentAddressType } = constants;
 
@@ -67,6 +68,8 @@ async function setup() {
     "Master",
     "Anon"
   );
+  console.log("setShardNumber: ", setShardNumber);
+  await setShardNumber(2);
   account1PrivateKeyStr =
     "";
   account1 = new AccountWallet(Wallet);
@@ -74,12 +77,6 @@ async function setup() {
   account1.setRPCClient(rpcClient);
   account1.setRPCTxServices(rpcTxService);
   account1.setRPCRequestServices(rpcRequestService);
-  const data = {
-    DeviceID: deviceID,
-  };
-  const authTokenDt = await Axios.post(`${rpcApiService}/auth/new-token`, data);
-  const authToken = authTokenDt.data.Result.Token;
-  account1.setRPCApiServices(rpcApiService, authToken);
   await account1.setKey(account1PrivateKeyStr);
   account1PaymentAddressStr =
     account1.key.base58CheckSerialize(PaymentAddressType);
