@@ -160,8 +160,8 @@ async function TestUnshieldPUnifiedToken() {
 async function RunPUnifiedTokenTests() {
     await setup();
 
-    // TestConvertPUnifiedToken();
-    TestUnshieldPUnifiedToken();
+    TestConvertPUnifiedToken();
+    // TestUnshieldPUnifiedToken();
 }
 
 RunPUnifiedTokenTests()
