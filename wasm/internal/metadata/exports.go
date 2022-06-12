@@ -192,6 +192,16 @@ const (
 	BurningFantomForDepositToSCRequestMeta = metadataCommon.BurningFantomForDepositToSCRequestMeta
 	BurningFantomConfirmForDepositToSCMeta = metadataCommon.BurningFantomConfirmForDepositToSCMeta
 
+	// incognito mode for Near
+	IssuingNearRequestMeta  = metadataCommon.IssuingNearRequestMeta
+	IssuingNearResponseMeta = metadataCommon.IssuingNearResponseMeta
+	BurningNearRequestMeta  = metadataCommon.BurningNearRequestMeta
+	BurningNearConfirmMeta  = metadataCommon.BurningNearConfirmMeta
+
+	// pNear ( Near )
+	BurningNearForDepositToSCRequestMeta = metadataCommon.BurningNearForDepositToSCRequestMeta
+	BurningNearConfirmForDepositToSCMeta = metadataCommon.BurningNearConfirmForDepositToSCMeta
+
 	// Bridge aggregator
 	BridgeAggModifyParamMeta                        = metadataCommon.BridgeAggModifyParamMeta
 	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta

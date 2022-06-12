@@ -203,6 +203,16 @@ const (
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
 
+	// incognito mode for Near
+	IssuingNearRequestMeta  = 335
+	IssuingNearResponseMeta = 336
+	BurningNearRequestMeta  = 337
+	BurningNearConfirmMeta  = 157
+
+	// pNear ( Near )
+	BurningNearForDepositToSCRequestMeta = 338
+	BurningNearConfirmForDepositToSCMeta = 158
+
 	// Bridge aggregator
 	BridgeAggModifyParamMeta                        = 340
 	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = 341
