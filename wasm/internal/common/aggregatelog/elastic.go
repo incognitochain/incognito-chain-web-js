@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
-	"os"
+	// "os"
 	"time"
 
 	"github.com/olivere/elastic"
@@ -115,29 +115,29 @@ func CreateLogIndex(client *elastic.Client, index string) error {
 	return nil
 }
 
-func SendMessageToElastic(message, level string) error {
-	validErr := ValidateElasticClient()
-	if validErr != nil {
-		return validErr
-	}
+// func SendMessageToElastic(message, level string) error {
+// 	validErr := ValidateElasticClient()
+// 	if validErr != nil {
+// 		return validErr
+// 	}
 
-	messageObject := MessageData{
-		Time:     time.Now(),
-		Message:  message,
-		LogLevel: level,
-		NodeID:   os.Getenv("NodeID"),
-		TestName: os.Getenv("TestName"),
-	}
-	// putResult, err := elasticClient.Index().
-	_, err := elasticClient.Index().
-		Index(LOG_AGGREGATION_INDEX).
-		Type("log").
-		BodyJson(messageObject).
-		Do(ctx)
-	if err != nil {
-		return err
-	}
-	// log.Printf("Indexed tweet %s to index %s, type %s\n", putResult.Id, putResult.Index, putResult.Type)
-	// log.Printf("Indexed tweet %s to index %s, type %s\n", putResult.Id, putResult.Index, putResult.Type)
-	return nil
-}
+// 	messageObject := MessageData{
+// 		Time:     time.Now(),
+// 		Message:  message,
+// 		LogLevel: level,
+// 		NodeID:   "NodeID",
+// 		TestName: "TestName",
+// 	}
+// 	// putResult, err := elasticClient.Index().
+// 	_, err := elasticClient.Index().
+// 		Index(LOG_AGGREGATION_INDEX).
+// 		Type("log").
+// 		BodyJson(messageObject).
+// 		Do(ctx)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// log.Printf("Indexed tweet %s to index %s, type %s\n", putResult.Id, putResult.Index, putResult.Type)
+// 	// log.Printf("Indexed tweet %s to index %s, type %s\n", putResult.Id, putResult.Index, putResult.Type)
+// 	return nil
+// }

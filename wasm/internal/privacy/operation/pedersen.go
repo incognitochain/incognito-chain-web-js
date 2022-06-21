@@ -1,7 +1,7 @@
 package operation
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 )
 
 const (

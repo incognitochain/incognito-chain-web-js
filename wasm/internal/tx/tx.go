@@ -146,20 +146,6 @@ func (tx Tx) Hash() *common.Hash {
 	return &hash
 }
 
-func (tx Tx) HashWithoutMetadataSig() *common.Hash {
-	md := tx.Metadata
-	mdHash := md.HashWithoutSig()
-	tx.Metadata = nil
-	txHash := tx.Hash()
-	if mdHash == nil || txHash == nil {
-		return nil
-	}
-	// tx.SetMetadata(md)
-	inBytes := append(mdHash[:], txHash[:]...)
-	hash := common.HashH(inBytes)
-	return &hash
-}
-
 func generateMlsagRing(inputCoins []privacy.PlainCoin, inputIndexes []uint64, outputCoins []*privacy.CoinV2, params *ExtendedParams, pi int, shardID byte, ringSize int) (*mlsag.Ring, [][]*big.Int, *privacy.Point, error) {
 	coinCache := params.Cache
 	mutualLen := len(coinCache.PublicKeys)
@@ -244,11 +230,11 @@ func (tx *Tx) prove(params *ExtendedParams) (*privacy.SenderSeal, error) {
 		return nil, err
 	}
 
-	if tx.Metadata != nil {
-		if err := tx.Metadata.Sign(&params.SenderSK, tx); err != nil {
-			return nil, err
-		}
-	}
+	// if tx.Metadata != nil {
+	// 	if err := tx.Metadata.Sign(&params.SenderSK, tx); err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	err = tx.sign(inputCoins, inputIndexes, outputCoins, params, tx.Hash()[:])
 	return senderSealToExport, err

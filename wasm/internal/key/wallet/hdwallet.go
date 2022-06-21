@@ -2,8 +2,8 @@ package wallet
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha512"
+	// "crypto/hmac"
+	// "crypto/sha512"
 	"errors"
 	"fmt"
 	
@@ -77,19 +77,19 @@ type KeyWallet struct {
 // }
 
 // getIntermediary
-func (key *KeyWallet) getIntermediary(childIdx uint32) ([]byte, error) {
-	childIndexBytes := common.Uint32ToBytes(childIdx)
+// func (key *KeyWallet) getIntermediary(childIdx uint32) ([]byte, error) {
+// 	childIndexBytes := common.Uint32ToBytes(childIdx)
 
-	var data []byte
-	data = append(data, childIndexBytes...)
+// 	var data []byte
+// 	data = append(data, childIndexBytes...)
 
-	hmacObj := hmac.New(sha512.New, key.ChainCode)
-	_, err := hmacObj.Write(data)
-	if err != nil {
-		return nil, err
-	}
-	return hmacObj.Sum(nil), nil
-}
+// 	hmacObj := hmac.New(sha512.New, key.ChainCode)
+// 	_, err := hmacObj.Write(data)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return hmacObj.Sum(nil), nil
+// }
 
 // Serialize receives keyType and serializes key which has keyType to bytes array
 // and append 4-byte checksum into bytes array

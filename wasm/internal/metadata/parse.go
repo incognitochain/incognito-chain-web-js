@@ -32,12 +32,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &InitTokenRequest{}
 	case IssuingRequestMeta:
 		md = &IssuingRequest{}
-	case IssuingResponseMeta:
-		md = &IssuingResponse{}
 	case ContractingRequestMeta:
 		md = &ContractingRequest{}
-	case BeaconSalaryResponseMeta:
-		md = &BeaconBlockSalaryRes{}
 	case BurningRequestMeta, BurningRequestMetaV2,
 		BurningForDepositToSCRequestMeta, BurningForDepositToSCRequestMetaV2,
 		BurningPBSCRequestMeta, BurningPRVERC20RequestMeta, BurningPRVBEP20RequestMeta,
@@ -68,16 +64,12 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &PDETradeResponse{}
 	case PDECrossPoolTradeRequestMeta:
 		md = &PDECrossPoolTradeRequest{}
-	case PDECrossPoolTradeResponseMeta:
-		md = &PDECrossPoolTradeResponse{}
 	case PDEWithdrawalRequestMeta:
 		md = &PDEWithdrawalRequest{}
 	case PDEWithdrawalResponseMeta:
 		md = &PDEWithdrawalResponse{}
 	case PDEFeeWithdrawalRequestMeta:
 		md = &PDEFeeWithdrawalRequest{}
-	case PDEFeeWithdrawalResponseMeta:
-		md = &PDEFeeWithdrawalResponse{}
 	case PDEContributionResponseMeta:
 		md = &PDEContributionResponse{}
 	case RelayingBNBHeaderMeta:
@@ -88,8 +80,6 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &UnStakingMetadata{}
 	case IssuingBSCRequestMeta:
 		md = &IssuingEVMRequest{}
-	case IssuingBSCResponseMeta:
-		md = &IssuingEVMResponse{}
 	case PortalV4UnshieldRequestMeta:
 		md = &PortalUnshieldRequest{}
 	case metadataCommon.Pdexv3ModifyParamsMeta:

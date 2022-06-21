@@ -465,11 +465,11 @@ func (tx *Tx) provePRV(params *ExtendedParams) ([]privacy.PlainCoin, []uint64, [
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if tx.Metadata != nil {
-		if err := tx.Metadata.Sign(&params.SenderSK, tx); err != nil {
-			return nil, nil, nil, err
-		}
-	}
+	// if tx.Metadata != nil {
+	// 	if err := tx.Metadata.Sign(&params.SenderSK, tx); err != nil {
+	// 		return nil, nil, nil, err
+	// 	}
+	// }
 	return inputCoins, inputIndexes, outputCoins, nil
 }
 

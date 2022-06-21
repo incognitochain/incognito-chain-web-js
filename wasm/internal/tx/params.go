@@ -46,24 +46,15 @@ func (params *ExtendedParams) GetInputCoins() ([]privacy.PlainCoin, []uint64, er
 	if len(params.InputCoins) == 0 {
 		return []privacy.PlainCoin{}, []uint64{}, nil
 	}
-	ver := params.InputCoins[0].Version
 	for _, ci := range params.InputCoins {
 		var c privacy.PlainCoin
 		var ind uint64
 		var err error
-		if ver == 2 {
-			c, ind, err = ci.ToCoin()
-			if err != nil {
-				return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
-			}
-		} else {
-			var temp *privacy.CoinV1
-			temp, ind, err = ci.ToCoinV1()
-			if err != nil {
-				return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
-			}
-			c = temp.CoinDetails
+		c, ind, err = ci.ToCoin()
+		if err != nil {
+			return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
 		}
+
 		resultCoins = append(resultCoins, c)
 		resultIndexes = append(resultIndexes, ind)
 	}
@@ -113,24 +104,15 @@ func (params *TokenParamsReader) GetInputCoins() ([]privacy.PlainCoin, []uint64,
 	if len(params.TokenInput) == 0 {
 		return []privacy.PlainCoin{}, []uint64{}, nil
 	}
-	ver := params.TokenInput[0].Version
 	for _, ci := range params.TokenInput {
 		var c privacy.PlainCoin
 		var ind uint64
 		var err error
-		if ver == 2 {
-			c, ind, err = ci.ToCoin()
-			if err != nil {
-				return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
-			}
-		} else {
-			var temp *privacy.CoinV1
-			temp, ind, err = ci.ToCoinV1()
-			if err != nil {
-				return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
-			}
-			c = temp.CoinDetails
+		c, ind, err = ci.ToCoin()
+		if err != nil {
+			return nil, nil, fmt.Errorf("cannot parse coin %v - %v", ci, err)
 		}
+
 		resultCoins = append(resultCoins, c)
 		resultIndexes = append(resultIndexes, ind)
 	}

@@ -16,15 +16,15 @@
 
 package curve25519
 
-import "golang.org/x/crypto/scrypt"
+// import "golang.org/x/crypto/scrypt"
 
-// quick scrypt wrapper
-func Scrypt_1024_1_1_256(data []byte) (result Hash) {
+// // quick scrypt wrapper
+// func Scrypt_1024_1_1_256(data []byte) (result Hash) {
 
-	dk, err := scrypt.Key(data, data, 1024, 1, 1, 32) // 32 byte  = 256 bits
-	if err != nil {
-		panic("scrypt failed") // maybe due to RAM
-	}
-	copy(result[:], dk)
-	return
-}
+// 	dk, err := scrypt.Key(data, data, 1024, 1, 1, 32) // 32 byte  = 256 bits
+// 	if err != nil {
+// 		panic("scrypt failed") // maybe due to RAM
+// 	}
+// 	copy(result[:], dk)
+// 	return
+// }

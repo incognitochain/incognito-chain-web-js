@@ -1,11 +1,11 @@
 package incognitokey
 
 import (
-	"errors"
+	// "errors"
 
 	"incognito-chain/privacy/key"
-	"incognito-chain/privacy/operation"
-	"incognito-chain/privacy/privacy_v1/schnorr"
+	// "incognito-chain/privacy/operation"
+	// "incognito-chain/privacy/privacy_v1/schnorr"
 
 	"incognito-chain/common"
 	"incognito-chain/common/base58"
@@ -74,21 +74,21 @@ func (keySet *KeySet) InitFromPrivateKey(privateKey *key.PrivateKey) error {
 
 // Sign receives data in bytes array and
 // returns the signature of that data using Schnorr Signature Scheme with signing key is private key in ketSet
-func (keySet KeySet) Sign(data []byte) ([]byte, error) {
-	if len(data) == 0 {
-		return []byte{}, NewCashecError(InvalidDataSignErr, errors.New("data is empty to sign"))
-	}
+// func (keySet KeySet) Sign(data []byte) ([]byte, error) {
+// 	if len(data) == 0 {
+// 		return []byte{}, NewCashecError(InvalidDataSignErr, errors.New("data is empty to sign"))
+// 	}
 
-	hash := common.HashB(data)
-	privateKeySig := new(schnorr.SchnorrPrivateKey)
-	privateKeySig.Set(new(operation.Scalar).FromBytesS(keySet.PrivateKey), new(operation.Scalar).FromUint64(0))
+// 	hash := common.HashB(data)
+// 	privateKeySig := new(schnorr.SchnorrPrivateKey)
+// 	privateKeySig.Set(new(operation.Scalar).FromBytesS(keySet.PrivateKey), new(operation.Scalar).FromUint64(0))
 
-	signature, err := privateKeySig.Sign(hash)
-	if err != nil {
-		return []byte{}, NewCashecError(SignError, err)
-	}
-	return signature.Bytes(), nil
-}
+// 	signature, err := privateKeySig.Sign(hash)
+// 	if err != nil {
+// 		return []byte{}, NewCashecError(SignError, err)
+// 	}
+// 	return signature.Bytes(), nil
+// }
 
 // Verify receives data and signature
 // It checks whether the given signature is the signature of data
@@ -129,13 +129,13 @@ func (keySet KeySet) GetOTASecretKeyInBase58CheckEncode() string {
 
 // SignDataInBase58CheckEncode receives data and
 // returns the signature that is base58 check encoded and is signed by private key in keySet
-func (keySet KeySet) SignDataInBase58CheckEncode(data []byte) (string, error) {
-	signatureByte, err := keySet.Sign(data)
-	if err != nil {
-		return common.EmptyString, NewCashecError(SignDataB58Err, err)
-	}
-	return base58.Base58Check{}.Encode(signatureByte, common.ZeroByte), nil
-}
+// func (keySet KeySet) SignDataInBase58CheckEncode(data []byte) (string, error) {
+// 	signatureByte, err := keySet.Sign(data)
+// 	if err != nil {
+// 		return common.EmptyString, NewCashecError(SignDataB58Err, err)
+// 	}
+// 	return base58.Base58Check{}.Encode(signatureByte, common.ZeroByte), nil
+// }
 
 // ValidateDataB58 receives a data, a base58 check encoded signature (sigB58)
 // and a base58 check encoded public key (pbkB58)

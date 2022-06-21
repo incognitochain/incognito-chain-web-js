@@ -6,7 +6,7 @@ import (
 	"incognito-chain/privacy/operation"
 	"incognito-chain/privacy/privacy_util"
 	"incognito-chain/privacy/coin"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var CACommitmentScheme operation.PedersenCommitment = CopyPedersenCommitmentScheme(operation.PedCom)

@@ -1,13 +1,13 @@
 package metadata
 
 import (
-	rCommon "github.com/ethereum/go-ethereum/common"
+	"encoding/hex"
 	"incognito-chain/common"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type IssuingEVMRequest struct {
-	BlockHash  rCommon.Hash
+	BlockHash  common.Hash
 	TxIndex    uint
 	ProofStrs  []string
 	IncTokenID common.Hash
@@ -15,7 +15,7 @@ type IssuingEVMRequest struct {
 }
 
 func NewIssuingEVMRequest(
-	blockHash rCommon.Hash,
+	blockHash common.Hash,
 	txIndex uint,
 	proofStrs []string,
 	incTokenID common.Hash,
@@ -38,7 +38,7 @@ func NewIssuingEVMRequestFromMap(
 	data map[string]interface{},
 	metatype int,
 ) (*IssuingEVMRequest, error) {
-	blockHash := rCommon.HexToHash(data["BlockHash"].(string))
+	blockHash := HexToHash(data["BlockHash"].(string))
 	txIdx := uint(data["TxIndex"].(float64))
 	proofsRaw := data["ProofStrs"].([]interface{})
 	proofStrs := []string{}
@@ -48,7 +48,7 @@ func NewIssuingEVMRequestFromMap(
 
 	incTokenID, err := common.Hash{}.NewHashFromStr(data["IncTokenID"].(string))
 	if err != nil {
-		return nil, errors.Errorf("TokenID incorrect")
+		return nil, errors.New("TokenID incorrect")
 	}
 
 	req, _ := NewIssuingEVMRequest(
@@ -75,4 +75,31 @@ func (iReq IssuingEVMRequest) Hash() *common.Hash {
 	// final hash
 	hash := common.HashH([]byte(record))
 	return &hash
+}
+
+func FromHex(s string) []byte {
+	if has0xPrefix(s) {
+		s = s[2:]
+	}
+	if len(s)%2 == 1 {
+		s = "0" + s
+	}
+	return Hex2Bytes(s)
+}
+
+func has0xPrefix(str string) bool {
+	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
+}
+
+func HexToHash(s string) common.Hash { return BytesToHash(FromHex(s)) }
+
+func BytesToHash(b []byte) common.Hash {
+	var h common.Hash
+	h.SetBytes(b)
+	return h
+}
+
+func Hex2Bytes(str string) []byte {
+	h, _ := hex.DecodeString(str)
+	return h
 }

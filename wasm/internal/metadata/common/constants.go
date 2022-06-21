@@ -212,6 +212,8 @@ const (
 	IssuingUnifiedRewardResponseMeta                = 345
 	BurningUnifiedTokenRequestMeta                  = 346
 	BurningUnifiedTokenResponseMeta                 = 347
+
+	BurnForCallETHRequestMeta = 349
 )
 
 var minerCreatedMetaTypes = []int{
@@ -340,3 +342,8 @@ var bridgeMetas = []string{
 	strconv.Itoa(BurningConfirmForDepositToSCMetaV2),
 	strconv.Itoa(BurningBSCConfirmMeta),
 }
+
+const (
+	BurnForCallReceiveTypeRedeposit = iota
+	BurnForCallReceiveTypeWithdraw
+)

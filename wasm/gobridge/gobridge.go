@@ -4,7 +4,7 @@ package gobridge
 
 import (
 	"syscall/js"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var bridgeRoot js.Value
@@ -38,7 +38,7 @@ type txCallback = func(string, int64) (string, error)
 func RegisterCallback(name string, inputFunc interface{}) {
 	mycb := func(_ js.Value, jsInputs []js.Value) (interface{}, error){
 		if len(jsInputs)<1{
-			return nil, errors.Errorf("Invalid number of parameters. Expected at least 1")
+			return nil, errors.New("Invalid number of parameters. Expected at least 1")
 		}
 		args := jsInputs[0].String()
 		var num int64 = 0
@@ -55,7 +55,7 @@ func RegisterCallback(name string, inputFunc interface{}) {
 		case txCallback:
 			return callback(args, num)
 		default:
-			return "", errors.Errorf("Unexpected error when executing callback")
+			return "", errors.New("Unexpected error when executing callback")
 		}
 		
 	}

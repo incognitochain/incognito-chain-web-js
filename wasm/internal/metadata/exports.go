@@ -23,13 +23,13 @@ var AcceptedWithdrawRewardRequestVersion = metadataCommon.AcceptedWithdrawReward
 var GenTokenIDFromRequest = metadataCommon.GenTokenIDFromRequest
 var NewMetadataBase = metadataCommon.NewMetadataBase
 var NewMetadataBaseWithSignature = metadataCommon.NewMetadataBaseWithSignature
-var IsAvailableMetaInTxType = metadataCommon.IsAvailableMetaInTxType
-var NoInputNoOutput = metadataCommon.NoInputNoOutput
-var NoInputHasOutput = metadataCommon.NoInputHasOutput
-var GetMetaAction = metadataCommon.GetMetaAction
-var GetLimitOfMeta = metadataCommon.GetLimitOfMeta
-var HasBridgeInstructions = metadataCommon.HasBridgeInstructions
-var HasPortalInstructions = metadataCommon.HasPortalInstructions
+// var IsAvailableMetaInTxType = metadataCommon.IsAvailableMetaInTxType
+// var NoInputNoOutput = metadataCommon.NoInputNoOutput
+// var NoInputHasOutput = metadataCommon.NoInputHasOutput
+// var GetMetaAction = metadataCommon.GetMetaAction
+// var GetLimitOfMeta = metadataCommon.GetLimitOfMeta
+// var HasBridgeInstructions = metadataCommon.HasBridgeInstructions
+// var HasPortalInstructions = metadataCommon.HasPortalInstructions
 
 var calculateSize = metadataCommon.CalculateSize
 
@@ -146,9 +146,9 @@ const (
 	BeaconOnly               = metadataCommon.BeaconOnly
 	StopAutoStakingAmount    = metadataCommon.StopAutoStakingAmount
 	EVMConfirmationBlocks    = metadataCommon.EVMConfirmationBlocks
-	NoAction                 = metadataCommon.NoAction
-	MetaRequestBeaconMintTxs = metadataCommon.MetaRequestBeaconMintTxs
-	MetaRequestShardMintTxs  = metadataCommon.MetaRequestShardMintTxs
+	// NoAction                 = metadataCommon.NoAction
+	// MetaRequestBeaconMintTxs = metadataCommon.MetaRequestBeaconMintTxs
+	// MetaRequestShardMintTxs  = metadataCommon.MetaRequestShardMintTxs
 	// portal v4
 	PortalV4UnshieldRequestMeta = metadataCommon.PortalV4UnshieldRequestMeta
 	// erc20/bep20 for prv token

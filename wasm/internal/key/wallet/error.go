@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -71,7 +70,7 @@ func (e WalletError) GetCode() int {
 
 func NewWalletError(key int, err error) *WalletError {
 	return &WalletError{
-		err:     errors.Wrap(err, ErrCodeMessage[key].message),
+		err:     fmt.Errorf("%s - %v", ErrCodeMessage[key].message, err),
 		code:    ErrCodeMessage[key].code,
 		message: ErrCodeMessage[key].message,
 	}

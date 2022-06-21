@@ -5,7 +5,7 @@ import (
 
 	"incognito-chain/privacy/operation"
 	"incognito-chain/privacy/privacy_util"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type AggregatedRangeWitness struct {
@@ -32,7 +32,7 @@ type bulletproofParams struct {
 	cs *operation.Point
 }
 
-// var AggParam = newBulletproofParams(privacy_util.MaxOutputCoin)
+var AggParam = newBulletproofParams(privacy_util.MaxOutputCoin)
 
 // func (proof AggregatedRangeProof) ValidateSanity() bool {
 // 	for i := 0; i < len(proof.cmsValue); i++ {

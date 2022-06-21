@@ -4,21 +4,22 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
+	// "fmt"
 	// "github.com/ethereum/go-ethereum/common"
 	// "log"
 	"math/big"
-	"net"
+	// "net"
 	// "os"
 	// "os/user"
 	// "path/filepath"
 	// "reflect"
-	"runtime"
+	// "runtime"
 	"strconv"
 	"strings"
 	// "unicode"
-
-	"github.com/pkg/errors"
+	
+	"errors"
+	"fmt"
 )
 
 // appDataDir returns an operating system specific directory to be used for
@@ -134,67 +135,67 @@ import (
 // returns a slice of appropriate net.Addrs to listen on with TCP. It also
 // properly detects addresses which apply to "all interfaces" and adds the
 // address as both IPv4 and IPv6.
-func ParseListeners(addrs []string, netType string) ([]SimpleAddr, error) {
-	simpleAddrs := make([]SimpleAddr, len(addrs))
+// func ParseListeners(addrs []string, netType string) ([]SimpleAddr, error) {
+// 	simpleAddrs := make([]SimpleAddr, len(addrs))
 
-	for i, addr := range addrs {
-		simpleAddr, err := ParseListener(addr, netType)
-		if err != nil {
-			return []SimpleAddr{}, err
-		}
+// 	for i, addr := range addrs {
+// 		simpleAddr, err := ParseListener(addr, netType)
+// 		if err != nil {
+// 			return []SimpleAddr{}, err
+// 		}
 
-		simpleAddrs[i] = *simpleAddr
-	}
+// 		simpleAddrs[i] = *simpleAddr
+// 	}
 
-	return simpleAddrs, nil
-}
+// 	return simpleAddrs, nil
+// }
 
-// ParseListener determines whether the listen address is IPv4 and IPv6 and
-// returns a slice of appropriate net.Addrs to listen on with TCP. It also
-// properly detects address which apply to "all interfaces" and adds the
-// address as both IPv4 and IPv6.
-func ParseListener(addr string, netType string) (*SimpleAddr, error) {
-	host, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		// Shouldn't happen due to already being normalized.
-		return nil, err
-	}
+// // ParseListener determines whether the listen address is IPv4 and IPv6 and
+// // returns a slice of appropriate net.Addrs to listen on with TCP. It also
+// // properly detects address which apply to "all interfaces" and adds the
+// // address as both IPv4 and IPv6.
+// func ParseListener(addr string, netType string) (*SimpleAddr, error) {
+// 	host, port, err := net.SplitHostPort(addr)
+// 	if err != nil {
+// 		// Shouldn't happen due to already being normalized.
+// 		return nil, err
+// 	}
 
-	portNumber, err := strconv.Atoi(port)
-	if err != nil || portNumber < 0 {
-		return nil, errors.New("port is invalid")
-	}
+// 	portNumber, err := strconv.Atoi(port)
+// 	if err != nil || portNumber < 0 {
+// 		return nil, errors.New("port is invalid")
+// 	}
 
-	var netAddr *SimpleAddr
-	// Empty host or host of * on plan9 is both IPv4 and IPv6.
-	if host == EmptyString || (host == "*" && runtime.GOOS == "plan9") {
-		netAddr = &SimpleAddr{Net: netType + "4", Addr: addr}
-		return netAddr, nil
-	}
+// 	var netAddr *SimpleAddr
+// 	// Empty host or host of * on plan9 is both IPv4 and IPv6.
+// 	if host == EmptyString || (host == "*" && runtime.GOOS == "plan9") {
+// 		netAddr = &SimpleAddr{Net: netType + "4", Addr: addr}
+// 		return netAddr, nil
+// 	}
 
-	// Strip IPv6 zone id if present since net.ParseIP does not
-	// handle it.
-	zoneIndex := strings.LastIndex(host, "%")
-	if zoneIndex > 0 {
-		host = host[:zoneIndex]
-	}
+// 	// Strip IPv6 zone id if present since net.ParseIP does not
+// 	// handle it.
+// 	zoneIndex := strings.LastIndex(host, "%")
+// 	if zoneIndex > 0 {
+// 		host = host[:zoneIndex]
+// 	}
 
-	// Parse the IP.
-	ip := net.ParseIP(host)
-	if ip == nil {
-		fmt.Printf("'%s' is not a valid IP address\n", host)
-		return nil, errors.New("IP address is invalid")
-	}
+// 	// Parse the IP.
+// 	ip := net.ParseIP(host)
+// 	if ip == nil {
+// 		fmt.Printf("'%s' is not a valid IP address\n", host)
+// 		return nil, errors.New("IP address is invalid")
+// 	}
 
-	// To4 returns nil when the IP is not an IPv4 address, so use
-	// this determine the address type.
-	if ip.To4() == nil {
-		//netAddrs = append(netAddrs, simpleAddr{net: netType + "6", addr: addr})
-	} else {
-		netAddr = &SimpleAddr{Net: netType + "4", Addr: addr}
-	}
-	return netAddr, nil
-}
+// 	// To4 returns nil when the IP is not an IPv4 address, so use
+// 	// this determine the address type.
+// 	if ip.To4() == nil {
+// 		//netAddrs = append(netAddrs, simpleAddr{net: netType + "6", addr: addr})
+// 	} else {
+// 		netAddr = &SimpleAddr{Net: netType + "4", Addr: addr}
+// 	}
+// 	return netAddr, nil
+// }
 
 // SliceExists receives a slice and a item in interface type
 // checks whether the slice contain the item or not
@@ -429,7 +430,7 @@ func (s *ErrorSaver) Save(errs ...error) error {
 	}
 	for i, err := range errs {
 		if err != nil {
-			s.err = errors.WithMessagef(err, "errSaver #%d", i)
+			s.err = fmt.Errorf("%v errSaver #%d", err, i)
 			return s.err
 		}
 	}

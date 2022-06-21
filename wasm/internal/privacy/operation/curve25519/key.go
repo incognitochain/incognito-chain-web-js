@@ -16,14 +16,14 @@
 
 package curve25519
 
-import (
-	"io"
-)
+// import (
+	// "io"
+// )
 import "fmt"
-import "bytes"
+// import "bytes"
 import "crypto/rand"
 import "encoding/hex"
-import "encoding/binary"
+// import "encoding/binary"
 
 const KeyLength = 32
 
@@ -158,14 +158,14 @@ func NewKeyPair() (privKey *Key, pubKey *Key) {
 	return
 }
 
-func ParseKey(buf io.Reader) (result Key, err error) {
-	key := make([]byte, KeyLength)
-	if _, err = buf.Read(key); err != nil {
-		return
-	}
-	copy(result[:], key)
-	return
-}
+// func ParseKey(buf io.Reader) (result Key, err error) {
+// 	key := make([]byte, KeyLength)
+// 	if _, err = buf.Read(key); err != nil {
+// 		return
+// 	}
+// 	copy(result[:], key)
+// 	return
+// }
 
 /*
    //does a * G where a is a scalar and G is the curve basepoint
@@ -399,56 +399,56 @@ func KeyDerivation(pub *Key, priv *Key) (KeyDerivation Key) {
 // the origincal c implementation needs to be checked for varint overflow
 // we also need to check the compatibility of golang varint with cryptonote implemented varint
 // outputIndex is the position of output within that specific transaction
-func (k *Key) KeyDerivationToScalar(outputIndex uint64) (scalar *Key) {
-	tmp := make([]byte, 12, 12)
+// func (k *Key) KeyDerivationToScalar(outputIndex uint64) (scalar *Key) {
+// 	tmp := make([]byte, 12, 12)
 
-	length := binary.PutUvarint(tmp, outputIndex)
-	tmp = tmp[:length]
+// 	length := binary.PutUvarint(tmp, outputIndex)
+// 	tmp = tmp[:length]
 
-	var buf bytes.Buffer
-	buf.Write(k[:])
-	buf.Write(tmp)
-	scalar = HashToScalar(buf.Bytes())
-	return
-}
+// 	var buf bytes.Buffer
+// 	buf.Write(k[:])
+// 	buf.Write(tmp)
+// 	scalar = HashToScalar(buf.Bytes())
+// 	return
+// }
 
 // generate ephermal keys  from a key derivation
 // base key is the B's public spend key or A's private spend key
 // outputIndex is the position of output within that specific transaction
-func (kd *Key) KeyDerivation_To_PublicKey(outputIndex uint64, baseKey Key) Key {
+// func (kd *Key) KeyDerivation_To_PublicKey(outputIndex uint64, baseKey Key) Key {
 
-	var point1, point2 ExtendedGroupElement
-	var point3 CachedGroupElement
-	var point4 CompletedGroupElement
-	var point5 ProjectiveGroupElement
+// 	var point1, point2 ExtendedGroupElement
+// 	var point3 CachedGroupElement
+// 	var point4 CompletedGroupElement
+// 	var point5 ProjectiveGroupElement
 
-	tmp := baseKey
-	if !point1.FromBytes(&tmp) {
-		panic("Invalid public key.")
-	}
-	scalar := kd.KeyDerivationToScalar(outputIndex)
-	GeScalarMultBase(&point2, scalar)
-	point2.ToCached(&point3)
-	geAdd(&point4, &point1, &point3)
-	point4.ToProjective(&point5)
-	point5.ToBytes(&tmp)
-	return tmp
-}
+// 	tmp := baseKey
+// 	if !point1.FromBytes(&tmp) {
+// 		panic("Invalid public key.")
+// 	}
+// 	scalar := kd.KeyDerivationToScalar(outputIndex)
+// 	GeScalarMultBase(&point2, scalar)
+// 	point2.ToCached(&point3)
+// 	geAdd(&point4, &point1, &point3)
+// 	point4.ToProjective(&point5)
+// 	point5.ToBytes(&tmp)
+// 	return tmp
+// }
 
 // generate ephermal keys  from a key derivation
 // base key is the A's private spend key
 // outputIndex is the position of output within that specific transaction
-func (kd *Key) KeyDerivation_To_PrivateKey(outputIndex uint64, baseKey Key) Key {
-	if !baseKey.Private_Key_Valid() {
-		panic("Invalid private key.")
-	}
-	scalar := kd.KeyDerivationToScalar(outputIndex)
+// func (kd *Key) KeyDerivation_To_PrivateKey(outputIndex uint64, baseKey Key) Key {
+// 	if !baseKey.Private_Key_Valid() {
+// 		panic("Invalid private key.")
+// 	}
+// 	scalar := kd.KeyDerivationToScalar(outputIndex)
 
-	tmp := baseKey
-	ScAdd(&tmp, &tmp, scalar)
+// 	tmp := baseKey
+// 	ScAdd(&tmp, &tmp, scalar)
 
-	return tmp
-}
+// 	return tmp
+// }
 
 // NewKeyImage creates a new KeyImage from the given public and private keys.
 // The keys are usually the ephemeral keys derived using KeyDerivation.

@@ -282,59 +282,59 @@ func GetCoinData(coin privacy.PlainCoin) CoinData {
 	}
 }
 
-func (c CoinData) ToCoinV1() (*privacy.CoinV1, uint64, error) {
-	var err error
-	var p *privacy.Point
-	result := &privacy.CoinV1{}
-	result.Init()
-	result.CoinDetails.SetInfo(c.Info)
-	if c.PublicKey.IsBlank() {
-		result.CoinDetails.SetPublicKey(nil)
-	} else {
-		p, err = (&privacy.Point{}).FromBytesS(c.PublicKey)
-		if err != nil {
-			return nil, 0, err
-		}
-		result.CoinDetails.SetPublicKey(p)
-	}
+// func (c CoinData) ToCoinV1() (*privacy.CoinV1, uint64, error) {
+// 	var err error
+// 	var p *privacy.Point
+// 	result := &privacy.CoinV1{}
+// 	result.Init()
+// 	result.CoinDetails.SetInfo(c.Info)
+// 	if c.PublicKey.IsBlank() {
+// 		result.CoinDetails.SetPublicKey(nil)
+// 	} else {
+// 		p, err = (&privacy.Point{}).FromBytesS(c.PublicKey)
+// 		if err != nil {
+// 			return nil, 0, err
+// 		}
+// 		result.CoinDetails.SetPublicKey(p)
+// 	}
 
-	if c.Commitment.IsBlank() {
-		result.CoinDetails.SetCommitment(nil)
-	} else {
-		p, err = (&privacy.Point{}).FromBytesS(c.Commitment)
-		if err != nil {
-			return nil, 0, err
-		}
-		result.CoinDetails.SetCommitment(p)
-	}
+// 	if c.Commitment.IsBlank() {
+// 		result.CoinDetails.SetCommitment(nil)
+// 	} else {
+// 		p, err = (&privacy.Point{}).FromBytesS(c.Commitment)
+// 		if err != nil {
+// 			return nil, 0, err
+// 		}
+// 		result.CoinDetails.SetCommitment(p)
+// 	}
 
-	if c.KeyImage.IsBlank() {
-		result.CoinDetails.SetKeyImage(nil)
-	} else {
-		p, err = (&privacy.Point{}).FromBytesS(c.KeyImage)
-		if err != nil {
-			return nil, 0, err
-		}
-		result.CoinDetails.SetKeyImage(p)
-	}
+// 	if c.KeyImage.IsBlank() {
+// 		result.CoinDetails.SetKeyImage(nil)
+// 	} else {
+// 		p, err = (&privacy.Point{}).FromBytesS(c.KeyImage)
+// 		if err != nil {
+// 			return nil, 0, err
+// 		}
+// 		result.CoinDetails.SetKeyImage(p)
+// 	}
 
-	result.CoinDetails.SetValue(uint64(c.Value))
-	if c.Mask.IsBlank() {
-		result.CoinDetails.SetRandomness(nil)
-	} else {
-		result.CoinDetails.SetRandomness((&privacy.Scalar{}).FromBytesS(c.Mask))
-	}
+// 	result.CoinDetails.SetValue(uint64(c.Value))
+// 	if c.Mask.IsBlank() {
+// 		result.CoinDetails.SetRandomness(nil)
+// 	} else {
+// 		result.CoinDetails.SetRandomness((&privacy.Scalar{}).FromBytesS(c.Mask))
+// 	}
 
-	if c.SNDerivator.IsBlank() {
-		result.CoinDetails.SetSNDerivator(nil)
-	} else {
-		result.CoinDetails.SetSNDerivator((&privacy.Scalar{}).FromBytesS(c.SNDerivator))
-	}
-	result.CoinDetailsEncrypted.SetBytes([]byte(c.Amount))
+// 	if c.SNDerivator.IsBlank() {
+// 		result.CoinDetails.SetSNDerivator(nil)
+// 	} else {
+// 		result.CoinDetails.SetSNDerivator((&privacy.Scalar{}).FromBytesS(c.SNDerivator))
+// 	}
+// 	result.CoinDetailsEncrypted.SetBytes([]byte(c.Amount))
 
-	ind := big.NewInt(0).SetBytes(c.Index)
-	return result, ind.Uint64(), nil
-}
+// 	ind := big.NewInt(0).SetBytes(c.Index)
+// 	return result, ind.Uint64(), nil
+// }
 
 func GetTokenID(c *privacy.CoinV2, keySet *incognitokey.KeySet, rawAssetTags map[string]*common.Hash) *common.Hash {
 	t := c.GetAssetTag()
@@ -348,7 +348,7 @@ func GetTokenID(c *privacy.CoinV2, keySet *incognitokey.KeySet, rawAssetTags map
 	}
 
 	// must take valid coin & keySet
-	_, txOTARandomPoint, _, _ :=  c.GetTxRandomDetail()
+	_, txOTARandomPoint, _, _ := c.GetTxRandomDetail()
 	sharedSecret := new(privacy.Point).ScalarMult(txOTARandomPoint, keySet.OTAKey.GetOTASecretKey())
 	blinder := privacy.HashToScalar(append(sharedSecret.ToBytesS(), []byte("assettag")...))
 	rawAssetTag := new(privacy.Point).Sub(t, new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], blinder))

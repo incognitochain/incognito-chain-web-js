@@ -7,7 +7,7 @@
   "scripts": {
     "start": "yarn build:wasm; node --experimental-repl-await -r ./inc.config",
     "start:dev": "yarn test-account && yarn build",
-    "build:wasm": "cd wasm && ./build.sh && cd ..",
+    "build:wasm": "cd wasm && ./build.sh && cd ..; wasm-opt -Oz -o popt.wasm privacy.wasm",
     "build:watch": "webpack --config webpack.config.js --watch",
     "build": "webpack --config webpack.config.js --mode production",
     "build:dev": "webpack --config webpack.config.js --mode development",

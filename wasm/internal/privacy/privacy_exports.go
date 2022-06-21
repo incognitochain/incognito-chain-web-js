@@ -92,16 +92,16 @@ func GenerateViewingKey(privateKey []byte) ViewingKey {
 	return key.GenerateViewingKey(privateKey)
 }
 
-type SchnSignature = schnorr.SchnSignature
-type SchnorrPublicKey = schnorr.SchnorrPublicKey
+// type SchnSignature = schnorr.SchnSignature
+// type SchnorrPublicKey = schnorr.SchnorrPublicKey
 type SchnorrPrivateKey = schnorr.SchnorrPrivateKey
 
 type Coin = coin.Coin
 type PlainCoin = coin.PlainCoin
-type PlainCoinV1 = coin.PlainCoinV1
-type CoinV1 = coin.CoinV1
+// type PlainCoinV1 = coin.PlainCoinV1
+// type CoinV1 = coin.CoinV1
 type CoinV2 = coin.CoinV2
-type CoinObject = coin.CoinObject
+// type CoinObject = coin.CoinObject
 type TxRandom = coin.TxRandom
 type SenderSeal = coin.SenderSeal
 
@@ -110,7 +110,7 @@ type Proof = proof.Proof
 // type PaymentWitnessParam = zkp.PaymentWitnessParam
 // type PaymentWitness = zkp.PaymentWitness
 type ProofV2 = privacy_v2.PaymentProofV2
-type ProofForConversion = privacy_v2.ConversionProofVer1ToVer2
+// type ProofForConversion = privacy_v2.ConversionProofVer1ToVer2
 type AggregatedRangeProof = agg_interface.AggregatedRangeProof
 // type AggregatedRangeProofV1 = aggregatedrange.AggregatedRangeProof
 type AggregatedRangeProofV2 = bulletproofs.AggregatedRangeProof

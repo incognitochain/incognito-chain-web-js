@@ -3,7 +3,7 @@ package tx
 import (
     "encoding/json"
 
-    "github.com/pkg/errors"
+    "errors"
     "incognito-chain/common"
     "incognito-chain/privacy"
 )

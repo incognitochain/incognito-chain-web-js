@@ -2,8 +2,6 @@ package incognitokey
 
 import (
 	"fmt"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -53,7 +51,7 @@ func (e CashecError) GetCode() int {
 
 func NewCashecError(key int, err error) *CashecError {
 	return &CashecError{
-		err:     errors.Wrap(err, ErrCodeMessage[key].Message),
+		err:     fmt.Errorf("%s - %v", ErrCodeMessage[key].Message, err),
 		Code:    ErrCodeMessage[key].Code,
 		Message: ErrCodeMessage[key].Message,
 	}
