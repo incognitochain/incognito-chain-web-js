@@ -180,8 +180,38 @@ const (
 	BurningPBSCRequestMeta = 252
 	BurningBSCConfirmMeta  = 253
 
+	// incognito mode for polygon
+	IssuingPLGRequestMeta  = 327
+	IssuingPLGResponseMeta = 328
+	BurningPLGRequestMeta  = 329
+	BurningPLGConfirmMeta  = 153
+
+	// pPLG ( Polygon )
+	BurningPLGForDepositToSCRequestMeta = 330
+	BurningPLGConfirmForDepositToSCMeta = 154
+
+	// incognito mode for Fantom
+	IssuingFantomRequestMeta  = 331
+	IssuingFantomResponseMeta = 332
+	BurningFantomRequestMeta  = 333
+	BurningFantomConfirmMeta  = 155
+
+	// pFantom ( Fantom )
+	BurningFantomForDepositToSCRequestMeta = 334
+	BurningFantomConfirmForDepositToSCMeta = 156
+
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
+
+	// Bridge aggregator
+	BridgeAggModifyListTokenMeta                    = 340
+	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = 341
+	BridgeAggConvertTokenToUnifiedTokenResponseMeta = 342
+	IssuingUnifiedTokenRequestMeta                  = 343
+	IssuingUnifiedTokenResponseMeta                 = 344
+	IssuingUnifiedRewardResponseMeta                = 345
+	BurningUnifiedTokenRequestMeta                  = 346
+	BurningUnifiedTokenResponseMeta                 = 347
 )
 
 var minerCreatedMetaTypes = []int{
@@ -216,6 +246,10 @@ var minerCreatedMetaTypes = []int{
 	Pdexv3TradeResponseMeta,
 	Pdexv3AddOrderResponseMeta,
 	Pdexv3WithdrawOrderResponseMeta,
+	BridgeAggConvertTokenToUnifiedTokenResponseMeta,
+	IssuingUnifiedTokenResponseMeta,
+	IssuingUnifiedRewardResponseMeta,
+	BurningUnifiedTokenResponseMeta,
 }
 
 // Special rules for shardID: stored as 2nd param of instruction of BeaconBlock

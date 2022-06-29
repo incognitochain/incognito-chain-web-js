@@ -84,7 +84,6 @@ async function setup() {
   };
   const authTokenDt = await Axios.post(`${rpcApiService}/auth/new-token`, data);
   const authToken = authTokenDt.data.Result.Token;
-  account1.setAuthToken(authToken);
   account1.setRPCApiServices(rpcApiService, authToken);
   await account1.setKey(account1PrivateKeyStr);
   account1PaymentAddressStr =

@@ -15,12 +15,15 @@
     "test": "yarn build:wasm; mocha \"test/**/*.spec.js\"",
     "test-account": "clear && yarn build && node ./test/wallet/accountwallet-test",
     "test-portal": "clear && yarn build:dev && node ./test/wallet/portal-test",
+    "test-punified": "clear && yarn build:dev && node ./test/wallet/punified-test",
     "build:gomobile-ios": "cd wasm/internal && gomobile bind -x -v -target=ios",
     "build:gomobile-android": "cd wasm/internal && gomobile bind -x -v -target=android",
     "run-test": "clear && node ./test/wallet/accountwallet-test",
     "build:gomobile": "yarn build:wasm && yarn build:gomobile-ios && yarn build:gomobile-android && yarn build",
     "push-code": "git add . && git commit -m 'push code' && git push",
-    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa"
+    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
+    "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
   },
   "repository": {
     "type": "git",
@@ -37,12 +40,12 @@
     "axios": "^0.19.0",
     "binary-sorted-array": "^1.0.4",
     "bip39": "^3.0.3",
+    "crypto-js": "^3.1.9-1",
     "hdkey": "^2.0.1",
     "lodash": "^4.17.20",
     "regenerator-runtime": "^0.13.7",
     "sha3": "^2.0.7",
-    "yarn": "^1.19.1",
-    "crypto-js": "^3.1.9-1"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

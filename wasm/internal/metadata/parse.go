@@ -3,6 +3,7 @@ package metadata
 import (
 	"encoding/json"
 
+	metadataBridge "incognito-chain/metadata/bridge"
 	metadataCommon "incognito-chain/metadata/common"
 	metadataPdexv3 "incognito-chain/metadata/pdexv3"
 
@@ -41,7 +42,9 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		BurningForDepositToSCRequestMeta, BurningForDepositToSCRequestMetaV2,
 		BurningPBSCRequestMeta, BurningPRVERC20RequestMeta, BurningPRVBEP20RequestMeta,
 		BurningPDEXERC20RequestMeta, BurningPDEXBEP20RequestMeta,
-		BurningPBSCForDepositToSCRequestMeta:
+		BurningPBSCForDepositToSCRequestMeta,
+		BurningPLGRequestMeta, BurningPLGForDepositToSCRequestMeta,
+		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta:
 		md = &BurningRequest{}
 	case ShardStakingMeta:
 		md = &StakingMetadata{}
@@ -123,6 +126,20 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataPdexv3.WithdrawalProtocolFeeRequest{}
 	case metadataCommon.Pdexv3WithdrawStakingRewardRequestMeta:
 		md = &metadataPdexv3.WithdrawalStakingRewardRequest{}
+	case metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta:
+		md = &metadataBridge.ConvertTokenToUnifiedTokenRequest{}
+	case metadataCommon.BridgeAggConvertTokenToUnifiedTokenResponseMeta:
+		md = &metadataBridge.ConvertTokenToUnifiedTokenResponse{}
+	case metadataCommon.IssuingUnifiedTokenRequestMeta:
+		md = &metadataBridge.ShieldRequest{}
+	case metadataCommon.IssuingUnifiedTokenResponseMeta:
+		md = &metadataBridge.ShieldResponse{}
+	case metadataCommon.IssuingUnifiedRewardResponseMeta:
+		md = &metadataBridge.ShieldResponse{}
+	case metadataCommon.BurningUnifiedTokenRequestMeta:
+		md = &metadataBridge.UnshieldRequest{}
+	case metadataCommon.BurningUnifiedTokenResponseMeta:
+		md = &metadataBridge.UnshieldResponse{}
 	default:
 		return nil, errors.Errorf("Could not parse metadata with type: %d", theType)
 	}

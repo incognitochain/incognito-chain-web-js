@@ -15,6 +15,7 @@ type AddOrderRequest struct {
 	SellAmount          uint64                              `json:"SellAmount"`
 	MinAcceptableAmount uint64                              `json:"MinAcceptableAmount"`
 	Receiver            map[common.Hash]privacy.OTAReceiver `json:"Receiver"`
+	RewardReceiver      map[common.Hash]privacy.OTAReceiver `json:"RewardReceiver,omitempty"`
 	AccessOption
 	metadataCommon.MetadataBase
 }
@@ -32,6 +33,7 @@ func (req *AddOrderRequest) UnmarshalJSON(raw []byte) error {
 		SellAmount          metadataCommon.Uint64Reader         `json:"SellAmount"`
 		MinAcceptableAmount metadataCommon.Uint64Reader         `json:"MinAcceptableAmount"`
 		Receiver            map[common.Hash]privacy.OTAReceiver `json:"Receiver"`
+		RewardReceiver      map[common.Hash]privacy.OTAReceiver `json:"RewardReceiver,omitempty"`
 		AccessOption
 		metadataCommon.MetadataBase
 	}
@@ -42,6 +44,7 @@ func (req *AddOrderRequest) UnmarshalJSON(raw []byte) error {
 		SellAmount:          uint64(temp.SellAmount),
 		MinAcceptableAmount: uint64(temp.MinAcceptableAmount),
 		Receiver:            temp.Receiver,
+		RewardReceiver:      temp.RewardReceiver,
 		AccessOption:        temp.AccessOption,
 		MetadataBase:        temp.MetadataBase,
 	}
