@@ -14,7 +14,7 @@ const (
 	HashSize              = 32 // bytes
 	MaxHashStringSize     = HashSize * 2
 	Base58Version         = 0
-	EncodeCoinsWithBase64 = true
+	EncodeCoinsWithBase64 = false
 )
 
 // size data for incognito key and signature
