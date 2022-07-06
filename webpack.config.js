@@ -137,7 +137,7 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, "build/web"),
-      publicPath: "/public/",
+      publicPath: "/",
       library: "wallet",
       libraryTarget: "umd",
     },
@@ -155,7 +155,7 @@ module.exports = (env, argv) => {
         use: [{
           loader: "worker-loader",
           options: {
-            publicPath: "/public/"
+            publicPath: "/"
           }
         }, {
           loader: "babel-loader",
