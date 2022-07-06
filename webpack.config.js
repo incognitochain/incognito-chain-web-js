@@ -10,7 +10,7 @@ const optimization = {
         warnings: false,
         compress: {
           comparisons: false,
-          drop_console: true,
+          drop_console: false,
         },
         parse: {},
         mangle: true,
