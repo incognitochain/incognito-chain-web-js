@@ -203,15 +203,18 @@ const (
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
 
-	// Bridge aggregator
-	BridgeAggModifyListTokenMeta                    = 340
+	// bridgeagg
+	BridgeAggModifyParamMeta                        = 340
 	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = 341
 	BridgeAggConvertTokenToUnifiedTokenResponseMeta = 342
 	IssuingUnifiedTokenRequestMeta                  = 343
 	IssuingUnifiedTokenResponseMeta                 = 344
-	IssuingUnifiedRewardResponseMeta                = 345
-	BurningUnifiedTokenRequestMeta                  = 346
-	BurningUnifiedTokenResponseMeta                 = 347
+	BurningUnifiedTokenRequestMeta                  = 345
+	BurningUnifiedTokenResponseMeta                 = 346
+	BridgeAggAddTokenMeta                           = 347
+
+	BurnForCallConfirmMeta = 158
+	BurnForCallRequestMeta = 348
 )
 
 var minerCreatedMetaTypes = []int{
@@ -248,7 +251,6 @@ var minerCreatedMetaTypes = []int{
 	Pdexv3WithdrawOrderResponseMeta,
 	BridgeAggConvertTokenToUnifiedTokenResponseMeta,
 	IssuingUnifiedTokenResponseMeta,
-	IssuingUnifiedRewardResponseMeta,
 	BurningUnifiedTokenResponseMeta,
 }
 
