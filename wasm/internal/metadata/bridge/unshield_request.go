@@ -8,37 +8,18 @@ import (
 	"incognito-chain/privacy"
 )
 
-type RejectedUnshieldRequest struct {
-	TokenID  common.Hash         `json:"TokenID"`
-	Amount   uint64              `json:"Amount"`
-	Receiver privacy.OTAReceiver `json:"Receiver"`
-}
-
-type AcceptedUnshieldRequest struct {
-	TokenID common.Hash                   `json:"TokenID"`
-	TxReqID common.Hash                   `json:"TxReqID"`
-	Data    []AcceptedUnshieldRequestData `json:"data"`
-}
-
-type AcceptedUnshieldRequestData struct {
-	Amount        uint64 `json:"BurningAmount"`
-	NetworkID     uint   `json:"NetworkID,omitempty"`
-	Fee           uint64 `json:"Fee"`
-	IsDepositToSC bool   `json:"IsDepositToSC"`
-}
-
 type UnshieldRequestData struct {
-	BurningAmount  uint64 `json:"BurningAmount"`
-	RemoteAddress  string `json:"RemoteAddress"`
-	IsDepositToSC  bool   `json:"IsDepositToSC"`
-	NetworkID      uint   `json:"NetworkID"`
-	ExpectedAmount uint64 `json:"ExpectedAmount"`
+	IncTokenID        common.Hash `json:"IncTokenID"`
+	BurningAmount     uint64      `json:"BurningAmount"`
+	MinExpectedAmount uint64      `json:"MinExpectedAmount"`
+	RemoteAddress     string      `json:"RemoteAddress"`
 }
 
 type UnshieldRequest struct {
-	TokenID  common.Hash           `json:"TokenID"`
-	Data     []UnshieldRequestData `json:"Data"`
-	Receiver privacy.OTAReceiver   `json:"Receiver"`
+	UnifiedTokenID common.Hash           `json:"UnifiedTokenID"`
+	Data           []UnshieldRequestData `json:"Data"`
+	Receiver       privacy.OTAReceiver   `json:"Receiver"`
+	IsDepositToSC  bool                  `json:"IsDepositToSC"`
 	metadataCommon.MetadataBase
 }
 
@@ -54,9 +35,9 @@ func NewUnshieldRequestWithValue(
 	tokenID common.Hash, data []UnshieldRequestData, receiver privacy.OTAReceiver,
 ) *UnshieldRequest {
 	return &UnshieldRequest{
-		TokenID:  tokenID,
-		Data:     data,
-		Receiver: receiver,
+		UnifiedTokenID: tokenID,
+		Data:           data,
+		Receiver:       receiver,
 		MetadataBase: metadataCommon.MetadataBase{
 			Type: metadataCommon.BurningUnifiedTokenRequestMeta,
 		},
@@ -65,18 +46,15 @@ func NewUnshieldRequestWithValue(
 
 func (request *UnshieldRequestData) MarshalJSON() ([]byte, error) {
 	data, err := json.Marshal(struct {
-		BurningAmount  uint64 `json:"BurningAmount"`
-		RemoteAddress  string `json:"RemoteAddress"`
-		IsDepositToSC  bool   `json:"IsDepositToSC"`
-		NetworkID      uint   `json:"NetworkID"`
-		ExpectedAmount uint64 `json:"ExpectedAmount"`
+		IncTokenID        common.Hash `json:"IncTokenID"`
+		BurningAmount     uint64      `json:"BurningAmount"`
+		MinExpectedAmount uint64      `json:"MinExpectedAmount"`
+		RemoteAddress     string      `json:"RemoteAddress"`
 	}{
-
-		BurningAmount:  request.BurningAmount,
-		RemoteAddress:  request.RemoteAddress,
-		IsDepositToSC:  request.IsDepositToSC,
-		NetworkID:      request.NetworkID,
-		ExpectedAmount: request.ExpectedAmount,
+		IncTokenID:        request.IncTokenID,
+		BurningAmount:     request.BurningAmount,
+		MinExpectedAmount: request.MinExpectedAmount,
+		RemoteAddress:     request.RemoteAddress,
 	})
 
 	if err != nil {
@@ -87,21 +65,19 @@ func (request *UnshieldRequestData) MarshalJSON() ([]byte, error) {
 
 func (request *UnshieldRequestData) UnmarshalJSON(data []byte) error {
 	temp := struct {
-		BurningAmount  metadataCommon.Uint64Reader `json:"BurningAmount"`
-		RemoteAddress  string                      `json:"RemoteAddress"`
-		IsDepositToSC  bool                        `json:"IsDepositToSC"`
-		NetworkID      uint                        `json:"NetworkID"`
-		ExpectedAmount metadataCommon.Uint64Reader `json:"ExpectedAmount"`
+		IncTokenID        common.Hash                 `json:"IncTokenID"`
+		BurningAmount     metadataCommon.Uint64Reader `json:"BurningAmount"`
+		MinExpectedAmount metadataCommon.Uint64Reader `json:"MinExpectedAmount"`
+		RemoteAddress     string                      `json:"RemoteAddress"`
 	}{}
 	err := json.Unmarshal(data, &temp)
 	if err != nil {
 		return err
 	}
+	request.IncTokenID = temp.IncTokenID
 	request.BurningAmount = uint64(temp.BurningAmount)
+	request.MinExpectedAmount = uint64(temp.MinExpectedAmount)
 	request.RemoteAddress = temp.RemoteAddress
-	request.IsDepositToSC = temp.IsDepositToSC
-	request.NetworkID = temp.NetworkID
-	request.ExpectedAmount = uint64(temp.ExpectedAmount)
 	return nil
 }
 

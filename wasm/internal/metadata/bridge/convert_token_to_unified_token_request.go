@@ -11,23 +11,9 @@ import (
 type ConvertTokenToUnifiedTokenRequest struct {
 	TokenID        common.Hash         `json:"TokenID"`
 	UnifiedTokenID common.Hash         `json:"UnifiedTokenID"`
-	NetworkID      uint                `json:"NetworkID"`
 	Amount         uint64              `json:"Amount"`
 	Receiver       privacy.OTAReceiver `json:"Receiver"`
 	metadataCommon.MetadataBase
-}
-
-type RejectedConvertTokenToUnifiedToken struct {
-	TokenID  common.Hash         `json:"TokenID"`
-	Amount   uint64              `json:"Amount"`
-	Receiver privacy.OTAReceiver `json:"Receiver"`
-}
-
-type AcceptedConvertTokenToUnifiedToken struct {
-	ConvertTokenToUnifiedTokenRequest
-	TxReqID         common.Hash `json:"TxReqID"`
-	ExternalTokenID []byte      `json:"ExternalTokenID"`
-	IncDecimal      uint        `json:"IncDecimal"`
 }
 
 func NewConvertTokenToUnifiedTokenRequest() *ConvertTokenToUnifiedTokenRequest {
@@ -35,7 +21,7 @@ func NewConvertTokenToUnifiedTokenRequest() *ConvertTokenToUnifiedTokenRequest {
 }
 
 func NewConvertTokenToUnifiedTokenRequestWithValue(
-	tokenID, unifiedTokenID common.Hash, networkID uint, amount uint64, receiver privacy.OTAReceiver,
+	tokenID, unifiedTokenID common.Hash, amount uint64, receiver privacy.OTAReceiver,
 ) *ConvertTokenToUnifiedTokenRequest {
 	metadataBase := metadataCommon.MetadataBase{
 		Type: metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta,
@@ -43,7 +29,6 @@ func NewConvertTokenToUnifiedTokenRequestWithValue(
 	return &ConvertTokenToUnifiedTokenRequest{
 		UnifiedTokenID: unifiedTokenID,
 		TokenID:        tokenID,
-		NetworkID:      networkID,
 		Amount:         amount,
 		Receiver:       receiver,
 		MetadataBase:   metadataBase,
@@ -54,14 +39,12 @@ func (request *ConvertTokenToUnifiedTokenRequest) MarshalJSON() ([]byte, error) 
 	data, err := json.Marshal(struct {
 		TokenID        common.Hash         `json:"TokenID"`
 		UnifiedTokenID common.Hash         `json:"UnifiedTokenID"`
-		NetworkID      uint                `json:"NetworkID"`
 		Amount         uint64              `json:"Amount"`
 		Receiver       privacy.OTAReceiver `json:"Receiver"`
 		metadataCommon.MetadataBase
 	}{
 		TokenID:        request.TokenID,
 		UnifiedTokenID: request.UnifiedTokenID,
-		NetworkID:      request.NetworkID,
 		Amount:         request.Amount,
 		Receiver:       request.Receiver,
 		MetadataBase:   request.MetadataBase,
@@ -77,7 +60,6 @@ func (request *ConvertTokenToUnifiedTokenRequest) UnmarshalJSON(data []byte) err
 	temp := struct {
 		TokenID        common.Hash                 `json:"TokenID"`
 		UnifiedTokenID common.Hash                 `json:"UnifiedTokenID"`
-		NetworkID      uint                        `json:"NetworkID"`
 		Amount         metadataCommon.Uint64Reader `json:"Amount"`
 		Receiver       privacy.OTAReceiver         `json:"Receiver"`
 		metadataCommon.MetadataBase
@@ -88,7 +70,6 @@ func (request *ConvertTokenToUnifiedTokenRequest) UnmarshalJSON(data []byte) err
 	}
 	request.TokenID = temp.TokenID
 	request.UnifiedTokenID = temp.UnifiedTokenID
-	request.NetworkID = temp.NetworkID
 	request.Amount = uint64(temp.Amount)
 	request.Receiver = temp.Receiver
 	request.MetadataBase = temp.MetadataBase

@@ -126,6 +126,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataPdexv3.WithdrawalProtocolFeeRequest{}
 	case metadataCommon.Pdexv3WithdrawStakingRewardRequestMeta:
 		md = &metadataPdexv3.WithdrawalStakingRewardRequest{}
+	case metadataCommon.BridgeAggModifyParamMeta:
+		md = &metadataBridge.ModifyBridgeAggParamReq{}
 	case metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta:
 		md = &metadataBridge.ConvertTokenToUnifiedTokenRequest{}
 	case metadataCommon.BridgeAggConvertTokenToUnifiedTokenResponseMeta:
@@ -134,12 +136,11 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataBridge.ShieldRequest{}
 	case metadataCommon.IssuingUnifiedTokenResponseMeta:
 		md = &metadataBridge.ShieldResponse{}
-	case metadataCommon.IssuingUnifiedRewardResponseMeta:
-		md = &metadataBridge.ShieldResponse{}
 	case metadataCommon.BurningUnifiedTokenRequestMeta:
 		md = &metadataBridge.UnshieldRequest{}
 	case metadataCommon.BurningUnifiedTokenResponseMeta:
 		md = &metadataBridge.UnshieldResponse{}
+
 	default:
 		return nil, errors.Errorf("Could not parse metadata with type: %d", theType)
 	}
