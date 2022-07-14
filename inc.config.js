@@ -19,6 +19,16 @@ const networks = {
             apiSvc: 'https://staging-api-service.incognito.org',
             deviceID: '9AE4B404-3E61-495D-835A-05CEE34BE251',
         } : null,
+    },
+    'mainnet': {
+        privateKeys: [process.env.PRIVATEKEY],
+        rpcClient: 'https://beta-fullnode.incognito.org/fullnode',
+        shardCount: 8,
+        services: process.env.SERVICES ? {
+            coinSvc: 'https://api-coinservice.incognito.org',
+            apiSvc: 'https://api-service.incognito.org',
+            deviceID: '9AE4B404-3E61-495D-835A-05CEE34BE251',
+        } : null,
     }
 }
 const currentNetwork = process.env.NETWORK || 'local';
@@ -37,18 +47,24 @@ module.exports = async function(){
     console.log('Initializing Incognito...');
     await inc.init(null, rpcClient, shardCount, services);
     const senders = await Promise.all(privateKeys.map(k => inc.NewTransactor(k, services)));
+    const addresses = senders.map(a => a.key.base58CheckSerialize(inc.constants.PaymentAddressType));
 
     if (!services && currentNetwork == 'local') {
-        const balanceV1 = await senders[0].getBalance({ tokenID: inc.constants.PRVIDSTR, version: 1 });
-        if (balanceV1 > 0) {
-            txResult = await senders[0].convert({ transfer: {} });
-            await senders[0].waitTx(txResult.txId, 2);
+        let balance = await senders[0].getBalance({ tokenID: inc.constants.PRVIDSTR, version: 1 });
+        if (balance > 0) {
+            const result = await senders[0].convert({ transfer: {}});
+            await senders[0].waitTx(result.txId, 2);
+        }
+        balance = await senders[4].getBalance({ tokenID: inc.constants.PRVIDSTR, version: 2 });
+        if (balance < 1000000000) {
+            const { result } = await inc.Tx(senders[0]).to(addresses[1], '1000000000000').to(addresses[2], '1000000000000').to(addresses[3], '1000000000000').to(addresses[4], '1000000000000').send().catch(console.error);
+            await senders[0].waitTx(result.txId, 2);
         }
     }
 
     Object.assign(global, inc, {
         privateKeys, rpcClient, shardCount, services,
-        addresses: senders.map(a => a.key.base58CheckSerialize(inc.constants.PaymentAddressType)),
+        addresses,
         senders,
         getPdexMethods,
     });
