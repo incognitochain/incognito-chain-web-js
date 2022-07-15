@@ -203,6 +203,41 @@ async function CreateAndSendToMainAccount(accounts) {
         })
 }
 
+async function CreateAndSendUnstake(accounts) {
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    })
+    const logs = []
+    logger.warn(`\nUnstake all nodes: \n`);
+    logger.log(`1: Accept \n`);
+    logger.log(`2: Cancel \n`);
+    readline.question(
+        ``,
+        async action => {
+            if (action === '1') {
+                for (let i = 0; i <= accounts.length - 1; i++) {
+                    const account = accounts[i];
+                    const { accountSender, name } = account;
+                    const tx = await accountSender.createAndSendStopAutoStakingTx({
+                        transfer: { fee: FeePerTx },
+                        extra: { version: PRIVACY_VERSION },
+                    });
+                    logs.push({
+                        name,
+                        tx
+                    })
+                }
+            }
+            if (logs.length > 0) {
+                logger.info(logs);
+            } else {
+                logger.warn('Nothing to show');
+            }
+            readline.close()
+        })
+}
+
 async function ActionsWithNode(accounts) {
     const readline = require('readline').createInterface({
         input: process.stdin,
@@ -215,7 +250,8 @@ async function ActionsWithNode(accounts) {
     console.log('1: Withdraw all rewards');
     console.log('2: Stake your node');
     console.log('3: Send to main account');
-    console.log('4: Cancel')
+    console.log('4: Unstake all nodes');
+    console.log('5: Cancel')
     console.log('\n========================\n')
     readline.question(
         ``,
@@ -233,6 +269,11 @@ async function ActionsWithNode(accounts) {
                 case '3':
                     readline.close()
                     fn = CreateAndSendToMainAccount;
+                    params = accounts;
+                    break;
+                case '4':
+                    readline.close()
+                    fn = CreateAndSendUnstake;
                     params = accounts;
                     break;
                 default:
