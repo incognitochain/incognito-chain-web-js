@@ -9,6 +9,7 @@ const {
   isPaymentAddress,
   isOldPaymentAddress,
   VerifierTx,
+  setShardNumber,
 } = require("../../");
 const { PaymentAddressType } = constants;
 
@@ -18,14 +19,14 @@ const MAINNET_BTC_ID = "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e618
 // const rpcClient = "https://lb-fullnode.incognito.org/fullnode";
 //  new RpcClient("https://mainnet.incognito.org/fullnode");
 // const rpcClient = "https://testnet.incognito.org/fullnode";
-const rpcClient = "http://51.89.21.38:11334";
+const rpcClient = "http://51.161.117.193:11334";
 // const rpcClient = new RpcClient("https://dev-test-node.incognito.org");
 // const rpcClient = new RpcClient("http://54.39.158.106:9334");
 // const rpcClient = new RpcClient("http://139.162.55.124:8334");   // dev-net
 // const rpcClient = "https://testnet1.incognito.org/fullnode"; //testnet1
 // "http://139.162.55.124:8334";
 
-const stagingServices = "http://51.89.21.38:6002";
+const stagingServices = "http://51.161.117.193:6002";
 
 const rpcCoinService =
   // "https://api-coinservice.incognito.org"; //mainnet
@@ -33,7 +34,7 @@ const rpcCoinService =
 // "https://api-coinservice-staging2.incognito.org"; // testnet1
 // "http://51.161.119.66:9009"; //dev-test-coin-service
 // const rpcTxService = `${stagingServices}/txservice`;
-const rpcTxService = "http://51.89.21.38:6004";
+const rpcTxService = "http://51.161.117.193:6004";
 //  "https://api-coinservice.incognito.org/txservice"; mainnet
 // "https://api-coinservice-staging.incognito.org/txservice";
 //  "https://api-coinservice-staging2.incognito.org/txservice"; // testnet1
@@ -51,11 +52,8 @@ const rpcApiService =
 const deviceID = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 let wallet;
 let account1PrivateKeyStr;
-let senderKeyWallet;
 let account1;
 let account1PaymentAddressStr;
-let receiverPaymentAddrStr;
-let receiverPaymentAddrStr2;
 
 const PRVID =
   "0000000000000000000000000000000000000000000000000000000000000004";
@@ -70,22 +68,15 @@ async function setup() {
     "Master",
     "Anon"
   );
-  // senderPrivateKeyStr =
-  //   "1139jtfTYJysjtddB4gFs6n3iW8YiDeFKWcKyufRmsb2fsDssj3BWCYXSmNtTR277MqQgHeiXpTWGit9r9mBUJfoyob5besrF9AW9HpLC4Nf";
+  console.log("setShardNumber: ", setShardNumber);
+  await setShardNumber(2);
   account1PrivateKeyStr =
     "";
-  // "112t8rniqSuDK8vdvHXGzkDzthVG6tsNtvZpvJEvZc5fUg1ts3GDPLWMZWFNbVEpNHeGx8vPLLoyaJRCUikMDqPFY1VzyRbLmLyWi4YDrS7h";
   account1 = new AccountWallet(Wallet);
   account1.setRPCCoinServices(rpcCoinService);
   account1.setRPCClient(rpcClient);
   account1.setRPCTxServices(rpcTxService);
   account1.setRPCRequestServices(rpcRequestService);
-  const data = {
-    DeviceID: deviceID,
-  };
-  const authTokenDt = await Axios.post(`${rpcApiService}/auth/new-token`, data);
-  const authToken = authTokenDt.data.Result.Token;
-  account1.setRPCApiServices(rpcApiService, authToken);
   await account1.setKey(account1PrivateKeyStr);
   account1PaymentAddressStr =
     account1.key.base58CheckSerialize(PaymentAddressType);
@@ -97,12 +88,12 @@ async function setup() {
 }
 
 async function TestConvertPUnifiedToken() {
-  let fee = 20;
-  let convertAmount = 1000000000;
-  // Matic (PLG)
-  let tokenID = 'dae027b21d8d57114da11209dce8eeb587d01adf59d4fc356a8be5eedc146859';
-  let pUnifiedTokenID = 'f5d88e2e3c8f02d6dc1e01b54c90f673d730bef7d941aeec81ad1e1db690961f';
-  let networkID = 3;
+  let fee = 10;
+  let convertAmount = 1000;
+  // LINK (PLG)
+  let tokenID = 'd43a67133bba907d04691c2b0e918c48b04db1a6ac2d03dd10f42b70422f12d6';
+  let pUnifiedTokenID = 'b35756452dc1fa1260513fa121c20c2b516a8645f8d496fa4235274dac0b1b52';
+  // let networkID = 3;
 
   try {
     let result = await account1.createAndSendConvertUnifiedTokenRequestTx (
@@ -110,7 +101,6 @@ async function TestConvertPUnifiedToken() {
         transfer: {fee, tokenID},
         extra: {
             pUnifiedTokenID,
-            networkID,
             convertAmount,
             version: 2,
         },
@@ -125,24 +115,29 @@ async function TestConvertPUnifiedToken() {
 async function TestUnshieldPUnifiedToken() {
   let fee = 20;
   //todo
-  let unshieldAmount = 1000000;
+  let unshieldAmount = 1000;
   let remoteAddress = '0xF91cEe2DE943733e338891Ef602c962eF4D7Eb81';
-  let unshieldingTokenID = 'f5d88e2e3c8f02d6dc1e01b54c90f673d730bef7d941aeec81ad1e1db690961f';
+  let unshieldingTokenID = 'b35756452dc1fa1260513fa121c20c2b516a8645f8d496fa4235274dac0b1b52';
   let networkID = 3;
-  let tokenPayments = [{
-    "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
-    "amount": 674990
-  }];
-  let prvPayments = [{
-    "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
-    "amount": 100
-  }];
+  let incTokenID = "d43a67133bba907d04691c2b0e918c48b04db1a6ac2d03dd10f42b70422f12d6";
+  let tokenPayments = [
+    // {
+    // // "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    // // "amount": 674990
+    // }
+  ];
+  let prvPayments = [
+    // {
+    // // "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    // // "amount": 100
+    // }
+  ];
 
   let burningInfos = [{
-      networkID: networkID, 
-      burningAmount: unshieldAmount, 
-      expectedAmount: 1, 
-      remoteAddress: remoteAddress
+    incTokenID: incTokenID, 
+    burningAmount: unshieldAmount, 
+    expectedAmount: 1000, 
+    remoteAddress: remoteAddress
   }];
 
   try {
@@ -165,8 +160,8 @@ async function TestUnshieldPUnifiedToken() {
 async function RunPUnifiedTokenTests() {
     await setup();
 
-    // TestConvertPUnifiedToken();
-    TestUnshieldPUnifiedToken();
+    TestConvertPUnifiedToken();
+    // TestUnshieldPUnifiedToken();
 }
 
 RunPUnifiedTokenTests()
