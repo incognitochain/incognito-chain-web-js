@@ -191,14 +191,4 @@ const (
 
 	BurningFantomForDepositToSCRequestMeta = metadataCommon.BurningFantomForDepositToSCRequestMeta
 	BurningFantomConfirmForDepositToSCMeta = metadataCommon.BurningFantomConfirmForDepositToSCMeta
-
-	// Bridge aggregator
-	BridgeAggModifyParamMeta                        = metadataCommon.BridgeAggModifyParamMeta
-	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta
-	BridgeAggConvertTokenToUnifiedTokenResponseMeta = metadataCommon.BridgeAggConvertTokenToUnifiedTokenResponseMeta
-	IssuingUnifiedTokenRequestMeta                  = metadataCommon.IssuingUnifiedTokenRequestMeta
-	IssuingUnifiedTokenResponseMeta                 = metadataCommon.IssuingUnifiedTokenResponseMeta
-	BurningUnifiedTokenRequestMeta                  = metadataCommon.BurningUnifiedTokenRequestMeta
-	BurningUnifiedTokenResponseMeta                 = metadataCommon.BurningUnifiedTokenResponseMeta
-	BridgeAggAddTokenMeta                           = metadataCommon.BridgeAggAddTokenMeta
 )

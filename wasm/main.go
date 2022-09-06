@@ -56,6 +56,6 @@ func main() {
 	// portal
 	gobridge.RegisterCallback("generateBTCMultisigAddress", internal.GenerateBTCMultisigAddress)
 
-	println("WASM loading finished")
+	gobridge.Log("WASM loading finished")
 	<-c
 }

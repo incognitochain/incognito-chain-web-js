@@ -1,3 +1,5 @@
+
+
 package metadata
 
 import (
@@ -32,6 +34,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &InitTokenRequest{}
 	case IssuingRequestMeta:
 		md = &IssuingRequest{}
+	case IssuingETHRequestMeta:
+		md = &IssuingEVMRequest{}
 	case IssuingResponseMeta:
 		md = &IssuingResponse{}
 	case ContractingRequestMeta:
@@ -140,7 +144,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataBridge.UnshieldRequest{}
 	case metadataCommon.BurningUnifiedTokenResponseMeta:
 		md = &metadataBridge.UnshieldResponse{}
-
+	case metadataCommon.BurnForCallRequestMeta:
+		md = &metadataBridge.BurnForCallRequest{}
 	default:
 		return nil, errors.Errorf("Could not parse metadata with type: %d", theType)
 	}

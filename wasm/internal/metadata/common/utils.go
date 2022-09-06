@@ -436,7 +436,7 @@ type OTADeclaration struct {
 type Uint64Reader uint64
 
 func (u Uint64Reader) MarshalJSON() ([]byte, error) {
-	return json.Marshal(u)
+	return json.Marshal(uint64(u))
 }
 func (u *Uint64Reader) UnmarshalJSON(raw []byte) error {
 	var theNum uint64

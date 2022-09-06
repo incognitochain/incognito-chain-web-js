@@ -11,6 +11,7 @@ const optimization = {
         compress: {
           comparisons: false,
           drop_console: false,
+          // pure_funcs: ['console.log'],
         },
         parse: {},
         mangle: true,

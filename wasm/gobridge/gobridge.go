@@ -3,11 +3,14 @@
 package gobridge
 
 import (
-	"syscall/js"
 	"github.com/pkg/errors"
+	"syscall/js"
 )
 
-var bridgeRoot js.Value
+var (
+	bridgeRoot js.Value
+	jsLog      js.Value
+)
 
 const (
 	bridgeJavaScriptName = "__gobridge__"
@@ -36,13 +39,13 @@ type txCallback = func(string, int64) (string, error)
 
 // RegisterCallback registers a Go function to be a callback used in JavaScript
 func RegisterCallback(name string, inputFunc interface{}) {
-	mycb := func(_ js.Value, jsInputs []js.Value) (interface{}, error){
-		if len(jsInputs)<1{
+	mycb := func(_ js.Value, jsInputs []js.Value) (interface{}, error) {
+		if len(jsInputs) < 1 {
 			return nil, errors.Errorf("Invalid number of parameters. Expected at least 1")
 		}
 		args := jsInputs[0].String()
 		var num int64 = 0
-		if len(jsInputs)>=2 && jsInputs[1].Type()==js.TypeNumber{
+		if len(jsInputs) >= 2 && jsInputs[1].Type() == js.TypeNumber {
 			num = int64(jsInputs[1].Int())
 		}
 		switch callback := inputFunc.(type) {
@@ -57,7 +60,7 @@ func RegisterCallback(name string, inputFunc interface{}) {
 		default:
 			return "", errors.Errorf("Unexpected error when executing callback")
 		}
-		
+
 	}
 	bridgeRoot.Set(name, js.FuncOf(registrationWrapper(mycb)))
 }
@@ -67,8 +70,12 @@ func RegisterValue(name string, value interface{}) {
 	bridgeRoot.Set(name, value)
 }
 
+func Log(s string) {
+	jsLog.Invoke(s)
+}
+
 func init() {
 	global := js.Global()
-
+	jsLog = global.Get("console").Get("info")
 	bridgeRoot = global.Get(bridgeJavaScriptName)
 }

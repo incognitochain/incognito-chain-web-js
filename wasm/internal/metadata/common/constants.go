@@ -203,7 +203,7 @@ const (
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
 
-	// Bridge aggregator
+	// bridgeagg
 	BridgeAggModifyParamMeta                        = 340
 	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = 341
 	BridgeAggConvertTokenToUnifiedTokenResponseMeta = 342
@@ -212,6 +212,9 @@ const (
 	BurningUnifiedTokenRequestMeta                  = 345
 	BurningUnifiedTokenResponseMeta                 = 346
 	BridgeAggAddTokenMeta                           = 347
+
+	BurnForCallConfirmMeta = 158
+	BurnForCallRequestMeta = 348
 )
 
 var minerCreatedMetaTypes = []int{
