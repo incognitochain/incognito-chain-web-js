@@ -40,6 +40,7 @@ const aliasConfig = {
   resolve: {
     alias: {
       "@lib": path.resolve(__dirname, "lib"),
+      "@privacy-wasm": path.resolve(__dirname, "privacy.wasm"),
     },
   },
 };
@@ -48,6 +49,7 @@ module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   const cfg = {
+    name: "wallet",
     devtool: "source-map",
     entry: {
       wallet: "./lib/wallet.js",
@@ -84,6 +86,7 @@ module.exports = (env, argv) => {
     ...aliasConfig,
   };
   const nodeCfg = {
+    name: "lib",
     devtool: "source-map",
     entry: {
       inc: "./lib/lib.js",
@@ -95,10 +98,17 @@ module.exports = (env, argv) => {
       libraryTarget: "commonjs2",
     },
     target: "node",
-    node: {
-      __dirname: false,
-    },
     module: {
+      defaultRules: [
+        {
+          type: "javascript/auto",
+          resolve: {}
+        },
+        {
+          test: /\.json$/i,
+          type: "json"
+        }
+      ],
       rules: [
         {
           test: /\.js$/,
@@ -106,8 +116,17 @@ module.exports = (env, argv) => {
           loader: "babel-loader",
           options: {
             plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: ["@babel/preset-env"],
+            presets: [
+              ["@babel/preset-env", {
+                "targets": {
+                  "node": "12"
+              }}],
+            ],
           },
+        },
+        {
+          test: /\.wasm$/,
+          loader: 'wasm-loader'
         },
       ],
     },

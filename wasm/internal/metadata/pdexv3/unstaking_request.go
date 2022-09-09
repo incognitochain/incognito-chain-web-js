@@ -8,9 +8,9 @@ import (
 
 type UnstakingRequest struct {
 	metadataCommon.MetadataBase
-	stakingPoolID   string
-	otaReceivers    map[string]string
-	nftID           string
+	stakingPoolID string
+	otaReceivers  map[string]string
+	AccessOption
 	unstakingAmount uint64
 }
 
@@ -23,7 +23,7 @@ func NewUnstakingRequest() *UnstakingRequest {
 }
 
 func NewUnstakingRequestWithValue(
-	stakingPoolID, nftID string,
+	stakingPoolID string, accessOption AccessOption,
 	otaReceivers map[string]string,
 	unstakingAmount uint64,
 ) *UnstakingRequest {
@@ -32,7 +32,7 @@ func NewUnstakingRequestWithValue(
 			Type: metadataCommon.Pdexv3UnstakingRequestMeta,
 		},
 		stakingPoolID:   stakingPoolID,
-		nftID:           nftID,
+		AccessOption:    accessOption,
 		otaReceivers:    otaReceivers,
 		unstakingAmount: unstakingAmount,
 	}
@@ -40,14 +40,14 @@ func NewUnstakingRequestWithValue(
 
 func (request *UnstakingRequest) MarshalJSON() ([]byte, error) {
 	data, err := json.Marshal(struct {
-		StakingPoolID   string            `json:"StakingPoolID"`
-		NftID           string            `json:"NftID"`
+		StakingPoolID string `json:"StakingPoolID"`
+		AccessOption
 		OtaReceivers    map[string]string `json:"OtaReceivers"`
 		UnstakingAmount uint64            `json:"UnstakingAmount"`
 		metadataCommon.MetadataBase
 	}{
 		StakingPoolID:   request.stakingPoolID,
-		NftID:           request.nftID,
+		AccessOption:    request.AccessOption,
 		OtaReceivers:    request.otaReceivers,
 		UnstakingAmount: request.unstakingAmount,
 		MetadataBase:    request.MetadataBase,
@@ -60,8 +60,8 @@ func (request *UnstakingRequest) MarshalJSON() ([]byte, error) {
 
 func (request *UnstakingRequest) UnmarshalJSON(data []byte) error {
 	temp := struct {
-		StakingPoolID   string                      `json:"StakingPoolID"`
-		NftID           string                      `json:"NftID"`
+		StakingPoolID string `json:"StakingPoolID"`
+		AccessOption
 		OtaReceivers    map[string]string           `json:"OtaReceivers"`
 		UnstakingAmount metadataCommon.Uint64Reader `json:"UnstakingAmount"`
 		metadataCommon.MetadataBase
@@ -71,7 +71,7 @@ func (request *UnstakingRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	request.stakingPoolID = temp.StakingPoolID
-	request.nftID = temp.NftID
+	request.AccessOption = temp.AccessOption
 	request.otaReceivers = temp.OtaReceivers
 	request.unstakingAmount = uint64(temp.UnstakingAmount)
 	request.MetadataBase = temp.MetadataBase
@@ -88,8 +88,4 @@ func (request *UnstakingRequest) OtaReceivers() map[string]string {
 
 func (request *UnstakingRequest) UnstakingAmount() uint64 {
 	return request.unstakingAmount
-}
-
-func (request *UnstakingRequest) NftID() string {
-	return request.nftID
 }

@@ -202,6 +202,16 @@ const (
 
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
+
+	// Bridge aggregator
+	BridgeAggModifyParamMeta                        = 340
+	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = 341
+	BridgeAggConvertTokenToUnifiedTokenResponseMeta = 342
+	IssuingUnifiedTokenRequestMeta                  = 343
+	IssuingUnifiedTokenResponseMeta                 = 344
+	BurningUnifiedTokenRequestMeta                  = 345
+	BurningUnifiedTokenResponseMeta                 = 346
+	BridgeAggAddTokenMeta                           = 347
 )
 
 var minerCreatedMetaTypes = []int{
@@ -236,6 +246,9 @@ var minerCreatedMetaTypes = []int{
 	Pdexv3TradeResponseMeta,
 	Pdexv3AddOrderResponseMeta,
 	Pdexv3WithdrawOrderResponseMeta,
+	BridgeAggConvertTokenToUnifiedTokenResponseMeta,
+	IssuingUnifiedTokenResponseMeta,
+	BurningUnifiedTokenResponseMeta,
 }
 
 // Special rules for shardID: stored as 2nd param of instruction of BeaconBlock

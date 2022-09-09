@@ -14,28 +14,8 @@ type WithdrawOrderRequest struct {
 	OrderID    string                              `json:"OrderID"`
 	Amount     uint64                              `json:"Amount"`
 	Receiver   map[common.Hash]privacy.OTAReceiver `json:"Receiver"`
-	NftID      common.Hash                         `json:"NftID"`
+	AccessOption
 	metadataCommon.MetadataBase
-}
-
-func NewWithdrawOrderRequest(
-	pairID, orderID string,
-	amount uint64,
-	recv map[common.Hash]privacy.OTAReceiver,
-	nftID common.Hash,
-	metaType int,
-) (*WithdrawOrderRequest, error) {
-	r := &WithdrawOrderRequest{
-		PoolPairID: pairID,
-		OrderID:    orderID,
-		Amount:     amount,
-		Receiver:   recv,
-		NftID:      nftID,
-		MetadataBase: metadataCommon.MetadataBase{
-			Type: metaType,
-		},
-	}
-	return r, nil
 }
 
 func (req WithdrawOrderRequest) Hash() *common.Hash {
@@ -50,7 +30,7 @@ func (req *WithdrawOrderRequest) UnmarshalJSON(raw []byte) error {
 		OrderID    string                              `json:"OrderID"`
 		Amount     metadataCommon.Uint64Reader         `json:"Amount"`
 		Receiver   map[common.Hash]privacy.OTAReceiver `json:"Receiver"`
-		NftID      common.Hash                         `json:"NftID"`
+		AccessOption
 		metadataCommon.MetadataBase
 	}
 	err := json.Unmarshal(raw, &temp)
@@ -59,7 +39,7 @@ func (req *WithdrawOrderRequest) UnmarshalJSON(raw []byte) error {
 		OrderID:      temp.OrderID,
 		Amount:       uint64(temp.Amount),
 		Receiver:     temp.Receiver,
-		NftID:        temp.NftID,
+		AccessOption: temp.AccessOption,
 		MetadataBase: temp.MetadataBase,
 	}
 	return err

@@ -5,7 +5,7 @@
   "main": "build-node/inc.js",
   "module": "build/wallet.js",
   "scripts": {
-    "start": "yarn build:wasm; node --experimental-repl-await --eval \"const Inc = require('.'); const inc = new Inc.SimpleWallet(); Inc.init()\" -i",
+    "start": "yarn build:wasm; node --experimental-repl-await -r ./inc.config",
     "start:dev": "yarn test-account && yarn build",
     "build:wasm": "cd wasm && ./build.sh && cd ..",
     "build:watch": "webpack --config webpack.config.js --watch",
@@ -15,12 +15,15 @@
     "test": "yarn build:wasm; mocha \"test/**/*.spec.js\"",
     "test-account": "clear && yarn build && node ./test/wallet/accountwallet-test",
     "test-portal": "clear && yarn build:dev && node ./test/wallet/portal-test",
+    "test-punified": "clear && yarn build:dev && node ./test/wallet/punified-test",
     "build:gomobile-ios": "cd wasm/internal && gomobile bind -x -v -target=ios",
     "build:gomobile-android": "cd wasm/internal && gomobile bind -x -v -target=android",
     "run-test": "clear && node ./test/wallet/accountwallet-test",
     "build:gomobile": "yarn build:wasm && yarn build:gomobile-ios && yarn build:gomobile-android && yarn build",
     "push-code": "git add . && git commit -m 'push code' && git push",
-    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa"
+    "fix-permission": "ssh-agent -s && ssh-add ~/.ssh/id_rsa",
+    "test-pdex3": "clear && yarn build && node ./test/wallet/pdex3-test",
+    "run-test-pdex3": "clear && node ./test/wallet/pdex3-test"
   },
   "repository": {
     "type": "git",
@@ -61,7 +64,8 @@
     "mocha": "^8.3.2",
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3"
+    "webpack-cli": "^3.2.3",
+    "wasm-loader": "^1.3.0"
   },
   "mocha": {
     "timeout": "1200000"
