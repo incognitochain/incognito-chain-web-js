@@ -657,6 +657,7 @@ func CreateOTAReceiverWithCfg(args string) (string, error) {
 		PaymentAddress  string
 		WithConceal     bool
 		CoinPrivacyType int
+		SenderShardID   int
 	}
 	err := json.Unmarshal(raw, &cfg)
 	if err != nil {
@@ -668,7 +669,7 @@ func CreateOTAReceiverWithCfg(args string) (string, error) {
 	}
 
 	var recv privacy.OTAReceiver
-	err = recv.From(kw.KeySet.PaymentAddress, cfg.CoinPrivacyType, cfg.WithConceal)
+	err = recv.From(kw.KeySet.PaymentAddress, cfg.SenderShardID, cfg.CoinPrivacyType, cfg.WithConceal)
 	if err != nil {
 		return "", err
 	}
