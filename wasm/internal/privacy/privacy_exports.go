@@ -76,7 +76,7 @@ type TransmissionKey = key.TransmissionKey
 type ViewingKey = key.ViewingKey
 type PrivateKey = key.PrivateKey
 type OTAKey = key.OTAKey
-type PaymentInfo = key.PaymentInfo
+type PaymentInfo = coin.PaymentInfo
 type PaymentAddress = key.PaymentAddress
 type OTAReceiver = coin.OTAReceiver
 

@@ -12,7 +12,6 @@ import (
 	"incognito-chain/common"
 	"incognito-chain/privacy/coin"
 	errhandler "incognito-chain/privacy/errorhandler"
-	"incognito-chain/privacy/key"
 	"incognito-chain/privacy/operation"
 	"incognito-chain/privacy/privacy_v2/bulletproofs"
 )
@@ -379,7 +378,7 @@ func (proof *PaymentProofV2) IsConfidentialAsset() (bool, error){
 // 	return true, nil
 // }
 
-func Prove(inputCoins []coin.PlainCoin, outputCoins []*coin.CoinV2, sharedSecrets []*operation.Point, hasConfidentialAsset bool, paymentInfo []*key.PaymentInfo) (*PaymentProofV2, error) {
+func Prove(inputCoins []coin.PlainCoin, outputCoins []*coin.CoinV2, sharedSecrets []*operation.Point, hasConfidentialAsset bool, paymentInfo []*coin.PaymentInfo) (*PaymentProofV2, error) {
 	var err error
 
 	proof := new(PaymentProofV2)
@@ -453,7 +452,11 @@ func Prove(inputCoins []coin.PlainCoin, outputCoins []*coin.CoinV2, sharedSecret
 	// After Prove, we should hide all information in coin details.
 	for i, outputCoin := range proof.outputCoins {
 		if !wallet.IsPublicKeyBurningAddress(outputCoin.GetPublicKey().ToBytesS()){
-			if err = outputCoin.ConcealOutputCoin(paymentInfo[i].PaymentAddress.GetPublicView()); err != nil {
+			concealPoint := (&operation.Point{}).Identity()
+			if paymentInfo[i].PaymentAddress != nil {
+				concealPoint = paymentInfo[i].PaymentAddress.GetPublicView()
+			}
+			if err = outputCoin.ConcealOutputCoin(concealPoint); err != nil {
 				return nil, err
 			}
 
