@@ -167,21 +167,6 @@ func(addr PaymentAddress) GetOTAPublicKey() *operation.Point{
 	return  encryptionKey
 }
 
-// PaymentInfo contains an address of a payee and a value of coins he/she will receive
-type PaymentInfo struct {
-	PaymentAddress PaymentAddress
-	Amount         uint64
-	Message        []byte // 512 bytes
-}
-
-func InitPaymentInfo(addr PaymentAddress, amount uint64, message []byte) *PaymentInfo {
-	return &PaymentInfo{
-		PaymentAddress: addr,
-		Amount: amount,
-		Message: message,
-	}
-}
-
 // GeneratePrivateKey generates a random 32-byte spending key
 func GeneratePrivateKey(seed []byte) PrivateKey {
 	bip32PrivKey := operation.HashToScalar(seed)

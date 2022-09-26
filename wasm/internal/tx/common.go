@@ -108,17 +108,26 @@ type PaymentReader struct {
 
 func (pp PaymentReader) To() (*privacy.PaymentInfo, error) {
 	result := &privacy.PaymentInfo{}
-	var theStr string
-	err := json.Unmarshal(pp.PaymentAddress, &theStr)
+	var tempString string
+	err := json.Unmarshal(pp.PaymentAddress, &tempString)
 	if err != nil {
 		return nil, err
 	}
 
-	kw, err := wallet.Base58CheckDeserialize(theStr)
-	if err != nil {
-		return nil, err
+	kw, err := wallet.Base58CheckDeserialize(tempString)
+	if err == nil {
+		result.PaymentAddress = &kw.KeySet.PaymentAddress
+	} else {
+		// parse as one-time receiver instead
+		var r privacy.OTAReceiver
+		err := r.FromString(tempString)
+		if err == nil {
+			result.OTAReceiver = &r
+		} else {
+			return nil, err
+		}
 	}
-	result.PaymentAddress = kw.KeySet.PaymentAddress
+	
 	num, err := strconv.ParseUint(pp.Amount, 10, 64)
 	if err != nil {
 		return nil, err
@@ -130,7 +139,7 @@ func (pp PaymentReader) To() (*privacy.PaymentInfo, error) {
 func (pp *PaymentReader) From(pInf *privacy.PaymentInfo) {
 	kw := &wallet.KeyWallet{}
 	kw.KeySet = incognitokey.KeySet{}
-	kw.KeySet.PaymentAddress = pInf.PaymentAddress
+	kw.KeySet.PaymentAddress = *pInf.PaymentAddress
 	paStr := kw.Base58CheckSerialize(wallet.PaymentAddressType)
 	result := PaymentReader{}
 	result.PaymentAddress, _ = json.Marshal(paStr)
@@ -145,9 +154,9 @@ func (u printedUintStr) MarshalJSON() ([]byte, error) {
 	return json.Marshal(strconv.FormatUint(uint64(u), 10))
 }
 func (u *printedUintStr) UnmarshalJSON(raw []byte) error {
-	var theStr string
-	json.Unmarshal(raw, &theStr)
-	temp, err := strconv.ParseUint(theStr, 10, 64)
+	var tempString string
+	json.Unmarshal(raw, &tempString)
+	temp, err := strconv.ParseUint(tempString, 10, 64)
 	*u = printedUintStr(temp)
 	return err
 }
@@ -366,22 +375,22 @@ func (b encodedBytes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(res)
 }
 func (b *encodedBytes) UnmarshalJSON(src []byte) error {
-	var theStr string
-	json.Unmarshal(src, &theStr)
-	if len(theStr) == 0 {
+	var tempString string
+	json.Unmarshal(src, &tempString)
+	if len(tempString) == 0 {
 		*b = encodedBytes([]byte{})
 		return nil
 	}
 	if common.AllowBase58EncodedCoins {
 		// AllowBase58EncodedCoins: accept base58 OR base64
-		res, _, err := Base58Encoding.Decode(theStr)
+		res, _, err := Base58Encoding.Decode(tempString)
 		if err == nil {
 			*b = res
 			return nil
 		}
 	}
 
-	res, err := Base64Encoding.DecodeString(theStr)
+	res, err := Base64Encoding.DecodeString(tempString)
 	*b = res
 	return err
 }

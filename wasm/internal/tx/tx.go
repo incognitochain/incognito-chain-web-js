@@ -390,7 +390,7 @@ func createPrivKeyMlsag(inputCoins []privacy.PlainCoin, outputCoins []*privacy.C
 	return privKeyMlsag, nil
 }
 
-func updateParamsWhenOverBalance(pInfos *[]PaymentReader, gParams *TxParams, senderPaymentAddree privacy.PaymentAddress) error {
+func updateParamsWhenOverBalance(pInfos *[]PaymentReader, gParams *TxParams, senderPaymentAddress privacy.PaymentAddress) error {
 	// Calculate sum of all output coins' value
 	sumOutputValue := uint64(0)
 	for _, p := range *pInfos {
@@ -413,7 +413,7 @@ func updateParamsWhenOverBalance(pInfos *[]PaymentReader, gParams *TxParams, sen
 	if overBalance > 0 {
 		temp := new(privacy.PaymentInfo)
 		temp.Amount = uint64(overBalance)
-		temp.PaymentAddress = senderPaymentAddree
+		temp.PaymentAddress = &senderPaymentAddress
 		changePaymentInfo := &PaymentReader{}
 
 		changePaymentInfo.From(temp)

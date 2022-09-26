@@ -96,6 +96,20 @@ func (coin *CoinV2) SetPlainTokenID(tokenID *common.Hash) error{
 
 // for confidential asset only
 func NewCoinCA(p *CoinParams, tokenID *common.Hash) (*CoinV2, *operation.Point, *SenderSeal, error) {
+	if p.OTAReceiver != nil {
+		c := NewCoinFromAmountAndTxRandomBytes(p.Amount, &p.OTAReceiver.PublicKey, &p.OTAReceiver.TxRandom, p.Message)
+		ind, err := p.OTAReceiver.TxRandom.GetIndex()
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		seal := SenderSeal{
+			r:             *(&operation.Scalar{}).FromUint64(0),
+			txRandomIndex: ind,
+		}
+		err = c.SetPlainTokenID(tokenID)
+		return c, nil, &seal, nil
+	}
+
 	receiverPublicKey, err := new(operation.Point).FromBytesS(p.PaymentAddress.Pk)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot parse outputCoinV2 from PaymentInfo when parseByte PublicKey, error %v ", err)

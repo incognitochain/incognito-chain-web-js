@@ -96,13 +96,13 @@ func parseInfoForSetBytes(coinBytes *[]byte, offset *int) ([]byte, error) {
 	return info, nil
 }
 
-func CreatePaymentInfosFromPlainCoinsAndAddress(c []PlainCoin, paymentAddress key.PaymentAddress, message []byte) []*key.PaymentInfo {
+func CreatePaymentInfosFromPlainCoinsAndAddress(c []PlainCoin, paymentAddress key.PaymentAddress, message []byte) []*PaymentInfo {
 	sumAmount := uint64(0)
 	for i := 0; i < len(c); i += 1 {
 		sumAmount += c[i].GetValue()
 	}
-	paymentInfos := make([]*key.PaymentInfo, 1)
-	paymentInfos[0] = key.InitPaymentInfo(paymentAddress, sumAmount, message)
+	paymentInfos := make([]*PaymentInfo, 1)
+	paymentInfos[0] = InitPaymentInfo(paymentAddress, sumAmount, message)
 	return paymentInfos
 }
 
@@ -114,6 +114,7 @@ func NewCoinFromAmountAndTxRandomBytes(amount uint64, publicKey *operation.Point
 	c.SetTxRandom(txRandom)
 	c.SetCommitment(operation.PedCom.CommitAtIndex(c.GetAmount(), c.GetRandomness(), operation.PedersenValueIndex))
 	c.SetSharedRandom(nil)
+	c.SetSharedConcealRandom(operation.RandomScalar())
 	c.SetInfo(info)
 	return c
 }
@@ -150,6 +151,19 @@ func (s *SenderSeal) UnmarshalJSON(src []byte) error {
 }
 
 func NewCoinFromPaymentInfo(p *CoinParams) (*CoinV2, *SenderSeal, error) {
+	if p.OTAReceiver != nil {
+		c := NewCoinFromAmountAndTxRandomBytes(p.Amount, &p.OTAReceiver.PublicKey, &p.OTAReceiver.TxRandom, p.Message)
+		ind, err := p.OTAReceiver.TxRandom.GetIndex()
+		if err != nil {
+			return nil, nil, err
+		}
+		seal := SenderSeal{
+			r:             *(&operation.Scalar{}).FromUint64(0),
+			txRandomIndex: ind,
+		}
+		return c, &seal, nil
+	}
+
 	receiverPublicKey, err := new(operation.Point).FromBytesS(p.PaymentAddress.Pk)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot parse outputCoinV2 from PaymentInfo when parseByte PublicKey, error %v ", err)
@@ -239,6 +253,22 @@ func ParseOTAInfoFromString(pubKeyStr, txRandomStr string) (*operation.Point, *T
 	return pubKey, txRandom, nil
 }
 
+// PaymentInfo contains the address or OTAReceiver of a payee and the amount they will receive
+type PaymentInfo struct {
+	PaymentAddress *key.PaymentAddress
+	OTAReceiver    *OTAReceiver
+	Amount         uint64
+	Message        []byte // 512 bytes
+}
+
+func InitPaymentInfo(addr key.PaymentAddress, amount uint64, message []byte) *PaymentInfo {
+	return &PaymentInfo{
+		PaymentAddress: &addr,
+		Amount: amount,
+		Message: message,
+	}
+}
+
 const (
 	PrivacyTypeTransfer = iota
 	PrivacyTypeMint
@@ -263,13 +293,13 @@ func DeriveShardInfoFromCoin(coinPubKey []byte) (int, int, int, error) {
 
 // CoinParams contains the necessary data to create a new coin
 type CoinParams struct {
-	key.PaymentInfo
+	PaymentInfo
 	SenderShardID   int
 	CoinPrivacyType int
 }
 
 // From initializes the CoinParam using input data (PaymentInfo must not be nil)
-func (p *CoinParams) From(inf *key.PaymentInfo, sid, cptype int) *CoinParams {
+func (p *CoinParams) From(inf *PaymentInfo, sid, cptype int) *CoinParams {
 	return &CoinParams{
 		PaymentInfo:     *inf,
 		SenderShardID:   sid % common.MaxShardNumber,
@@ -279,8 +309,13 @@ func (p *CoinParams) From(inf *key.PaymentInfo, sid, cptype int) *CoinParams {
 
 // FromPaymentInfo initializes the CoinParam using a PaymentInfo (must not be nil);
 // others are set to default
-func (p *CoinParams) FromPaymentInfo(inf *key.PaymentInfo) *CoinParams {
-	receiverPublicKeyBytes := inf.PaymentAddress.Pk
+func (p *CoinParams) FromPaymentInfo(inf *PaymentInfo) *CoinParams {
+	var receiverPublicKeyBytes []byte
+	if inf.PaymentAddress != nil {
+		receiverPublicKeyBytes = inf.PaymentAddress.Pk
+	} else if inf.OTAReceiver != nil {
+		receiverPublicKeyBytes = inf.OTAReceiver.PublicKey.ToBytesS()
+	}
 	shardID := common.GetShardIDFromLastByte(receiverPublicKeyBytes[len(receiverPublicKeyBytes)-1])
 	return &CoinParams{
 		PaymentInfo:     *inf,
