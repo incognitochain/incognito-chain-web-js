@@ -129,7 +129,16 @@ async function TestCreateContributeAccessOTA() {
             amount2: 1,
             poolPairID: PoolID,
         });
-        console.log('SANG TEST:::: ', result)
+        console.log('TestCreateContributeAccessOTA:::: ', result)
+    } catch (e) {
+        console.log('TestCreateContributeAccessOTA error: ', e);
+    }
+}
+
+async function TestGetOTAReceiveWithCfg() {
+    try {
+        const otaReceiverWithCfg = await accountSender.getOTAReceiveWithCfg();
+        console.log('TestGetOTAReceiveWithCfg:::: ', otaReceiverWithCfg)
     } catch (e) {
         console.log('TestCreateContributeAccessOTA error: ', e);
     }
@@ -138,6 +147,7 @@ async function TestCreateContributeAccessOTA() {
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
+    await TestGetOTAReceiveWithCfg();
     // await TestGetBalance();
     // await TestGetBalanceAccessOTA();
     // await TestGetListShare();
