@@ -72,7 +72,7 @@ func (recv *OTAReceiver) FromAddress(addr key.PaymentAddress) error {
 	return fmt.Errorf("Cannot generate OTAReceiver after %d attempts", MAX_TRIES_OTA)
 }
 
-func (recv *OTAReceiver) FromAddressWithoutConceal(addr key.PaymentAddress) error {
+func (recv *OTAReceiver) From(addr key.PaymentAddress, cptype int, withConceal bool) error {
 	if recv == nil {
 		return errors.New("OTAReceiver not initialized")
 	}
@@ -80,6 +80,9 @@ func (recv *OTAReceiver) FromAddressWithoutConceal(addr key.PaymentAddress) erro
 	targetShardID := common.GetShardIDFromLastByte(addr.Pk[len(addr.Pk)-1])
 	otaRand := operation.RandomScalar()
 	concealRand := (&operation.Scalar{}).FromUint64(0)
+	if withConceal {
+		concealRand = operation.RandomScalar()
+	}
 
 	index := uint32(0)
 	publicOTA := addr.GetOTAPublicKey()
@@ -96,7 +99,7 @@ func (recv *OTAReceiver) FromAddressWithoutConceal(addr key.PaymentAddress) erro
 
 		pkb := publicKey.ToBytesS()
 		senderShardID, recvShardID, coinPrivacyType, _ := DeriveShardInfoFromCoin(pkb)
-		if recvShardID == int(targetShardID) && senderShardID == int(targetShardID) && coinPrivacyType == PrivacyTypeMint {
+		if recvShardID == int(targetShardID) && senderShardID == int(targetShardID) && coinPrivacyType == cptype {
 			otaRandomPoint := (&operation.Point{}).ScalarMultBase(otaRand)
 			concealRandomPoint := (&operation.Point{}).ScalarMultBase(concealRand)
 			recv.PublicKey = *publicKey

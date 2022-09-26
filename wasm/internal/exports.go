@@ -598,3 +598,27 @@ func CreateOTAReceiver(paramStr string) (string, error) {
 	}
 	return recv.String()
 }
+
+func CreateOTAReceiverWithCfg(args string) (string, error) {
+	raw := []byte(args)
+	var cfg struct {
+		PaymentAddress  string
+		WithConceal     bool
+		CoinPrivacyType int
+	}
+	err := json.Unmarshal(raw, &cfg)
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal configs %s - %v", args, err)
+	}
+	kw, err := wallet.Base58CheckDeserialize(cfg.PaymentAddress)
+	if err != nil {
+		return "", err
+	}
+
+	var recv privacy.OTAReceiver
+	err = recv.From(kw.KeySet.PaymentAddress, cfg.CoinPrivacyType, cfg.WithConceal)
+	if err != nil {
+		return "", err
+	}
+	return recv.String()
+}

@@ -98,7 +98,7 @@ func TestOTAReceiverFromAddressWithoutConceal(t *testing.T) {
             kw, err := wallet.Base58CheckDeserialize(testcase.data)
             NoError(t, err)
             var r OTAReceiver
-            err = r.FromAddressWithoutConceal(kw.KeySet.PaymentAddress)
+            err = r.From(kw.KeySet.PaymentAddress, PrivacyTypeTransfer, false)
             NoError(t, err)
             p, err := r.TxRandom.GetTxConcealRandomPoint()
             NoError(t, err)

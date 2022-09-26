@@ -49,6 +49,7 @@ func main() {
 	gobridge.RegisterCallback("setShardCount", internal.SetShardCount)
 	gobridge.RegisterCallback("setCfg", internal.SetConfigs)
 	gobridge.RegisterCallback("createOTAReceiver", internal.CreateOTAReceiver)
+	gobridge.RegisterCallback("createOTAReceiverWithCfg", internal.CreateOTAReceiverWithCfg)
 	// not applicable
 	// gobridge.RegisterCallback("deriveSerialNumber", internal.DeriveSerialNumber)
 
