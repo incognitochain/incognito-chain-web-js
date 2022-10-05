@@ -211,4 +211,21 @@ const (
 	BurningUnifiedTokenRequestMeta                  = metadataCommon.BurningUnifiedTokenRequestMeta
 	BurningUnifiedTokenResponseMeta                 = metadataCommon.BurningUnifiedTokenResponseMeta
 	BridgeAggAddTokenMeta                           = metadataCommon.BridgeAggAddTokenMeta
+
+	// Aurora and Avalache bridge
+	IssuingAuroraRequestMeta  = metadataCommon.IssuingAuroraRequestMeta
+	IssuingAuroraResponseMeta = metadataCommon.IssuingAuroraResponseMeta
+	BurningAuroraRequestMeta  = metadataCommon.BurningAuroraRequestMeta
+	BurningAuroraConfirmMeta  = metadataCommon.BurningAuroraConfirmMeta
+
+	IssuingAvaxRequestMeta  = metadataCommon.IssuingAvaxRequestMeta
+	IssuingAvaxResponseMeta = metadataCommon.IssuingAvaxResponseMeta
+	BurningAvaxRequestMeta  = metadataCommon.BurningAvaxRequestMeta
+	BurningAvaxConfirmMeta  = metadataCommon.BurningAvaxConfirmMeta
+
+	BurningAuroraForDepositToSCRequestMeta = metadataCommon.BurningAuroraForDepositToSCRequestMeta
+	BurningAuroraConfirmForDepositToSCMeta = metadataCommon.BurningAuroraConfirmForDepositToSCMeta
+
+	BurningAvaxForDepositToSCRequestMeta = metadataCommon.BurningAvaxForDepositToSCRequestMeta
+	BurningAvaxConfirmForDepositToSCMeta = metadataCommon.BurningAvaxConfirmForDepositToSCMeta
 )
