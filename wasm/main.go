@@ -1,4 +1,5 @@
-//+build linux,386 wasm
+//go:build (linux && 386) || wasm
+// +build linux,386 wasm
 
 package main
 
@@ -7,6 +8,7 @@ import (
 	internal "incognito-chain"
 )
 
+// TODO: 0xkraken
 func main() {
 	c := make(chan struct{}, 0)
 

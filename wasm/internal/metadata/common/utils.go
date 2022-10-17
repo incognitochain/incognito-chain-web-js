@@ -435,6 +435,7 @@ type OTADeclaration struct {
 
 type Uint64Reader uint64
 
+//TODO: 0xkraken
 func (u Uint64Reader) MarshalJSON() ([]byte, error) {
 	return json.Marshal(u)
 }

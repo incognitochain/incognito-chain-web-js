@@ -223,6 +223,12 @@ const (
 	BurningUnifiedTokenResponseMeta                 = 346
 	BridgeAggAddTokenMeta                           = 347
 
+	// Burn for swap (new flow)
+	BurnForCallConfirmMeta      = 158
+	BurnForCallRequestMeta      = 348
+	BurnForCallResponseMeta     = 349
+	IssuingReshieldResponseMeta = 350
+
 	// incognito mode for Aurora
 	IssuingAuroraRequestMeta  = 351
 	IssuingAuroraResponseMeta = 352

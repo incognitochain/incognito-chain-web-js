@@ -212,6 +212,12 @@ const (
 	BurningUnifiedTokenResponseMeta                 = metadataCommon.BurningUnifiedTokenResponseMeta
 	BridgeAggAddTokenMeta                           = metadataCommon.BridgeAggAddTokenMeta
 
+	// Burn for swap (new flow)
+	BurnForCallRequestMeta      = metadataCommon.BurnForCallRequestMeta
+	BurnForCallResponseMeta     = metadataCommon.BurnForCallResponseMeta
+	BurnForCallConfirmMeta      = metadataCommon.BurnForCallConfirmMeta
+	IssuingReshieldResponseMeta = metadataCommon.IssuingReshieldResponseMeta
+
 	// Aurora and Avalache bridge
 	IssuingAuroraRequestMeta  = metadataCommon.IssuingAuroraRequestMeta
 	IssuingAuroraResponseMeta = metadataCommon.IssuingAuroraResponseMeta
