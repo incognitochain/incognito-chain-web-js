@@ -8,7 +8,6 @@ import (
 	internal "incognito-chain"
 )
 
-// TODO: 0xkraken
 func main() {
 	c := make(chan struct{}, 0)
 

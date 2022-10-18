@@ -33,6 +33,8 @@ FOUNDATION_EXPORT NSString* _Nonnull GomobileCreateConvertTx(NSString* _Nullable
 
 FOUNDATION_EXPORT NSString* _Nonnull GomobileCreateOTAReceiver(NSString* _Nullable paramStr, NSError* _Nullable* _Nullable error);
 
+FOUNDATION_EXPORT NSString* _Nonnull GomobileCreateOTAReceiverWithCfg(NSString* _Nullable args, NSError* _Nullable* _Nullable error);
+
 FOUNDATION_EXPORT NSString* _Nonnull GomobileCreateTransaction(NSString* _Nullable args, int64_t num, NSError* _Nullable* _Nullable error);
 
 FOUNDATION_EXPORT NSString* _Nonnull GomobileDecryptCoin(NSString* _Nullable paramStr, NSError* _Nullable* _Nullable error);
