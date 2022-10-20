@@ -5,6 +5,12 @@ const {
     setupWallet
 } = require("./constants")
 
+const {
+    Wallet,
+    Account: AccountWallet,
+    StorageServices,
+} = require("../../");
+
 let wallet;
 let accountSender;
 let pDexV3Instance;
@@ -144,10 +150,50 @@ async function TestGetOTAReceiveWithCfg() {
     }
 }
 
+async function TestLoadMasterKey() {
+    try {
+        let wallet = new Wallet();
+        wallet.Name = "Hang";
+        const keys = {
+            password: '$as90_jasLsS',
+            aesKey: '40b2732280dc3eab197dc83d1b2f43ca',
+            passphrase: '$as90_jasLsS',
+        }
+        await wallet.import(
+            "sunny easy talent undo alter giant music slam common glide judge misery",
+            keys.aesKey,
+            "Masterkey",
+            new StorageServices()
+        );
+        await wallet.save(keys.aesKey, false);
+        await wallet.createNewAccount("account1");
+        await wallet.save(keys.aesKey, false);
+        await wallet.createNewAccount("account2");
+        await wallet.save(keys.aesKey, false);
+        await wallet.loadWallet({
+            password: keys.passphrase,
+            aesKey: keys.aesKey,
+        });
+        console.log("LIST_ACCOUNT", wallet.MasterAccount.child[1].getOTAKey());
+        // const account2 = await wallet.importAccount(prvKey, "phat2");
+        console.log("LIST_ACCOUNT", wallet.MasterAccount.child.length);
+        // await wallet.removeAccount(prvKey);
+        console.log("LIST_ACCOUNT", wallet.MasterAccount.child.length);
+        await wallet.save(keys.aesKey, false);
+        await wallet.loadWallet({
+            password: keys.passphrase,
+            aesKey: keys.aesKey,
+        });
+    } catch (error) {
+        console.log("TestLoadWallet ERROR", error);
+    }
+}
+
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
-    await TestGetOTAReceiveWithCfg();
+    await TestLoadMasterKey()
+    // await TestGetOTAReceiveWithCfg();
     // await TestGetBalance();
     // await TestGetBalanceAccessOTA();
     // await TestGetListShare();
