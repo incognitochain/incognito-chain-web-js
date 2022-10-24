@@ -165,10 +165,48 @@ async function TestCreateTransactionPApps() {
     }
 }
 
+
+async function TestSwapHistory() {
+    try {
+        const contract = [
+            '0xf31D49B636C24a854Eabe9BB05e85baA7411A380',
+            '0x0e2923c21E2C5A2BDD18aa460B3FdDDDaDb0aE18'
+        ];
+
+        // storage PApps
+        await pDexV3Instance.setStorageSwapHistoryByCallContract({
+            callContract: '0xf31D49B636C24a854Eabe9BB05e85baA7411A380',
+            txHash: '56ab7e00bdcb29008227b5590005c28534e3a18cd13dcc7f19acbb32832b871e',
+            sellTokenID: '0000000000000000000000000000000000000000000000000000000000000004',
+            buyTokenID: 'd6644f62d0ef0475335ae7bb6103f358979cbfcd2b85481e3bde2b82101a095c',
+            sellAmountText: '0.002',
+            buyAmountText: '0.003',
+        });
+
+        // storage PDEX
+        await pDexV3Instance.setStorageSwapHistoryByCallContract({
+            callContract: 'incognito',
+            txHash: 'aa066120cca1b10e202fd3747c9dd50e0f992983e5ea3c50d315060f398ac699',
+            sellTokenID: '61e1efbf6be9decc46fdf8250cdae5be12bee501b65f774a58af4513b645f6a3',
+            buyTokenID: '4584d5e9b2fc0337dfb17f4b5bb025e5b82c38cfa4f54e8a3d4fcdd03954ff82',
+            sellAmountText: '0.004',
+            buyAmountText: '0.006',
+        });
+
+        const txs = await pDexV3Instance.getSwapHistoryStorage({
+            callContracts: contract
+        })
+        console.log('TestSwapHistory:::: ', txs)
+    } catch (e) {
+        console.log('TestSwapHistory error: ', e);
+    }
+}
+
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
-    await TestCreateTransactionPApps();
+    await TestSwapHistory()
+    // await TestCreateTransactionPApps();
     // await TestGetBalance();
     // await TestGetBalanceAccessOTA();
     // await TestGetListShare();
