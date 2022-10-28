@@ -165,7 +165,6 @@ async function TestCreateTransactionPApps() {
     }
 }
 
-
 async function TestSwapHistory() {
     try {
         const contract = [
@@ -202,10 +201,21 @@ async function TestSwapHistory() {
     }
 }
 
+async function TestCreateOTASenderID() {
+    try {
+        const OTA = await accountSender.getOTAReceiveWithCfg({ senderShardID: 3 });
+        console.log('TestCreateOTASenderID ', OTA)
+    } catch (e) {
+        console.log('TestCreateOTASenderID error: ', e);
+    }
+}
+
+
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
-    await TestSwapHistory()
+    await TestCreateOTASenderID();
+    // await TestSwapHistory()
     // await TestCreateTransactionPApps();
     // await TestGetBalance();
     // await TestGetBalanceAccessOTA();
