@@ -210,11 +210,20 @@ async function TestCreateOTASenderID() {
     }
 }
 
+async function TestGetPDex3State() {
+    try {
+        const pdexState = await accountSender.rpcCoinService.apiGetPDeState();
+        console.log('TestGetPDex3State: ', { amount: pdexState?.Params?.MintNftRequireAmount })
+    } catch (e) {
+        console.log('TestGetPDex3State error: ', e);
+    }
+}
+
 
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
-    await TestCreateOTASenderID();
+    // await TestCreateOTASenderID();
     // await TestSwapHistory()
     // await TestCreateTransactionPApps();
     // await TestGetBalance();
@@ -225,6 +234,7 @@ async function RunTest() {
     // await TestGetLPHistory();
     // await TestGetOrderHistory();
     // await TestGetOpenOrderHistory();
+    await TestGetPDex3State();
 }
 
 RunTest()
