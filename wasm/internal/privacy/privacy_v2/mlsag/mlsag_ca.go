@@ -27,17 +27,6 @@ func (ml *Mlsag) SignConfidentialAsset(message []byte) (*MlsagSig, error) {
 	}, nil
 }
 
-// func VerifyConfidentialAsset(sig *MlsagSig, K *Ring, message []byte) (bool, error) {
-// 	if len(message) != common.HashSize {
-// 		return false, errors.New("Cannot mlsag verify the message because its length is not 32, maybe it has not been hashed")
-// 	}
-// 	message32byte := [32]byte{}
-// 	copy(message32byte[:], message)
-// 	b1 := verifyKeyImages(sig.keyImages)
-// 	b2, err := verifyRingCA(sig, K, message32byte)
-// 	return (b1 && b2), err
-// }
-
 func NewMlsagCA(privateKeys []*operation.Scalar, R *Ring, pi int) *Mlsag {
 	return &Mlsag{
 		R,
@@ -132,7 +121,6 @@ func calculateFirstCCA(digest [common.HashSize]byte, alpha []*operation.Scalar, 
 
 	// Process last column
 	alphaG := new(operation.Point).ScalarMult(
-		// TODO : which g here ?
 		operation.PedCom.G[operation.PedersenRandomnessIndex],
 		alpha[len(K)-2],
 	)

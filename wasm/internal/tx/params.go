@@ -7,6 +7,7 @@ import (
 	"incognito-chain/common"
 	"incognito-chain/metadata"
 	"incognito-chain/privacy"
+	"incognito-chain/privacy/operation"
 )
 
 type RingData struct {
@@ -190,6 +191,36 @@ func (params *ExtendedParams) GetTxTokenParams() (*TxTokenParams, error) {
 			HasPrivacyCoin: params.HasPrivacy, HasPrivacyToken: params.HasPrivacy,
 			shardID: shardID, Metadata: md, Info: info, TokenParams: tp},
 		nil
+}
+
+func (params *ExtendedParams) UseHwSigner() (bool, *operation.Scalar, int) {
+	if params.Kvargs == nil {
+		return false, nil, -1
+	}
+	temp, exists := params.Kvargs["firstC"]
+	if !exists {
+		return false, nil, -1
+	}
+	tempStr, ok := temp.(string)
+	if !ok {
+		return false, nil, -1
+	}
+	b, err := Base64Encoding.DecodeString(tempStr)
+	if err != nil {
+		return false, nil, -1
+	}
+	sc := (&operation.Scalar{}).FromBytesS(b)
+
+	temp, exists = params.Kvargs["pi"]
+	if !exists {
+		return false, nil, -1
+	}
+	pi, ok := temp.(float64)
+	if !ok {
+		return false, nil, -1
+	}
+
+	return true, sc, int(pi)
 }
 
 // ----- structs from chain code -----

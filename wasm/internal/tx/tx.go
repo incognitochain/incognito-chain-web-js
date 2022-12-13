@@ -264,12 +264,15 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 		ringSize = 1
 	}
 
-	// Generate Ring
-	piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
-	if piErr != nil {
-		return piErr
+	var pi int
+	useHw, firstC, pi := params.UseHwSigner()
+	if !useHw {
+		piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
+		if piErr != nil {
+			return piErr
+		}
+		pi = int(piBig.Int64())
 	}
-	var pi int = int(piBig.Int64())
 	shardID := common.GetShardIDFromLastByte(tx.pubKeyLastByteSender)
 	ring, indexes, commitmentToZero, err := generateMlsagRing(inp, inputIndexes, out, params, pi, shardID, ringSize)
 	if err != nil {
@@ -284,26 +287,30 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 		return err
 	}
 
-	// Set sigPrivKey
-	privKeysMlsag, err := createPrivKeyMlsag(inp, out, &params.SenderSK, commitmentToZero)
-	if err != nil {
-		return err
-	}
-	sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
-	sk, err := privacy.ArrayScalarToBytes(&privKeysMlsag)
-	if err != nil {
-		return err
-	}
-	tx.sigPrivKey = sk
+	if useHw {
+		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
 
-	// Set Signature
-	mlsagSignature, err := sag.Sign(hashedMessage)
-	if err != nil {
-		return err
+		sig, err := sag.PartialSign(hashedMessage, firstC)
+		if err != nil {
+			return err
+		}
+		tx.Sig, err = sig.ToBytes()
+	} else { 
+		privKeysMlsag, err := createPrivKeyMlsag(inp, out, &params.SenderSK, commitmentToZero)
+		if err != nil {
+			return err
+		}
+		sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
+
+		// Set Signature
+		mlsagSignature, err := sag.Sign(hashedMessage)
+		if err != nil {
+			return err
+		}
+		// inputCoins already hold keyImage so set to nil to reduce size
+		mlsagSignature.SetKeyImages(nil)
+		tx.Sig, err = mlsagSignature.ToBytes()
 	}
-	// inputCoins already hold keyImage so set to nil to reduce size
-	mlsagSignature.SetKeyImages(nil)
-	tx.Sig, err = mlsagSignature.ToBytes()
 
 	return err
 }

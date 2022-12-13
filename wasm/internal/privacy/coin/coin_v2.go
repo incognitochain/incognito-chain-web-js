@@ -103,11 +103,8 @@ type CoinV2 struct {
 //Retrieve the private OTA key of coin from the Master PrivateKey
 func (c CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar, error) {
 	keySet := new(incognitokey.KeySet)
-	ckey := key.PrivateKey(make([]byte, operation.Ed25519KeySize))
-	copy(ckey, privKey[:])
-	if err := keySet.InitFromPrivateKey(&ckey); err != nil {
-		panic(err)
-		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, fmt.Errorf("Cannot init keyset from privateKey %x - %v", ckey, err))
+	if err := keySet.InitFromPrivateKey(&privKey); err != nil {
+		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, fmt.Errorf("Cannot init keyset from privateKey %x - %v", privKey, err))
 	}
 
 	belongs, rK := c.DoesCoinBelongToKeySet(keySet)
