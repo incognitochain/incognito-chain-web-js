@@ -23,6 +23,7 @@ async function TestGetBalance() {
         });
         const tokenIDs = [
             PRV_ID,
+            "3a526c0fa9abfc3e3e37becc52c5c10abbb7897b0534ad17018e766fc6133590"
         ];
         // console.log("KEY INFO", { keyInfo, tokenIDs });
         let task = tokenIDs.map((tokenID) =>
@@ -219,6 +220,18 @@ async function TestGetPDex3State() {
     }
 }
 
+async function TestConsolidate() {
+    try {
+        const USDT_TOKEN_ID = "3a526c0fa9abfc3e3e37becc52c5c10abbb7897b0534ad17018e766fc6133590"
+        const res = await accountSender.consolidate({
+            transfer: { tokenID: USDT_TOKEN_ID },
+            extra: { version: PRIVACY_VERSION } });
+        console.log('TestConsolidate: ', { res })
+    } catch (e) {
+        console.log('TestConsolidate error: ', e);
+    }
+}
+
 
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
@@ -226,7 +239,7 @@ async function RunTest() {
     // await TestCreateOTASenderID();
     // await TestSwapHistory()
     // await TestCreateTransactionPApps();
-    // await TestGetBalance();
+    await TestGetBalance();
     // await TestGetBalanceAccessOTA();
     // await TestGetListShare();
     // await TestGetTxsHistory()
@@ -234,7 +247,8 @@ async function RunTest() {
     // await TestGetLPHistory();
     // await TestGetOrderHistory();
     // await TestGetOpenOrderHistory();
-    await TestGetPDex3State();
+    // await TestGetPDex3State();
+    await TestConsolidate();
 }
 
 RunTest()
