@@ -675,3 +675,33 @@ func CreateOTAReceiverWithCfg(args string) (string, error) {
 	}
 	return recv.String()
 }
+
+func PrepareParseKeyImage(args string) (string, error) {
+	raw := []byte(args)
+	var holder struct {
+		OtaSecretKey []byte
+		Coin         transaction.CoinData
+	}
+	err := json.Unmarshal(raw, &holder)
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal prepareParseKeyImage-params %s - %v", string(raw), err)
+	}
+
+	c, _, err := holder.Coin.ToCoin()
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal prepareParseKeyImage-coin %s - %v", string(raw), err)
+	}
+	_, txOTARandomPoint, index, err := c.GetTxRandomDetail()
+	if err != nil {
+		return "", fmt.Errorf("invalid coin")
+	}
+	otasc := (&privacy.Scalar{}).FromBytesS(holder.OtaSecretKey)
+	rK := new(privacy.Point).ScalarMult(txOTARandomPoint, otasc)
+
+	H := privacy.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))
+	holder.Coin.SharedConcealRandom = H.ToBytesS()
+
+	resJson, _ := json.Marshal(holder.Coin)
+	return string(resJson), nil
+}
+

@@ -51,6 +51,8 @@ func main() {
 	gobridge.RegisterCallback("setCfg", internal.SetConfigs)
 	gobridge.RegisterCallback("createOTAReceiver", internal.CreateOTAReceiver)
 	gobridge.RegisterCallback("createOTAReceiverWithCfg", internal.CreateOTAReceiverWithCfg)
+
+	gobridge.RegisterCallback("prepareParseKeyImage", internal.PrepareParseKeyImage)
 	// not applicable
 	// gobridge.RegisterCallback("deriveSerialNumber", internal.DeriveSerialNumber)
 

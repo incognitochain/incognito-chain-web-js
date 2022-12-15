@@ -101,7 +101,7 @@ type CoinV2 struct {
 }
 
 //Retrieve the private OTA key of coin from the Master PrivateKey
-func (c CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar, error) {
+func (c *CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar, error) {
 	keySet := new(incognitokey.KeySet)
 	if err := keySet.InitFromPrivateKey(&privKey); err != nil {
 		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, fmt.Errorf("Cannot init keyset from privateKey %x - %v", privKey, err))
@@ -114,12 +114,16 @@ func (c CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar
 	_, _, index, _ :=  c.GetTxRandomDetail()
 	H := operation.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))     // Hash(r_ota*K, index)
 
+	// DEBUG
+	c.SetSharedConcealRandom(H)
+	// END DEBUG
+	
 	k := new(operation.Scalar).FromBytesS(privKey)
 	return new(operation.Scalar).Add(H, k), nil // Hash(rK, index) + privSpend
 }
 
 //Retrieve the keyImage of coin from the Master PrivateKey
-func (c CoinV2) ParseKeyImageWithPrivateKey(privKey key.PrivateKey) (*operation.Point, error) {
+func (c *CoinV2) ParseKeyImageWithPrivateKey(privKey key.PrivateKey) (*operation.Point, error) {
 	k, err := c.ParsePrivateKeyOfCoin(privKey)
 	if err != nil {
 		return nil, err

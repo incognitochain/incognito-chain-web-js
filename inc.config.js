@@ -11,7 +11,7 @@ const networks = {
         services: null,
     },
     'testnet': {
-        privateKeys: [process.env.PRIVATEKEY || '112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or', '1111111Bb6ysL7BRNMR8wHEmF5UhAKiePmC4w3qr3kZMEyw6s2KYGLmktQQPW4nyvyvBZj6dBn49ZjaVyZwwe9TiFe874CeaanNhcxLaASi', '112t8rne7fpTVvSgZcSgyFV23FYEv3sbRRJZzPscRcTo8DsdZwstgn6UyHbnKHmyLJrSkvF13fzkZ4e8YD5A2wg8jzUZx6Yscdr4NuUUQDAt', '112t8rnXoBXrThDTACHx2rbEq7nBgrzcZhVZV4fvNEcGJetQ13spZRMuW5ncvsKA1KvtkauZuK2jV8pxEZLpiuHtKX3FkKv2uC5ZeRC8L6we', '112t8rnZUQXxcbayAZvyyZyKDhwVJBLkHuTKMhrS51nQZcXKYXGopUTj22JtZ8KxYQcak54KUQLhimv1GLLPFk1cc8JCHZ2JwxCRXGsg4gXU'],
+        privateKeys: [process.env.PRIVATEKEY || '112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or', '1111111Bb6ysL7BRNMR8wHEmF5UhAKiePmC4w3qr3kZMEyw6s2KYGLmktQQPW4nyvyvBZj6dBn49ZjaVyZwwe9TiFe874CeaanNhcxLaASi', '112t8rne7fpTVvSgZcSgyFV23FYEv3sbRRJZzPscRcTo8DsdZwstgn6UyHbnKHmyLJrSkvF13fzkZ4e8YD5A2wg8jzUZx6Yscdr4NuUUQDAt', '112t8rnXoBXrThDTACHx2rbEq7nBgrzcZhVZV4fvNEcGJetQ13spZRMuW5ncvsKA1KvtkauZuK2jV8pxEZLpiuHtKX3FkKv2uC5ZeRC8L6we', '111111kS6f4f8WWtnm99V87baV1yLTQXTRwouZ6mGpZWjsW2oj3otBY3kR8xwYbKCGG9n1jxFawh5jvHkTLP92YGD1woMfPycMVKn1inxA'],
         rpcClient: 'https://testnet.incognito.org/fullnode',
         shardCount: 8,
         services: process.env.SERVICES ? {

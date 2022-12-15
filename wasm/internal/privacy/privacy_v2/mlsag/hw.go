@@ -11,6 +11,7 @@ import (
 type MlsagPartialSig struct {
 	MlsagSig
 	Cpi *operation.Scalar
+	SumCommitmentPriv *operation.Scalar
 }
 
 func (ml *MlsagPartialSig) ToBytes() ([]byte, error) {
@@ -18,18 +19,7 @@ func (ml *MlsagPartialSig) ToBytes() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return append(b, ml.Cpi.ToBytesS()...), nil
-}
-
-// Get from byte and store to signature
-func (ml *MlsagPartialSig) FromBytes(b []byte) (*MlsagPartialSig, error) {
-	ml.Cpi = (&operation.Scalar{}).FromBytesS(b[:operation.Ed25519KeySize])
-	_, err := ml.MlsagSig.FromBytes(b[operation.Ed25519KeySize:])
-	if err != nil {
-		return nil, err
-	}
-
-	return ml, nil
+	return append(append(b, ml.Cpi.ToBytesS()...), ml.SumCommitmentPriv.ToBytesS()...), nil
 }
 
 func NewMlsagFromInputCoins(inputs []coin.PlainCoin, R *Ring, pi int) *Mlsag {
@@ -64,12 +54,14 @@ func (ml *Mlsag) generateMlsagPublicChallenges() (r [][]*operation.Scalar) {
 	return
 }
 
-func (ml *Mlsag) calcCFromFirst(message [common.HashSize]byte, firstC *operation.Scalar, r [][]*operation.Scalar) ([]*operation.Scalar, error) {
+func (ml *Mlsag) calcCFromSeed(message [common.HashSize]byte, cseed []byte, r [][]*operation.Scalar) ([]*operation.Scalar, error) {
 	n := len(ml.R.keys)
 	c := make([]*operation.Scalar, n)
 
 	var i int = (ml.pi + 1) % n
-	c[i] = firstC
+	c[i] = operation.HashToScalar(append(message[:], cseed...))
+	println("first C")
+	println(c[i])
 	for next := (i + 1) % n; i != ml.pi; {
 		nextC, err := calculateNextC(
 			message,
@@ -88,7 +80,7 @@ func (ml *Mlsag) calcCFromFirst(message [common.HashSize]byte, firstC *operation
 	return c, nil
 }
 
-func (ml *Mlsag) PartialSign(message []byte, firstC *operation.Scalar) (*MlsagPartialSig, error) {
+func (ml *Mlsag) PartialSign(message []byte, cseed []byte) (*MlsagPartialSig, error) {
 	if len(message) != common.HashSize {
 		return nil, fmt.Errorf("invalid msg length")
 	}
@@ -96,7 +88,7 @@ func (ml *Mlsag) PartialSign(message []byte, firstC *operation.Scalar) (*MlsagPa
 	copy(message32byte[:], message)
 
 	r := ml.generateMlsagPublicChallenges()
-	c, err := ml.calcCFromFirst(message32byte, firstC, r)
+	c, err := ml.calcCFromSeed(message32byte, cseed, r)
 
 	if err != nil {
 		return nil, err
