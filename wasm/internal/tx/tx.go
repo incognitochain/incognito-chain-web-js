@@ -288,9 +288,16 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 	}
 
 	if useHw {
+		sumRand := new(privacy.Scalar).FromUint64(0)
+		for _, in := range inp {
+			sumRand.Add(sumRand, in.GetRandomness())
+		}
+		for _, out := range out {
+			sumRand.Sub(sumRand, out.GetRandomness())
+		}
 		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
 
-		sig, err := sag.PartialSign(hashedMessage, firstC)
+		sig, err := sag.PartialSign(hashedMessage, firstC, sumRand)
 		if err != nil {
 			return err
 		}

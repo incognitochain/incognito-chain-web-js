@@ -10,7 +10,7 @@ import (
 
 type MlsagPartialSig struct {
 	MlsagSig
-	Cpi *operation.Scalar
+	Cpi               *operation.Scalar
 	SumCommitmentPriv *operation.Scalar
 }
 
@@ -44,11 +44,12 @@ func (ml *Mlsag) generateMlsagPublicChallenges() (r [][]*operation.Scalar) {
 		r[i] = make([]*operation.Scalar, m)
 		if i == ml.pi {
 			for j := 0; j < m; j += 1 {
-				r[i][j] = &operation.Scalar{}
+				r[i][j] = (&operation.Scalar{}).FromUint64(0)
 			}
-		}
-		for j := 0; j < m; j += 1 {
-			r[i][j] = operation.RandomScalar()
+		} else {
+			for j := 0; j < m; j += 1 {
+				r[i][j] = operation.RandomScalar()
+			}
 		}
 	}
 	return
@@ -80,7 +81,7 @@ func (ml *Mlsag) calcCFromSeed(message [common.HashSize]byte, cseed []byte, r []
 	return c, nil
 }
 
-func (ml *Mlsag) PartialSign(message []byte, cseed []byte) (*MlsagPartialSig, error) {
+func (ml *Mlsag) PartialSign(message []byte, cseed []byte, sumCommitmentPriv *operation.Scalar) (*MlsagPartialSig, error) {
 	if len(message) != common.HashSize {
 		return nil, fmt.Errorf("invalid msg length")
 	}
@@ -89,15 +90,15 @@ func (ml *Mlsag) PartialSign(message []byte, cseed []byte) (*MlsagPartialSig, er
 
 	r := ml.generateMlsagPublicChallenges()
 	c, err := ml.calcCFromSeed(message32byte, cseed, r)
-
 	if err != nil {
 		return nil, err
 	}
+
 	return &MlsagPartialSig{
 		MlsagSig{
 			c[0], nil, r,
 		},
 		c[ml.pi],
-		&operation.Scalar{},
+		sumCommitmentPriv,
 	}, nil
 }
