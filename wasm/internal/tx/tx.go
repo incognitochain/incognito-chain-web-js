@@ -273,6 +273,10 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 		}
 		pi = int(piBig.Int64())
 	}
+	//debug
+	pi = 2
+	hashedMessage = common.Hash{1}.Bytes()
+
 	shardID := common.GetShardIDFromLastByte(tx.pubKeyLastByteSender)
 	ring, indexes, commitmentToZero, err := generateMlsagRing(inp, inputIndexes, out, params, pi, shardID, ringSize)
 	if err != nil {
@@ -286,6 +290,7 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 	if err != nil {
 		return err
 	}
+
 
 	if useHw {
 		sumRand := new(privacy.Scalar).FromUint64(0)
