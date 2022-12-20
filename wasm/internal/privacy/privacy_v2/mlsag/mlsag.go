@@ -3,6 +3,10 @@
 package mlsag
 
 import (
+	"encoding/base64"
+	"fmt"
+	"strings"
+
 	// "bytes"
 	"errors"
 	"incognito-chain/common"
@@ -198,6 +202,7 @@ func calculateFirstC(digest [common.HashSize]byte, alpha []*operation.Scalar, K 
 		operation.PedCom.G[operation.PedersenRandomnessIndex],
 		alpha[len(K)-1],
 	)
+
 	b = append(b, alphaG.ToBytesS()...)
 
 	return operation.HashToScalar(b), nil
@@ -267,6 +272,8 @@ func (this *Mlsag) calculateC(message [common.HashSize]byte, alpha []*operation.
 	if err != nil {
 		return nil, err
 	}
+	println("first C")
+	println(fmt.Sprintf("%x", firstC.ToBytesS()))
 
 	var i int = (this.pi + 1) % n
 	c[i] = firstC
@@ -301,8 +308,18 @@ func (this *Mlsag) Sign(message []byte) (*MlsagSig, error) {
 	copy(message32byte[:], message)
 
 	alpha, r := this.createRandomChallenges()          // step 2 in paper
-	c, err := this.calculateC(message32byte, alpha, r) // step 3 and 4 in paper
 
+	lstAlpha := make([]string, len(alpha))
+	for i:= 0; i < len(alpha); i+= 1 {
+		println(base64.StdEncoding.EncodeToString(alpha[i].ToBytesS()))
+		lstAlpha = append(lstAlpha, fmt.Sprintf("\"%s\"", base64.StdEncoding.EncodeToString(alpha[i].ToBytesS())))
+	}
+	lstAlphaStr := fmt.Sprintf("[%s]",strings.Join(lstAlpha, ","))
+	println("list alpha")
+	println(lstAlphaStr)
+
+	c, err := this.calculateC(message32byte, alpha, r) // step 3 and 4 in paper
+    panic(".... Tx failed")
 	if err != nil {
 		return nil, err
 	}
