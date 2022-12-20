@@ -49,6 +49,9 @@ func (viewKey ViewingKey) GetPublicSpend() *operation.Point {
 }
 
 func (viewKey ViewingKey) GetPrivateView() *operation.Scalar {
+	if (viewKey.Rk == nil) {
+		return nil
+	}
 	return new(operation.Scalar).FromBytesS(viewKey.Rk)
 }
 

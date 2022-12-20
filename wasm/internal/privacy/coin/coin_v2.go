@@ -113,10 +113,7 @@ func (c *CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scala
 	}
 	_, _, index, _ :=  c.GetTxRandomDetail()
 	H := operation.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))     // Hash(r_ota*K, index)
-
-	// DEBUG
-	c.SetSharedConcealRandom(H)
-	// END DEBUG
+	c.SetSharedRandom(H)
 	
 	k := new(operation.Scalar).FromBytesS(privKey)
 	return new(operation.Scalar).Add(H, k), nil // Hash(rK, index) + privSpend
@@ -175,27 +172,17 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 		err := errors.New("Cannot Decrypt CoinV2: Keyset is empty")
 		return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
 	}
-
-	// Must parse keyImage first in any situation
-	if len(keySet.PrivateKey) > 0 {
-		keyImage, err := c.ParseKeyImageWithPrivateKey(keySet.PrivateKey)
-		if err != nil {
-			return nil, errhandler.NewPrivacyErr(errhandler.ParseKeyImageWithPrivateKeyErr, err)
-		}
-		c.SetKeyImage(keyImage)
-	}
-
-	if !c.IsEncrypted() {
-		return c, nil
-	}
-
 	viewKey := keySet.ReadonlyKey
-	if len(viewKey.Rk) == 0 && len(keySet.PrivateKey) == 0 {
-		err := errors.New("Cannot Decrypt CoinV2: Keyset does not contain viewkey or privatekey")
-		return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
-	}
 
 	if viewKey.GetPrivateView()!= nil {
+		// try parse keyImage first
+		if len(keySet.PrivateKey) > 0 {
+			keyImage, err := c.ParseKeyImageWithPrivateKey(keySet.PrivateKey)
+			if err != nil {
+				return nil, errhandler.NewPrivacyErr(errhandler.ParseKeyImageWithPrivateKeyErr, err)
+			}
+			c.SetKeyImage(keyImage)
+		}
 		txConcealRandomPoint, err := c.GetTxRandom().GetTxConcealRandomPoint()
 		if err != nil {
 			return nil, err
@@ -211,23 +198,37 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 		hash = operation.HashToScalar(hash.ToBytesS())
 		value := c.GetAmount().Sub(c.GetAmount(), hash)
 
-		commitment := operation.PedCom.CommitAtIndex(value, randomness, operation.PedersenValueIndex)
-		// for `confidential asset` coin, we commit differently
-		if c.GetAssetTag() != nil{
-			com, err := ComputeCommitmentCA(c.GetAssetTag(), randomness, value)
-			if err!=nil{
-				err := errors.New("Cannot recompute commitment when decrypting")
-				return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
-			}
-			commitment = com
-		}
-		if !operation.IsPointEqual(commitment, c.GetCommitment()) {
-			err := errors.New("Cannot Decrypt CoinV2: Commitment is not the same after decrypt")
-			return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
-		}
+		// commitment := operation.PedCom.CommitAtIndex(value, randomness, operation.PedersenValueIndex)
+		// // for `confidential asset` coin, we commit differently
+		// if c.GetAssetTag() != nil{
+		// 	com, err := ComputeCommitmentCA(c.GetAssetTag(), randomness, value)
+		// 	if err!=nil{
+		// 		err := errors.New("Cannot recompute commitment when decrypting")
+		// 		return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
+		// 	}
+		// 	commitment = com
+		// }
+		// if !operation.IsPointEqual(commitment, c.GetCommitment()) {
+		// 	err := errors.New("Cannot Decrypt CoinV2: Commitment is not the same after decrypt")
+		// 	return nil, errhandler.NewPrivacyErr(errhandler.DecryptOutputCoinErr, err)
+		// }
 		c.SetRandomness(randomness)
 		c.SetAmount(value)
+	} else if keySet.OTAKey.GetOTASecretKey() != nil {
+		belongs, rK := c.DoesCoinBelongToKeySet(keySet)
+		if !belongs {
+			return nil, fmt.Errorf("cannot use unowned coin")
+		} else {
+			_, _, index, _ :=  c.GetTxRandomDetail()
+			H := operation.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))
+			c.SetSharedRandom(H)
+		}
 	}
+
+	if !c.IsEncrypted() {
+		return c, nil
+	}
+
 	return c, nil
 }
 
