@@ -46,6 +46,7 @@ const getPdexMethods = (privateKey) => {
 module.exports = async function(){
     console.log('Initializing Incognito...');
     await inc.init(null, rpcClient, shardCount, services);
+    privateKeys.push(null); // hardware wallet's account
     const senders = await Promise.all(privateKeys.map(k => inc.NewTransactor(k, services)));
     const addresses = senders.map(a => a.key.base58CheckSerialize(inc.constants.PaymentAddressType));
 
