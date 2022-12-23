@@ -168,7 +168,7 @@ func NewKeySetFromPrivate(skStr string) (string, error) {
 	}
 
 	ks := &incognitokey.KeySet{}
-	if len(skHolder.PrivateKey) > 0 {
+	if len(skHolder.PrivateKey) == 32 {
 		err := ks.InitFromPrivateKeyByte(skHolder.PrivateKey)
 		if err != nil {
 			return "", fmt.Errorf("init-key error - %v", err)

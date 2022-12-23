@@ -176,7 +176,7 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 
 	if viewKey.GetPrivateView()!= nil {
 		// try parse keyImage first
-		if len(keySet.PrivateKey) > 0 {
+		if keySet.PrivateKey != nil && len(keySet.PrivateKey[:]) == 32 {
 			keyImage, err := c.ParseKeyImageWithPrivateKey(keySet.PrivateKey)
 			if err != nil {
 				return nil, errhandler.NewPrivacyErr(errhandler.ParseKeyImageWithPrivateKeyErr, err)
