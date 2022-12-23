@@ -1,5 +1,3 @@
-
-
 package metadata
 
 import (
@@ -48,7 +46,10 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		BurningPDEXERC20RequestMeta, BurningPDEXBEP20RequestMeta,
 		BurningPBSCForDepositToSCRequestMeta,
 		BurningPLGRequestMeta, BurningPLGForDepositToSCRequestMeta,
-		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta:
+		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta,
+		metadataCommon.BurningAvaxRequestMeta, metadataCommon.BurningAvaxForDepositToSCRequestMeta,
+		metadataCommon.BurningAuroraRequestMeta, metadataCommon.BurningAuroraForDepositToSCRequestMeta,
+		metadataCommon.BurningNearRequestMeta:
 		md = &BurningRequest{}
 	case ShardStakingMeta:
 		md = &StakingMetadata{}
