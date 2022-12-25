@@ -51,6 +51,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		metadataCommon.BurningAuroraRequestMeta, metadataCommon.BurningAuroraForDepositToSCRequestMeta,
 		metadataCommon.BurningNearRequestMeta:
 		md = &BurningRequest{}
+	case BurningPRVRequestMeta:
+		md = &BurningPRVRequest{}
 	case ShardStakingMeta:
 		md = &StakingMetadata{}
 	case BeaconStakingMeta:

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 echo "GOOS=js GOARCH=wasm go build -o ./build/privacy.wasm *.go"
 GOOS=js GOARCH=wasm go build -o ../privacy.wasm *.go
 
