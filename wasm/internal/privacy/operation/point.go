@@ -13,6 +13,10 @@ type Point struct {
 	key C25519.Key
 }
 
+func NewPoint(k C25519.Key) *Point {
+	return &Point{key: k}
+}
+
 func RandomPoint() *Point {
 	sc := RandomScalar()
 	return new(Point).ScalarMultBase(sc)
@@ -46,6 +50,10 @@ func (p *Point) Set(q *Point) *Point {
 	}
 	p.key = q.key
 	return p
+}
+
+func (p Point) String() string {
+	return fmt.Sprintf("%x", p.key[:])
 }
 
 func (p Point) MarshalText() []byte {

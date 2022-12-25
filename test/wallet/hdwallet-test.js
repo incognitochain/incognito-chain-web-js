@@ -1,5 +1,4 @@
-const { Wallet, Transactor : AccountWallet, types, constants, utils, wasm } = require('../../');
-const { KeyWallet } = types;
+const { Wallet, Transactor : AccountWallet, constants, utils, wasm, KeyWallet } = require('../../');
 const { base58CheckEncode : checkEncode, base64Encode, base64Decode } = utils;
 
 async function TestKeyWallet() {
@@ -29,15 +28,15 @@ async function TestKeyWallet() {
 
 
 async function TestGetKeySetFromPrivateKeyStr(){
-  let privateKey = "112t8rneH8RSZmLfmtYibmrAxpBtpSnLtkdJY57JJmdhRdnTTF8yxrzaMxi9ctjQyXXETNZ26pTnmNL2LDPWxahVQgQQyNUKy4dHiBcFSjng"
+  let privateKey = "112t8rnXoBXrThDTACHx2rbEq7nBgrzcZhVZV4fvNEcGJetQ13spZRMuW5ncvsKA1KvtkauZuK2jV8pxEZLpiuHtKX3FkKv2uC5ZeRC8L6we";
 
-  // let keyWallet = new(KeyWallet)
+  let keyw = KeyWallet.base58CheckDeserialize(privateKey);
   let res = await KeyWallet.getKeySetFromPrivateKeyStr(privateKey);
   console.log("res: ", res);
 
   // test payment address conversion
   let paymentAddress = '12sttFKciCWyRbNsK1yD1mWEwZoeWi1JtWJZ7gKTbx5eB25U4FnrfkxgxbnZ8zDn2QNhhW44HBZJ1EnfwVBueR44D5ucWxGNpXZMawoCmv6G2cwKi4xkasuysu3WtpV5ZMSYgaJ1mwe9fqgVD9mh';
-  let oldPaymentAddress = KeyWallet.toLegacyPaymentAddress(paymentAddress);
+  let oldPaymentAddress = keyw.toLegacyPaymentAddress(paymentAddress);
   // compare to fixed testcase's result
   if (oldPaymentAddress != '12S3yvTvWUJfubx3whjYLv23NtaNSwQMGWWScSaAkf3uQg8xdZjPFD4fG8vGvXjpRgrRioS5zuyzZbkac44rjBfs7mEdgoL4pwKu87u') throw 'Failed Payment Address Conversion';
   console.log("Payment Address of legacy format: ", oldPaymentAddress);

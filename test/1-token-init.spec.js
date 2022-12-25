@@ -1,54 +1,48 @@
-const chai = require('chai');
-const expect = chai.expect;
-const chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
-const bn = require('bn.js');
-const Inc = require('..');
-const { setup } = require('./setup');
+const inc = require('..');
+const { setup, expect, bn } = require('./setup');
 
-let initToken = (amount) => async function() {
-    global.testingTokens = [];
-    amount = new bn(amount).toString();
-    let res = await this.transactors[0].newToken({ transfer: { tokenPayments: new Inc.types.PaymentInfo(this.incAddresses[0], amount), fee: 40 }, extra: { tokenName: "My New Token", tokenSymbol: "MNT" }});
-    console.log(`after creation, wait balance change for token ${res.TokenID}, address ${this.incAddresses[0]}`);
-    let change = await this.transactors[0].waitBalanceChange(res.TokenID);
-    change = new bn(change.balance) - new bn(change.oldBalance);
-    this.newTokenID = res.TokenID;
-    global.testingTokens[0] = res.TokenID;
-    await expect(change.toString(), "Created Token balance mismatch").to.equal(amount);
-
-    res = await this.transactors[0].newToken({ transfer: { tokenPayments: new Inc.types.PaymentInfo(this.incAddresses[1], amount), fee: 40 }, extra: { tokenName: "My New Token 2", tokenSymbol: "MN2" }});
-    console.log(`after creation, wait balance change for token ${res.TokenID}, address ${this.incAddresses[1]}`);
-    change = await this.transactors[1].waitBalanceChange(res.TokenID);
-    change = new bn(change.balance) - new bn(change.oldBalance);
-    global.testingTokens[1] = res.TokenID;
-    await expect(change.toString(), "Created Token balance mismatch").to.equal(amount);
-}
-
-let transferToken = (amount) => async function() {
-    amount = new bn(amount).toString();
-    let res = await this.transactors[0].token({ transfer: { tokenID: this.newTokenID, tokenPayments: [new Inc.types.PaymentInfo(this.incAddresses[1], amount)], fee: 40, info: "TOKEN TRANSFER" }});
-    console.log(`after same-shard transfer, wait balance change for token ${this.newTokenID}, address ${this.incAddresses[1]}`);
-    let change = await this.transactors[1].waitBalanceChange(this.newTokenID);
-    change = new bn(change.balance) - new bn(change.oldBalance);
-    await expect(change.toString(), "Transferred Token balance mismatch").to.equal(amount);
-}
-
-let crossTransferToken = (amount) => async function() {
-    amount = new bn(amount).toString();
-    let res = await this.transactors[0].token({ transfer: { tokenID: this.newTokenID, tokenPayments: [new Inc.types.PaymentInfo(this.incAddresses[2], amount)], fee: 40, info: "CROSS-SHARD TOKEN TRANSFER" }});
-    console.log(`after cross-shard transfer, wait balance change for token ${this.newTokenID}, address ${this.incAddresses[2]}`);
-    let change = await this.transactors[2].waitBalanceChange(this.newTokenID);
-    change = new bn(change.balance) - new bn(change.oldBalance);
-    await expect(change.toString(), "Transferred Token balance mismatch").to.equal(amount);
-}
-
-describe('Tests for updated token-init flow', async function() {
+describe('Test create (custom) & transfer token', async function() {
     before(setup());
     describe('init token', async function() {
-        const startAmount = 400000;
-        it('should create new token & see balance update', initToken(startAmount));
-        it('should send some new token to the same shard', transferToken(200000));
-        it('should send some new token to another shard', crossTransferToken(100));
+        const testAmounts = [400000, 200000, 100];
+        it('should create new token & see balance update', async function() {
+            global.testingTokens = [];
+            amount = new bn(testAmounts[0]).toString();
+            let b = await inc.Tx(senders[0]).to(addresses[0], amount).newToken("My New Token", "MNT").send();
+            let id = b.getNewTokenID(b.result);
+            console.log(`after creation, wait balance change for token ${id}, address ${addresses[0]}`);
+
+            let change = await senders[0].waitBalanceChange(id); // assume getBalance() resolves instantly
+            change = new bn(change.balance).sub(new bn(change.oldBalance));
+            this.newTokenID = id;
+            global.testingTokens[0] = id;
+            await expect(change, "Created Token balance mismatch").to.bignumber.equal(amount);
+
+            b = await inc.Tx(senders[0]).to(addresses[1], amount).newToken("My New Token 2", "MN2").send();
+            id = b.getNewTokenID(b.result);
+            console.log(`after creation, wait balance change for token ${id}, address ${addresses[1]}`);
+            change = await senders[1].waitBalanceChange(id);
+            change = new bn(change.balance).sub(new bn(change.oldBalance));
+            global.testingTokens[1] = id;
+            await expect(change, "Created Token balance mismatch").to.bignumber.equal(amount);
+        });
+
+        it('should send some new token to the same shard', async function() {
+            amount = new bn(testAmounts[1]).toString();
+            await inc.Tx(senders[0]).withTokenID(this.newTokenID).to(addresses[1], amount).withInfo("TOKEN TRANSFER").send();
+            console.log(`after same-shard transfer, wait balance change for token ${this.newTokenID}, address ${addresses[1]}`);
+            let change = await senders[1].waitBalanceChange(this.newTokenID);
+            change = new bn(change.balance).sub(new bn(change.oldBalance));
+            await expect(change, "Transferred Token balance mismatch").to.bignumber.equal(amount);
+        });
+
+        it('should send some new token to another shard', async function() {
+            amount = new bn(testAmounts[2]).toString();
+            await inc.Tx(senders[0]).withTokenID(this.newTokenID).to(addresses[2], amount).withFee(40).withInfo("CROSS-SHARD TOKEN TRANSFER").send();
+            console.log(`after cross-shard transfer, wait balance change for token ${this.newTokenID}, address ${addresses[2]}`);
+            let change = await senders[2].waitBalanceChange(this.newTokenID);
+            change = new bn(change.balance).sub(new bn(change.oldBalance));
+            await expect(change, "Transferred Token balance mismatch").to.bignumber.equal(amount);
+        });
     });
 })

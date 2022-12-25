@@ -1607,7 +1607,6 @@ async function TestLiquidity() {
   //   txId: '9e167bad6b35370e715c204cddb79561c80d1fb20d240992d2f02cf5614dacf7',
   // })
   // const tsx = await pDexV3Instance.updateStatusStorageWithdrawLP();p
-  // console.log('SANG TEST: ', tsx)
   // console.log("balance: ", balance);
   // const txMin = await pDexV3Instance.createAndMintNftTx({
   //   extra: { version: privacyVersion },

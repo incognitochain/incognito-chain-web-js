@@ -1,11 +1,5 @@
-const chai = require('chai');
-const expect = chai.expect;
-const chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
-const bn = require('bn.js');
-chai.use(require('chai-bn')(bn));
 const Inc = require('..');
-const { setup } = require('./setup');
+const { setup, expect, bn } = require('./setup');
 
 let getFirstTokenID = (lst) => {
     if (global.testingTokens && global.testingTokens[0]) return global.testingTokens[0];

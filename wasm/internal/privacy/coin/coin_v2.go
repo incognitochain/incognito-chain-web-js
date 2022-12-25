@@ -103,15 +103,18 @@ type CoinV2 struct {
 //Retrieve the private OTA key of coin from the Master PrivateKey
 func (c CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar, error) {
 	keySet := new(incognitokey.KeySet)
-	if err := keySet.InitFromPrivateKey(&privKey); err != nil {
-		err := errors.New("Cannot init keyset from privateKey")
-		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, err)
+	ckey := key.PrivateKey(make([]byte, operation.Ed25519KeySize))
+	copy(ckey, privKey[:])
+	if err := keySet.InitFromPrivateKey(&ckey); err != nil {
+		panic(err)
+		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, fmt.Errorf("Cannot init keyset from privateKey %x - %v", ckey, err))
 	}
-	_, txRandomOTAPoint, index, err := c.GetTxRandomDetail()
-	if err != nil {
-		return nil, err
+
+	belongs, rK := c.DoesCoinBelongToKeySet(keySet)
+	if !belongs {
+		return nil, fmt.Errorf("cannot use unowned coin")
 	}
-	rK := new(operation.Point).ScalarMult(txRandomOTAPoint, keySet.OTAKey.GetOTASecretKey()) //(r_ota*G) * k = r_ota * K
+	_, _, index, _ :=  c.GetTxRandomDetail()
 	H := operation.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))     // Hash(r_ota*K, index)
 
 	k := new(operation.Scalar).FromBytesS(privKey)
@@ -122,8 +125,7 @@ func (c CoinV2) ParsePrivateKeyOfCoin(privKey key.PrivateKey) (*operation.Scalar
 func (c CoinV2) ParseKeyImageWithPrivateKey(privKey key.PrivateKey) (*operation.Point, error) {
 	k, err := c.ParsePrivateKeyOfCoin(privKey)
 	if err != nil {
-		err := errors.New("Cannot init keyset from privateKey")
-		return nil, errhandler.NewPrivacyErr(errhandler.InvalidPrivateKeyErr, err)
+		return nil, err
 	}
 	Hp := operation.HashToPoint(c.GetPublicKey().ToBytesS())
 	return new(operation.Point).ScalarMult(Hp, k), nil
@@ -177,8 +179,7 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 	if len(keySet.PrivateKey) > 0 {
 		keyImage, err := c.ParseKeyImageWithPrivateKey(keySet.PrivateKey)
 		if err != nil {
-			errReturn := errors.New("Cannot parse key image with privateKey CoinV2" + err.Error())
-			return nil, errhandler.NewPrivacyErr(errhandler.ParseKeyImageWithPrivateKeyErr, errReturn)
+			return nil, errhandler.NewPrivacyErr(errhandler.ParseKeyImageWithPrivateKeyErr, err)
 		}
 		c.SetKeyImage(keyImage)
 	}
@@ -540,27 +541,22 @@ func (c *CoinV2) UnmarshalJSON(data []byte) error {
 // }
 
 // Check whether the utxo is from this keyset
-// func (c *CoinV2) DoesCoinBelongToKeySet(keySet *incognitokey.KeySet) (bool, *operation.Point) {
-// 	_, txOTARandomPoint, index, err1 :=  c.GetTxRandomDetail()
-// 	if err1 != nil {
-// 		return false, nil
-// 	}
+func (c *CoinV2) DoesCoinBelongToKeySet(keySet *incognitokey.KeySet) (bool, *operation.Point) {
+	_, txOTARandomPoint, index, err1 :=  c.GetTxRandomDetail()
+	if err1 != nil {
+		return false, nil
+	}
 
-// 	//Check if the utxo belong to this one-time-address
-// 	rK := new(operation.Point).ScalarMult(txOTARandomPoint, keySet.OTAKey.GetOTASecretKey())
+	//Check if the utxo belong to this one-time-address
+	rK := new(operation.Point).ScalarMult(txOTARandomPoint, keySet.OTAKey.GetOTASecretKey())
 
-// 	hashed := operation.HashToScalar(
-// 		append(rK.ToBytesS(), common.Uint32ToBytes(index)...),
-// 	)
+	hashed := operation.HashToScalar(
+		append(rK.ToBytesS(), common.Uint32ToBytes(index)...),
+	)
 
-// 	HnG := new(operation.Point).ScalarMultBase(hashed)
-// 	KCheck := new(operation.Point).Sub(c.GetPublicKey(), HnG)
+	HnG := new(operation.Point).ScalarMultBase(hashed)
+	KCheck := new(operation.Point).Sub(c.GetPublicKey(), HnG)
 
-// 	////Retrieve the sharedConcealRandomPoint for generating the blinded assetTag
-// 	//var rSharedConcealPoint *operation.Point
-// 	//if keySet.ReadonlyKey.GetPrivateView() != nil {
-// 	//	rSharedConcealPoint = new(operation.Point).ScalarMult(txConcealRandomPoint, keySet.ReadonlyKey.GetPrivateView())
-// 	//}
 
-// 	return operation.IsPointEqual(KCheck, keySet.OTAKey.GetPublicSpend()), rK
-// }
+	return operation.IsPointEqual(KCheck, keySet.OTAKey.GetPublicSpend()), rK
+}

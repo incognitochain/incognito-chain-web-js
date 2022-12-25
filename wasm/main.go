@@ -15,6 +15,7 @@ func main() {
 
 	gobridge.RegisterCallback("newKeySetFromPrivate", internal.NewKeySetFromPrivate)
 	gobridge.RegisterCallback("decryptCoin", internal.DecryptCoin)
+	gobridge.RegisterCallback("decryptCoinList", internal.DecryptCoinList)
 	gobridge.RegisterCallback("createCoin", internal.CreateCoin)
 	gobridge.RegisterCallback("generateBLSKeyPairFromSeed", internal.GenerateBLSKeyPairFromSeed)
 	gobridge.RegisterCallback("hybridEncrypt", internal.HybridEncrypt)
@@ -49,12 +50,13 @@ func main() {
 	gobridge.RegisterCallback("setShardCount", internal.SetShardCount)
 	gobridge.RegisterCallback("setCfg", internal.SetConfigs)
 	gobridge.RegisterCallback("createOTAReceiver", internal.CreateOTAReceiver)
+	gobridge.RegisterCallback("createOTAReceiverWithCfg", internal.CreateOTAReceiverWithCfg)
 	// not applicable
 	// gobridge.RegisterCallback("deriveSerialNumber", internal.DeriveSerialNumber)
 
 	// portal
 	gobridge.RegisterCallback("generateBTCMultisigAddress", internal.GenerateBTCMultisigAddress)
 
-	println("WASM loading finished")
+	gobridge.Log("WASM loading finished")
 	<-c
 }

@@ -169,8 +169,8 @@ type CoinData struct {
 
 	// for v1
 	SNDerivator encodedBytes `json:"SNDerivator"`
-	// tag is nil unless confidential asset
-	AssetTag encodedBytes `json:"AssetTag"`
+	AssetTag    encodedBytes `json:"AssetTag"`
+	TokenID     *common.Hash `json:"TokenID,omitempty"`
 }
 
 func (c CoinData) ToCoin() (*privacy.CoinV2, uint64, error) {
@@ -334,6 +334,29 @@ func (c CoinData) ToCoinV1() (*privacy.CoinV1, uint64, error) {
 
 	ind := big.NewInt(0).SetBytes(c.Index)
 	return result, ind.Uint64(), nil
+}
+
+func GetTokenID(c *privacy.CoinV2, keySet *incognitokey.KeySet, rawAssetTags map[string]*common.Hash) *common.Hash {
+	t := c.GetAssetTag()
+	prv := common.PRVCoinID
+	ca := common.ConfidentialAssetID
+	if t == nil {
+		return &prv
+	}
+	if asset, exists := rawAssetTags[t.String()]; exists {
+		return asset
+	}
+
+	// must take valid coin & keySet
+	_, txOTARandomPoint, _, _ :=  c.GetTxRandomDetail()
+	sharedSecret := new(privacy.Point).ScalarMult(txOTARandomPoint, keySet.OTAKey.GetOTASecretKey())
+	blinder := privacy.HashToScalar(append(sharedSecret.ToBytesS(), []byte("assettag")...))
+	rawAssetTag := new(privacy.Point).Sub(t, new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], blinder))
+
+	if asset, exists := rawAssetTags[rawAssetTag.String()]; exists {
+		return asset
+	}
+	return &ca
 }
 
 func ScalarToBytes(sc *privacy.Scalar) []byte {

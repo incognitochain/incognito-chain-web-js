@@ -1,5 +1,4 @@
-const { Wallet, Transactor : AccountWallet, types, constants, utils } = require('../');
-const { KeyWallet } = types;
+const { Wallet, Transactor : AccountWallet, constants, utils, KeyWallet } = require('../');
 const { generateCommitteeKeyFromHashPrivateKey, generateBLSPubKeyB58CheckEncodeFromSeed, base58CheckDecode: checkDecode, base58CheckEncode : checkEncode, hashSha3BytesToBytes, convertHashToStr } = utils;
 
 async function TestCommitteeKey(){

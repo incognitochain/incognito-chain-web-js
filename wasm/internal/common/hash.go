@@ -30,9 +30,11 @@ func (hashObj Hash) UnmarshalText(text []byte) error {
 // UnmarshalJSON unmarshal json data to hashObj
 func (hashObj *Hash) UnmarshalJSON(data []byte) error {
 	hashString := ""
-	_ = json.Unmarshal(data, &hashString)
-	hashObj.Decode(hashObj, hashString)
-	return nil
+	err := json.Unmarshal(data, &hashString)
+	if err != nil {
+		return err
+	}
+	return hashObj.Decode(hashObj, hashString)
 }
 
 // Format writes first few bytes of hash for debugging

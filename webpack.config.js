@@ -10,7 +10,8 @@ const optimization = {
         warnings: false,
         compress: {
           comparisons: false,
-          drop_console: false,
+          drop_console: true,
+          // pure_funcs: ['console.log'],
         },
         parse: {},
         mangle: true,
@@ -65,17 +66,16 @@ module.exports = (env, argv) => {
       fs: "empty",
     },
     module: {
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: "babel-loader",
-          options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: ["@babel/preset-env"],
-          },
+      rules: [{
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
+          presets: ["@babel/preset-env"],
+          ignore: [/wasm_exec|sjcl/],
         },
-      ],
+      }, ],
     },
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({
@@ -95,43 +95,113 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, "build-node"),
       filename: "[name].js",
       library: "",
-      libraryTarget: "commonjs2",
+      libraryTarget: "umd",
     },
     target: "node",
     module: {
-      defaultRules: [
-        {
-          type: "javascript/auto",
-          resolve: {}
+      defaultRules: [{
+        type: "javascript/auto",
+        resolve: {}
+      }, {
+        test: /\.json$/i,
+        type: "json"
+      }],
+      rules: [{
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
+          presets: [
+            ["@babel/preset-env", {
+              "targets": {
+                "node": "12"
+              }
+            }],
+          ],
+          ignore: [/wasm_exec|sjcl/],
         },
-        {
-          test: /\.json$/i,
-          type: "json"
-        }
-      ],
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: "babel-loader",
-          options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties"],
-            presets: [
-              ["@babel/preset-env", {
-                "targets": {
-                  "node": "12"
-              }}],
-            ],
-          },
-        },
-        {
-          test: /\.wasm$/,
-          loader: 'wasm-loader'
-        },
-      ],
+      }, {
+        test: /\.wasm$/,
+        loader: 'wasm-loader'
+      }, ],
     },
     ...(isProduction ? prodConfig : devConfig),
     ...aliasConfig,
   };
-  return [cfg, nodeCfg];
+
+  const webCfg = {
+    name: "wallet-web",
+    devtool: "source-map",
+    entry: {
+      "wallet": ["./lib/wallet-web.js"],
+    },
+    output: {
+      path: path.resolve(__dirname, "build/web"),
+      publicPath: "/",
+      library: "wallet",
+      libraryTarget: "umd",
+    },
+    target: "web",
+    module: {
+      defaultRules: [{
+        type: "javascript/auto",
+        resolve: {}
+      }, {
+        test: /\.json$/i,
+        type: "json"
+      }],
+      rules: [{
+        test: /\.worker\.js$/i,
+        use: [{
+          loader: "worker-loader",
+          options: {
+            publicPath: "/"
+          }
+        }, {
+          loader: "babel-loader",
+          options: {
+            plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+            presets: [
+              ["@babel/preset-env", {
+                useBuiltIns: "entry",
+                corejs: "3.10.2"
+              }],
+            ],
+            ignore: [/wasm_exec|sjcl/],
+          },
+        }, ],
+      }, {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
+          presets: [
+            ["@babel/preset-env", {
+              useBuiltIns: "entry",
+              corejs: "3.10.2"
+            }],
+          ],
+          ignore: [/wasm_exec|sjcl/],
+        },
+      }, {
+        test: /\.wasm$/,
+        loader: 'file-loader',
+        options: {
+          name: "privacy.wasm",
+          outputPath: "",
+          emitFile: false
+        }
+      }, ],
+    },
+    plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1,
+      }),
+    ],
+    ...(isProduction ? prodConfig : devConfig),
+    ...aliasConfig,
+  };
+  return [cfg, nodeCfg, webCfg];
 };

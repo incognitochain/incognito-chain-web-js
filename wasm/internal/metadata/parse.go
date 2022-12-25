@@ -32,6 +32,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &InitTokenRequest{}
 	case IssuingRequestMeta:
 		md = &IssuingRequest{}
+	case IssuingETHRequestMeta:
+		md = &IssuingEVMRequest{}
 	case IssuingResponseMeta:
 		md = &IssuingResponse{}
 	case ContractingRequestMeta:
@@ -44,8 +46,13 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		BurningPDEXERC20RequestMeta, BurningPDEXBEP20RequestMeta,
 		BurningPBSCForDepositToSCRequestMeta,
 		BurningPLGRequestMeta, BurningPLGForDepositToSCRequestMeta,
-		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta:
+		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta,
+		metadataCommon.BurningAvaxRequestMeta, metadataCommon.BurningAvaxForDepositToSCRequestMeta,
+		metadataCommon.BurningAuroraRequestMeta, metadataCommon.BurningAuroraForDepositToSCRequestMeta,
+		metadataCommon.BurningNearRequestMeta:
 		md = &BurningRequest{}
+	case BurningPRVRequestMeta:
+		md = &BurningPRVRequest{}
 	case ShardStakingMeta:
 		md = &StakingMetadata{}
 	case BeaconStakingMeta:
@@ -140,7 +147,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataBridge.UnshieldRequest{}
 	case metadataCommon.BurningUnifiedTokenResponseMeta:
 		md = &metadataBridge.UnshieldResponse{}
-
+	case metadataCommon.BurnForCallRequestMeta:
+		md = &metadataBridge.BurnForCallRequest{}
 	default:
 		return nil, errors.Errorf("Could not parse metadata with type: %d", theType)
 	}

@@ -224,6 +224,58 @@ func DecryptCoin(paramStr string) (string, error) {
 	return string(resJson), nil
 }
 
+// DecryptCoinList supports v2 coins only
+func DecryptCoinList(paramStr string) (string, error) {
+	var err error
+	temp := &struct {
+		CoinList  []transaction.CoinData
+		KeySet    string
+		TokenList []common.Hash
+	}{}
+	err = json.Unmarshal([]byte(paramStr), temp)
+	if err != nil {
+		return "", err
+	}
+	rawAssetTags := make(map[string]*common.Hash)
+	for _, tokenID := range temp.TokenList {
+		t := privacy.HashToPoint(tokenID[:])
+		rawAssetTags[t.String()] = &common.Hash{}
+		*rawAssetTags[t.String()] = tokenID
+	}
+	tempKw, err := wallet.Base58CheckDeserialize(temp.KeySet)
+	if err != nil {
+		return "", err
+	}
+	var resultCoins []transaction.CoinData
+	for i, _ := range temp.CoinList {
+		c, _, err := temp.CoinList[i].ToCoin()
+		if err != nil {
+			return "", err
+		}
+		// coins that have KeyImage are already decrypted
+		if c.GetKeyImage() == nil {
+			_, err = c.Decrypt(&tempKw.KeySet)
+		}
+		if err == nil {
+			resultCoin := transaction.GetCoinData(c)
+			if temp.CoinList[i].TokenID != nil && *temp.CoinList[i].TokenID != common.ConfidentialAssetID {
+				resultCoin.TokenID = temp.CoinList[i].TokenID
+			} else {
+				// find tokenID using the token list
+				resultCoin.TokenID = transaction.GetTokenID(c, &tempKw.KeySet, rawAssetTags)
+			}
+			resultCoin.Index = temp.CoinList[i].Index
+			resultCoins = append(resultCoins, resultCoin)
+		} // coins that fail Decrypt are considered unowned
+	}
+
+	resJson, err := json.Marshal(resultCoins)
+	if err != nil {
+		return "", fmt.Errorf("marshal-coin-list error %v", err)
+	}
+	return string(resJson), nil
+}
+
 func CreateCoin(paramStr string) (string, error) {
 	var err error
 	temp := &struct {
@@ -593,6 +645,31 @@ func CreateOTAReceiver(paramStr string) (string, error) {
 
 	var recv privacy.OTAReceiver
 	err = recv.FromAddress(kw.KeySet.PaymentAddress)
+	if err != nil {
+		return "", err
+	}
+	return recv.String()
+}
+
+func CreateOTAReceiverWithCfg(args string) (string, error) {
+	raw := []byte(args)
+	var cfg struct {
+		PaymentAddress  string
+		WithConceal     bool
+		CoinPrivacyType int
+		SenderShardID   int
+	}
+	err := json.Unmarshal(raw, &cfg)
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal configs %s - %v", args, err)
+	}
+	kw, err := wallet.Base58CheckDeserialize(cfg.PaymentAddress)
+	if err != nil {
+		return "", err
+	}
+
+	var recv privacy.OTAReceiver
+	err = recv.From(kw.KeySet.PaymentAddress, cfg.SenderShardID, cfg.CoinPrivacyType, cfg.WithConceal)
 	if err != nil {
 		return "", err
 	}
