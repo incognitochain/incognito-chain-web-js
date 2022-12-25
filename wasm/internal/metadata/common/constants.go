@@ -200,6 +200,9 @@ const (
 	BurningFantomForDepositToSCRequestMeta = 334
 	BurningFantomConfirmForDepositToSCMeta = 156
 
+	// pDAO
+	BurningPRVRequestMeta = 338
+
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
 
@@ -208,10 +211,6 @@ const (
 	IssuingNearResponseMeta = 336
 	BurningNearRequestMeta  = 337
 	BurningNearConfirmMeta  = 157
-
-	// pNear ( Near )
-	BurningNearForDepositToSCRequestMeta = 338
-	BurningNearConfirmForDepositToSCMeta = 158
 
 	// Bridge aggregator
 	BridgeAggModifyParamMeta                        = 340

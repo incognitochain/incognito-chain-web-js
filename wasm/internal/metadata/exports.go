@@ -198,9 +198,7 @@ const (
 	BurningNearRequestMeta  = metadataCommon.BurningNearRequestMeta
 	BurningNearConfirmMeta  = metadataCommon.BurningNearConfirmMeta
 
-	// pNear ( Near )
-	BurningNearForDepositToSCRequestMeta = metadataCommon.BurningNearForDepositToSCRequestMeta
-	BurningNearConfirmForDepositToSCMeta = metadataCommon.BurningNearConfirmForDepositToSCMeta
+	BurningPRVRequestMeta = metadataCommon.BurningPRVRequestMeta
 
 	// Bridge aggregator
 	BridgeAggModifyParamMeta                        = metadataCommon.BridgeAggModifyParamMeta

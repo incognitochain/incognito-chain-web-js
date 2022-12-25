@@ -45,12 +45,14 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		BurningPBSCForDepositToSCRequestMeta,
 		BurningPLGRequestMeta, BurningPLGForDepositToSCRequestMeta,
 		BurningFantomRequestMeta, BurningFantomForDepositToSCRequestMeta,
-		BurningNearRequestMeta, BurningNearForDepositToSCRequestMeta,
+		BurningNearRequestMeta,
 		BurningAuroraRequestMeta, BurningAuroraForDepositToSCRequestMeta,
 		BurningAvaxRequestMeta, BurningAvaxForDepositToSCRequestMeta:
 		md = &BurningRequest{}
 	case IssuingNearRequestMeta:
 		md = &metadataBridge.IssuingWasmRequest{}
+	case BurningPRVRequestMeta:
+		md = &BurningPRVRequest{}
 	case ShardStakingMeta:
 		md = &StakingMetadata{}
 	case BeaconStakingMeta:
