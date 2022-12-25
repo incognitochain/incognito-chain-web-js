@@ -192,6 +192,8 @@ const (
 	BurningFantomForDepositToSCRequestMeta = metadataCommon.BurningFantomForDepositToSCRequestMeta
 	BurningFantomConfirmForDepositToSCMeta = metadataCommon.BurningFantomConfirmForDepositToSCMeta
 
+	BurningPRVRequestMeta = metadataCommon.BurningPRVRequestMeta
+
 	// Bridge aggregator
 	BridgeAggModifyParamMeta                        = metadataCommon.BridgeAggModifyParamMeta
 	BridgeAggConvertTokenToUnifiedTokenRequestMeta  = metadataCommon.BridgeAggConvertTokenToUnifiedTokenRequestMeta

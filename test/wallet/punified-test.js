@@ -11,22 +11,22 @@ const {
   VerifierTx,
   setShardNumber,
 } = require("../../");
-const { PaymentAddressType } = constants;
+const { PaymentAddressType, BurningPRVBEP20RequestMeta } = constants;
 
 const TESTNET_BTC_ID = "4584d5e9b2fc0337dfb17f4b5bb025e5b82c38cfa4f54e8a3d4fcdd03954ff82";
 const MAINNET_BTC_ID = "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696";
 
 // const rpcClient = "https://lb-fullnode.incognito.org/fullnode";
 //  new RpcClient("https://mainnet.incognito.org/fullnode");
-// const rpcClient = "https://testnet.incognito.org/fullnode";
-const rpcClient = "http://51.161.117.193:11334";
+const rpcClient = "https://testnet.incognito.org/fullnode";
+// const rpcClient = "http://51.161.117.193:11334";
 // const rpcClient = new RpcClient("https://dev-test-node.incognito.org");
 // const rpcClient = new RpcClient("http://54.39.158.106:9334");
 // const rpcClient = new RpcClient("http://139.162.55.124:8334");   // dev-net
 // const rpcClient = "https://testnet1.incognito.org/fullnode"; //testnet1
 // "http://139.162.55.124:8334";
 
-const stagingServices = "http://51.161.117.193:6002";
+const stagingServices = "https://api-coinservice-staging.incognito.org";
 
 const rpcCoinService =
   // "https://api-coinservice.incognito.org"; //mainnet
@@ -34,7 +34,7 @@ const rpcCoinService =
 // "https://api-coinservice-staging2.incognito.org"; // testnet1
 // "http://51.161.119.66:9009"; //dev-test-coin-service
 // const rpcTxService = `${stagingServices}/txservice`;
-const rpcTxService = "http://51.161.117.193:6004";
+const rpcTxService = "https://api-coinservice-staging.incognito.org/txservice";
 //  "https://api-coinservice.incognito.org/txservice"; mainnet
 // "https://api-coinservice-staging.incognito.org/txservice";
 //  "https://api-coinservice-staging2.incognito.org/txservice"; // testnet1
@@ -157,11 +157,51 @@ async function TestUnshieldPUnifiedToken() {
   }
 }
 
+async function TestCreateAndSendBurningPegPRVRequestTx() {
+  const BurningPRVRequestMeta = 338;
+  let fee = 1e8;
+  //todo
+  let unshieldAmount = 3000;
+  let remoteAddress = '0xF91cEe2DE943733e338891Ef602c962eF4D7Eb81';
+  let paymentTokenID = "d88840264322db699177328ee5901f42fb78d7b4958b791bd03ca87fa2390f4b";
+  let tokenPayments = [
+    {
+    "paymentAddress": "12svfkP6w5UDJDSCwqH978PvqiqBxKmUnA9em9yAYWYJVRv7wuXY1qhhYpPAm4BDz2mLbFrRmdK3yRhnTqJCZXKHUmoi7NV83HCH2YFpctHNaDdkSiQshsjw2UFUuwdEvcidgaKmF3VJpY5f8RdN", 
+    "amount": 1000
+    }
+  ];
+  let prvPayments = [
+    // {
+    // // "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    // // "amount": 100
+    // }
+  ];
+
+  try {
+    let result = await account1.createAndSendBurningPegPRVRequestTx (
+      {
+        transfer: {fee, prvPayments, tokenPayments, paymentTokenID},
+        extra: {
+            txHashHandler: null,
+            version: 2,
+            burningType: BurningPRVRequestMeta,
+            burnAmount: unshieldAmount,
+            remoteAddress: remoteAddress,
+        },
+      }
+    );
+    console.log("result: ", result);
+  } catch(e) {
+    console.log("error: ", e);
+  }
+}
+
 async function RunPUnifiedTokenTests() {
     await setup();
 
-    TestConvertPUnifiedToken();
+    // TestConvertPUnifiedToken();
     // TestUnshieldPUnifiedToken();
+    TestCreateAndSendBurningPegPRVRequestTx();
 }
 
 RunPUnifiedTokenTests()

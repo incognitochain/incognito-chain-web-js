@@ -200,6 +200,9 @@ const (
 	BurningFantomForDepositToSCRequestMeta = 334
 	BurningFantomConfirmForDepositToSCMeta = 156
 
+	// pDAO
+	BurningPRVRequestMeta = 338
+
 	// portal v4
 	PortalV4UnshieldRequestMeta = 262
 
