@@ -5,6 +5,11 @@ const {
     setupWallet
 } = require("./constants")
 
+const {
+    Wallet,
+    Account: AccountWallet,
+} = require("../../");
+
 let wallet;
 let accountSender;
 let pDexV3Instance;
@@ -232,14 +237,47 @@ async function TestConsolidate() {
     }
 }
 
+async function TestRandomSeedByShardID() {
+    try {
+        const expectedShardID = 3;
+        while (true) {
+            let wallet = new Wallet();
+            wallet = await wallet.init(
+                "password",
+                {},
+                "Master",
+                "Anon"
+            );
+            const { Mnemonic, MasterAccount } = wallet;
+            const account = MasterAccount.child[0];
+            const { KeySet } = account.key;
+            const lastBytes = KeySet.PaymentAddress.Pk[KeySet.PaymentAddress.Pk.length - 1]
+            const shardID = lastBytes % 8;
+            const paymentAddress = account.getPaymentAddress();
+            if (shardID === expectedShardID) {
+                console.log('TestRandomSeedByShardID: ', {
+                    Mnemonic,
+                    shardID,
+                    paymentAddress
+                })
+                break;
+            }
+        }
+    } catch (e) {
+        console.log('TestRandomSeedByShardID error: ', e);
+    }
+}
+
+
 
 async function RunTest() {
     console.log("BEGIN WEB PDEX3 TEST");
     await setup();
+    await TestRandomSeedByShardID()
     // await TestCreateOTASenderID();
     // await TestSwapHistory()
     // await TestCreateTransactionPApps();
-    await TestGetBalance();
+    // await TestGetBalance();
     // await TestGetBalanceAccessOTA();
     // await TestGetListShare();
     // await TestGetTxsHistory()
@@ -248,7 +286,7 @@ async function RunTest() {
     // await TestGetOrderHistory();
     // await TestGetOpenOrderHistory();
     // await TestGetPDex3State();
-    await TestConsolidate();
+    // await TestConsolidate();
 }
 
 RunTest()
