@@ -44,7 +44,7 @@ const ACCESS_ID         = "00000000000000000000000000000000000000000000000000000
 const PRIVATE_KEY_STR   = "112t8rnXdAqwz4XVnLqfcopFuQbof6n141BPKY1uHfwmyir324SNod9sWSFNXDBSNKXp26SXPhNdVFNyeeqiCs6Tc8yrcsVPaBWrk5auTrNP"
 const DEVICE_ID         = "9AE4B404-3E61-495D-835A-05CEE34BE251";
 const PRIVACY_VERSION   = 2;
-const FeePerTx          = 100;
+const FeePerTx          = 100000000;
 
 async function setupWallet({ isCreateWallet = false } = {}) {
     let wallet;
