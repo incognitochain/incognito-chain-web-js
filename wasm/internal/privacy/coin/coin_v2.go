@@ -225,9 +225,9 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 		}
 	}
 
-	if !c.IsEncrypted() {
-		return c, nil
-	}
+	// if !c.IsEncrypted() {
+	// 	return c, nil
+	// }
 
 	return c, nil
 }

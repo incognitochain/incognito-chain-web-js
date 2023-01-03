@@ -219,13 +219,24 @@ func (tx *Tx) prove(params *ExtendedParams) (*privacy.SenderSeal, error) {
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
 	var senderKeySet incognitokey.KeySet
-	senderKeySet.InitFromPrivateKey(&params.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var err error
+	if len(params.SenderSK[:]) == 32 {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:])
+		if err != nil {
+			return nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	// currently support returning the 1st SenderSeal only
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _, payInf := range params.PaymentInfo {
 		temp, _ := payInf.To()
-		c, seal, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))
+		c, seal, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(b), privacy.CoinPrivacyTypeTransfer))
 		if senderSealToExport == nil {
 			senderSealToExport = seal
 		}
@@ -340,10 +351,19 @@ func (tx *Tx) Create(params *ExtendedParams, theirTime int64) (*privacy.SenderSe
 
 func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]PaymentReader) error {
 	var err error
+	var senderPaymentAddress privacy.PaymentAddress
 	// Get Keyset from param
-	skBytes := *params_compat.SenderSK
-	senderPaymentAddress := privacy.GeneratePaymentAddress(skBytes)
-	tx.sigPrivKey = skBytes
+	skb := (*params_compat.SenderSK)[:]
+	if len(skb) == 32 { 
+		senderPaymentAddress = privacy.GeneratePaymentAddress(skb)
+	} else {
+		err = senderPaymentAddress.SetBytes(skb)
+		if err != nil {
+			return err
+		}
+	}
+	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
+	// tx.sigPrivKey = skBytes
 	// Tx: initialize some values
 	// non-zero means it was set before
 	if tx.LockTime == 0 {
@@ -353,7 +373,7 @@ func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]Paym
 	// normal type indicator
 	tx.Type = TxNormalType
 	tx.Metadata = params_compat.Metadata
-	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
+	
 	// we don't support version 1
 	tx.Version = 2
 	tx.Info = params_compat.Info
