@@ -40,6 +40,8 @@ type ExtendedParams struct {
 	TokenParams *TokenParamsReader `json:"TokenParams,omitempty"`
 }
 
+func (p *ExtendedParams) GetKvargs() map[string]interface{} { return p.Kvargs }
+
 func (params *ExtendedParams) GetInputCoins() ([]privacy.PlainCoin, []uint64, error) {
 	var resultCoins []privacy.PlainCoin
 	var resultIndexes []uint64
@@ -192,14 +194,18 @@ func (params *ExtendedParams) GetTxTokenParams() (*TxTokenParams, error) {
 		nil
 }
 
-func (params *ExtendedParams) UseHwSigner(i int) (bool, []byte, int, error) {
-	if params.Kvargs == nil {
+type keyValueParams interface {
+	GetKvargs() map[string]interface{}
+}
+
+func UseHwSigner(params keyValueParams, i int) (bool, []byte, int, error) {
+	if params.GetKvargs() == nil {
 		return false, nil, -1, nil
 	}
-	raw, err := json.Marshal(params.Kvargs)
+	raw, err := json.Marshal(params.GetKvargs())
 	var holder struct {
 		Cseed [][]byte `json:"cseed"`
-		Pi []uint `json:"pi"`
+		Pi    []uint   `json:"pi"`
 	}
 	err = json.Unmarshal(raw, &holder)
 	if err != nil {
@@ -224,6 +230,8 @@ type TxParams struct {
 	Info        []byte
 	Kvargs      map[string]interface{}
 }
+
+func (p *TxParams) GetKvargs() map[string]interface{} { return p.Kvargs }
 
 func NewTxParams(sk *privacy.PrivateKey, pInfos []*privacy.PaymentInfo, inputs []privacy.PlainCoin, fee uint64, isPriv bool, tokenID *common.Hash, md metadata.Metadata, info []byte) *TxParams {
 	if info == nil {

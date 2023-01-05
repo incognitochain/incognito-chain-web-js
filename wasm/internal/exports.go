@@ -580,7 +580,7 @@ func SetConfigs(args string) (bool, error) {
 	}
 	err := json.Unmarshal(raw, &cfg)
 	if err != nil {
-		return false, fmt.Errorf("cannot unmarshal configs %s - %v", cfg, err)
+		return false, fmt.Errorf("cannot unmarshal configs %s - %v", args, err)
 	}
 	common.MaxShardNumber = cfg.MaxShardNumber
 	common.AllowBase58EncodedCoins = cfg.AllowBase58EncodedCoins

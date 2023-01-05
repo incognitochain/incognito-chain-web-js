@@ -336,12 +336,18 @@ func (tx *Tx) signCA(inp []privacy.PlainCoin, inputIndexes []uint64, out []*priv
 		ringSize = 1
 	}
 
-	// Generate Ring
-	piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
-	if piErr != nil {
-		return piErr
+	var pi int
+	useHw, firstC, pi, err := UseHwSigner(params_compat, 1)
+	if err != nil {
+		return err
 	}
-	var pi int = int(piBig.Int64())
+	if !useHw {
+		piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
+		if piErr != nil {
+			return piErr
+		}
+		pi = int(piBig.Int64())
+	}
 	shardID := common.GetShardIDFromLastByte(tx.pubKeyLastByteSender)
 	ring, indexes, commitmentsToZero, err := generateMlsagRingCA(inp, inputIndexes, out, params_token, pi, shardID, ringSize)
 	if err != nil {
@@ -356,26 +362,96 @@ func (tx *Tx) signCA(inp []privacy.PlainCoin, inputIndexes []uint64, out []*priv
 		return err
 	}
 
-	// Set sigPrivKey
-	privKeysMlsag, err := createPrivKeyMlsagCA(inp, out, outputSharedSecrets, params_compat, shardID, commitmentsToZero)
-	if err != nil {
-		return err
-	}
-	sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
-	sk, err := privacy.ArrayScalarToBytes(&privKeysMlsag)
-	if err != nil {
-		return err
-	}
-	tx.sigPrivKey = sk
+	if useHw {
+		var temp []byte = *params_compat.SenderSK
+		privOTA := temp[3*privacy.Ed25519KeySize : 4*privacy.Ed25519KeySize]
+		numOfInputs := new(privacy.Scalar).FromUint64(uint64(len(inp)))
+		numOfOutputs := new(privacy.Scalar).FromUint64(uint64(len(out)))
+		sumInputAssetTagBlinders := new(privacy.Scalar).FromUint64(0)
+		sumOutputAssetTagBlinders := new(privacy.Scalar).FromUint64(0)
+		rehashed := privacy.HashToPoint(params_compat.TokenID[:])
+		sumRand := new(privacy.Scalar).FromUint64(0)
+		for _, in := range inp {
+			inputCoin_specific, ok := in.(*privacy.CoinV2)
+			if !ok || inputCoin_specific.GetAssetTag() == nil {
+				return fmt.Errorf("Cannot cast a coin as v2-CA")
+			}
+			isUnblinded := privacy.IsPointEqual(rehashed, inputCoin_specific.GetAssetTag())
+			if isUnblinded {
+			}
 
-	// Set Signature
-	mlsagSignature, err := sag.SignConfidentialAsset(hashedMessage)
-	if err != nil {
-		return err
+			sharedSecret := new(privacy.Point).Identity()
+			bl := new(privacy.Scalar).FromUint64(0)
+			if !isUnblinded {
+				sharedSecret, err = inputCoin_specific.RecomputeSharedFromOTAKey(privOTA)
+				if err != nil {
+					return err
+				}
+				// _, _, indexForShard, err := inputCoin_specific.GetTxRandomDetail()
+				// if err != nil {
+				// 	return nil, err
+				// }
+				bl, err = privacy.ComputeAssetTagBlinder(sharedSecret)
+				if err != nil {
+					return err
+				}
+			}
+
+			v := inputCoin_specific.GetAmount()
+			effectiveRCom := new(privacy.Scalar).Mul(bl, v)
+			effectiveRCom.Add(effectiveRCom, inputCoin_specific.GetRandomness())
+
+			sumInputAssetTagBlinders.Add(sumInputAssetTagBlinders, bl)
+			sumRand.Add(sumRand, effectiveRCom)
+		}
+		for i, oc := range out {
+			if oc.GetAssetTag() == nil {
+				return fmt.Errorf("Cannot cast a coin as v2-CA")
+			}
+			// lengths between 0 and len(outputCoins) were rejected before
+			bl := new(privacy.Scalar).FromUint64(0)
+			isUnblinded := privacy.IsPointEqual(rehashed, oc.GetAssetTag())
+			if isUnblinded {
+			} else {
+				var err error
+				bl, err = privacy.ComputeAssetTagBlinder(outputSharedSecrets[i])
+				if err != nil {
+					return err
+				}
+			}
+			v := oc.GetAmount()
+			effectiveRCom := new(privacy.Scalar).Mul(bl, v)
+			effectiveRCom.Add(effectiveRCom, oc.GetRandomness())
+			sumOutputAssetTagBlinders.Add(sumOutputAssetTagBlinders, bl)
+			sumRand.Sub(sumRand, effectiveRCom)
+		}
+
+		sumInputAssetTagBlinders.Mul(sumInputAssetTagBlinders, numOfOutputs)
+		sumOutputAssetTagBlinders.Mul(sumOutputAssetTagBlinders, numOfInputs)
+		assetSum := new(privacy.Scalar).Sub(sumInputAssetTagBlinders, sumOutputAssetTagBlinders)
+		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
+
+		sig, err := sag.PartialSignConfidentialAsset(hashedMessage, firstC, assetSum, sumRand)
+		if err != nil {
+			return err
+		}
+		tx.Sig, err = sig.ToBytes()
+	} else {
+		privKeysMlsag, err := createPrivKeyMlsagCA(inp, out, outputSharedSecrets, params_compat, shardID, commitmentsToZero)
+		if err != nil {
+			return err
+		}
+		sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
+
+		// Set Signature
+		mlsagSignature, err := sag.SignConfidentialAsset(hashedMessage)
+		if err != nil {
+			return err
+		}
+		// inputCoins already hold keyImage so set to nil to reduce size
+		mlsagSignature.SetKeyImages(nil)
+		tx.Sig, err = mlsagSignature.ToBytes()
 	}
-	// inputCoins already hold keyImage so set to nil to reduce size
-	mlsagSignature.SetKeyImages(nil)
-	tx.Sig, err = mlsagSignature.ToBytes()
 
 	return err
 }

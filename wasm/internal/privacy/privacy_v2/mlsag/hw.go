@@ -100,3 +100,68 @@ func (ml *Mlsag) PartialSign(message []byte, cseed []byte, sumCommitmentPriv *op
 		sumCommitmentPriv,
 	}, nil
 }
+
+type MlsagCAPartialSig struct {
+	MlsagSig
+	Cpi               *operation.Scalar
+	SumCommitmentPriv *operation.Scalar
+	SumAssetTagPriv   *operation.Scalar
+}
+
+func (ml *MlsagCAPartialSig) ToBytes() ([]byte, error) {
+	b, err := ml.MlsagSig.ToBytes()
+	if err != nil {
+		return nil, err
+	}
+	b = append(b, ml.Cpi.ToBytesS()...)
+	b = append(b, ml.SumAssetTagPriv.ToBytesS()...)
+	b = append(b, ml.SumCommitmentPriv.ToBytesS()...)
+	return b, nil
+}
+
+func (ml *Mlsag) calcCCAFromSeed(message [common.HashSize]byte, cseed []byte, r [][]*operation.Scalar) ([]*operation.Scalar, error) {
+	n := len(ml.R.keys)
+	c := make([]*operation.Scalar, n)
+
+	var i int = (ml.pi + 1) % n
+	c[i] = operation.HashToScalar(append(message[:], cseed...))
+	for next := (i + 1) % n; i != ml.pi; {
+		nextC, err := calculateNextCCA(
+			message,
+			r[i], c[i],
+			(*ml.R).keys[i],
+			ml.keyImages,
+		)
+		if err != nil {
+			return nil, err
+		}
+		c[next] = nextC
+		i = next
+		next = (next + 1) % n
+	}
+
+	return c, nil
+}
+
+func (ml *Mlsag) PartialSignConfidentialAsset(message []byte, cseed []byte, sumAssetTagPriv, sumCommitmentPriv *operation.Scalar) (*MlsagCAPartialSig, error) {
+	if len(message) != common.HashSize {
+		return nil, fmt.Errorf("invalid msg length")
+	}
+	message32byte := [32]byte{}
+	copy(message32byte[:], message)
+
+	r := ml.generateMlsagPublicChallenges()
+	c, err := ml.calcCFromSeed(message32byte, cseed, r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MlsagCAPartialSig{
+		MlsagSig{
+			c[0], nil, r,
+		},
+		c[ml.pi],
+		sumAssetTagPriv,
+		sumCommitmentPriv,
+	}, nil
+}

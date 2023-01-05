@@ -221,12 +221,12 @@ func (tx *Tx) prove(params *ExtendedParams) (*privacy.SenderSeal, error) {
 	var senderKeySet incognitokey.KeySet
 	var b byte
 	var err error
-	if len(params.SenderSK[:]) == 32 {
+	if len(params.SenderSK[:]) == privacy.Ed25519KeySize {
 		// read raw private key
 		senderKeySet.InitFromPrivateKey(&params.SenderSK)
 	} else {
 		// read raw payment address instead
-		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:])
+		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:3*privacy.Ed25519KeySize])
 		if err != nil {
 			return nil, err
 		}
@@ -276,7 +276,7 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 	}
 
 	var pi int
-	useHw, firstC, pi, err := params.UseHwSigner(0)
+	useHw, firstC, pi, err := UseHwSigner(params, 0)
 	if err != nil {
 		return err
 	}
@@ -316,7 +316,7 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 			return err
 		}
 		tx.Sig, err = sig.ToBytes()
-	} else { 
+	} else {
 		privKeysMlsag, err := createPrivKeyMlsag(inp, out, &params.SenderSK, commitmentToZero)
 		if err != nil {
 			return err
@@ -357,13 +357,15 @@ func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]Paym
 	var senderPaymentAddress privacy.PaymentAddress
 	// Get Keyset from param
 	skb := (*params_compat.SenderSK)[:]
-	if len(skb) == 32 { 
+	if len(skb) == privacy.Ed25519KeySize {
 		senderPaymentAddress = privacy.GeneratePaymentAddress(skb)
-	} else {
-		err = senderPaymentAddress.SetBytes(skb)
+	} else if len(skb) == 4*privacy.Ed25519KeySize {
+		err = senderPaymentAddress.SetBytes(skb[:3*privacy.Ed25519KeySize])
 		if err != nil {
 			return err
 		}
+	} else {
+		return fmt.Errorf("invalid tx key format")
 	}
 	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
 	// tx.sigPrivKey = skBytes
@@ -376,7 +378,7 @@ func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]Paym
 	// normal type indicator
 	tx.Type = TxNormalType
 	tx.Metadata = params_compat.Metadata
-	
+
 	// we don't support version 1
 	tx.Version = 2
 	tx.Info = params_compat.Info
