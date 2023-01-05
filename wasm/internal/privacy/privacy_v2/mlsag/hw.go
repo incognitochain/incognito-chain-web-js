@@ -61,8 +61,6 @@ func (ml *Mlsag) calcCFromSeed(message [common.HashSize]byte, cseed []byte, r []
 
 	var i int = (ml.pi + 1) % n
 	c[i] = operation.HashToScalar(append(message[:], cseed...))
-	println("first C")
-	println(fmt.Sprintf("%x", c[i].ToBytesS()))
 	for next := (i + 1) % n; i != ml.pi; {
 		nextC, err := calculateNextC(
 			message,

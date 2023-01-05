@@ -276,7 +276,10 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 	}
 
 	var pi int
-	useHw, firstC, pi := params.UseHwSigner()
+	useHw, firstC, pi, err := params.UseHwSigner(0)
+	if err != nil {
+		return err
+	}
 	if !useHw {
 		piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
 		if piErr != nil {

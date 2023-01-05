@@ -192,33 +192,24 @@ func (params *ExtendedParams) GetTxTokenParams() (*TxTokenParams, error) {
 		nil
 }
 
-func (params *ExtendedParams) UseHwSigner() (bool, []byte, int) {
+func (params *ExtendedParams) UseHwSigner(i int) (bool, []byte, int, error) {
 	if params.Kvargs == nil {
-		return false, nil, -1
+		return false, nil, -1, nil
 	}
-	temp, exists := params.Kvargs["cseed"]
-	if !exists {
-		return false, nil, -1
+	raw, err := json.Marshal(params.Kvargs)
+	var holder struct {
+		Cseed [][]byte `json:"cseed"`
+		Pi []uint `json:"pi"`
 	}
-	tempStr, ok := temp.(string)
-	if !ok {
-		return false, nil, -1
-	}
-	b, err := Base64Encoding.DecodeString(tempStr)
+	err = json.Unmarshal(raw, &holder)
 	if err != nil {
-		return false, nil, -1
+		return false, nil, -1, nil
+	}
+	if len(holder.Cseed) != len(holder.Pi) || i >= len(holder.Cseed) {
+		return false, nil, -1, fmt.Errorf("invalid params for using hardware device")
 	}
 
-	temp, exists = params.Kvargs["pi"]
-	if !exists {
-		return false, nil, -1
-	}
-	pi, ok := temp.(float64)
-	if !ok {
-		return false, nil, -1
-	}
-
-	return true, b, int(pi)
+	return true, holder.Cseed[i], int(holder.Pi[i]), nil
 }
 
 // ----- structs from chain code -----
@@ -231,6 +222,7 @@ type TxParams struct {
 	TokenID     *common.Hash
 	Metadata    metadata.Metadata
 	Info        []byte
+	Kvargs      map[string]interface{}
 }
 
 func NewTxParams(sk *privacy.PrivateKey, pInfos []*privacy.PaymentInfo, inputs []privacy.PlainCoin, fee uint64, isPriv bool, tokenID *common.Hash, md metadata.Metadata, info []byte) *TxParams {

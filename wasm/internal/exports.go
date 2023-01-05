@@ -182,7 +182,9 @@ func NewKeySetFromPrivate(skStr string) (string, error) {
 		ks.OTAKey.SetPublicSpend(ks.PaymentAddress.Pk)
 		ks.OTAKey.SetOTASecretKey(skHolder.OTAKey)
 		ks.ReadonlyKey.Pk = ks.PaymentAddress.Pk
-		ks.ReadonlyKey.Rk = skHolder.ViewKey
+		if len(skHolder.ViewKey) == privacy.Ed25519KeySize {
+			ks.ReadonlyKey.Rk = skHolder.ViewKey
+		}
 	}
 	txJson, err := json.Marshal(ks)
 	if err != nil {

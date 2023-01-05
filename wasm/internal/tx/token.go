@@ -392,6 +392,7 @@ func (tx *Tx) proveToken(params *ExtendedParams) (bool, *privacy.SenderSeal, err
 	// paying fee using pToken is not supported
 	feeToken := uint64(0)
 	params_compat := NewTxParams(temp.SenderKey, temp.TokenParams.Receiver, temp.TokenParams.TokenInput, feeToken, temp.HasPrivacyToken, &tid, nil, temp.Info)
+	params_compat.Kvargs = params.Kvargs
 
 	// Init tx and params (tx and params will be changed)
 	if err := tx.initializeTxAndParams(params_compat, &params.TokenParams.TokenPaymentInfo); err != nil {
