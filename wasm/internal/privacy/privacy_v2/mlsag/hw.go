@@ -104,8 +104,8 @@ func (ml *Mlsag) PartialSign(message []byte, cseed []byte, sumCommitmentPriv *op
 type MlsagCAPartialSig struct {
 	MlsagSig
 	Cpi               *operation.Scalar
-	SumCommitmentPriv *operation.Scalar
 	SumAssetTagPriv   *operation.Scalar
+	SumCommitmentPriv *operation.Scalar
 }
 
 func (ml *MlsagCAPartialSig) ToBytes() ([]byte, error) {
