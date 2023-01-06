@@ -183,6 +183,10 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 			}
 			c.SetKeyImage(keyImage)
 		}
+		if !c.IsEncrypted() {
+			return c, nil
+		}
+
 		txConcealRandomPoint, err := c.GetTxRandom().GetTxConcealRandomPoint()
 		if err != nil {
 			return nil, err
@@ -224,10 +228,6 @@ func (c *CoinV2) Decrypt(keySet *incognitokey.KeySet) (PlainCoin, error) {
 			c.SetSharedRandom(H)
 		}
 	}
-
-	// if !c.IsEncrypted() {
-	// 	return c, nil
-	// }
 
 	return c, nil
 }

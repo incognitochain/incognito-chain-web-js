@@ -292,8 +292,19 @@ func (tx *Tx) proveCA(params_compat *TxParams, params_token *TokenParamsReader) 
 	var isBurning bool = false
 	var tid common.Hash = *params_compat.TokenID
 	var senderKeySet incognitokey.KeySet
-	_ = senderKeySet.InitFromPrivateKey(params_compat.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var skb []byte = *params_compat.SenderSK
+	if len(skb) == privacy.Ed25519KeySize {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(params_compat.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(skb[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return false, nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _, inf := range params_compat.PaymentInfo {
 		c, sharedSecret, seal, err := privacy.NewCoinCA(privacy.NewCoinParams().From(inf, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer), &tid)
@@ -429,6 +440,17 @@ func (tx *Tx) signCA(inp []privacy.PlainCoin, inputIndexes []uint64, out []*priv
 		sumInputAssetTagBlinders.Mul(sumInputAssetTagBlinders, numOfOutputs)
 		sumOutputAssetTagBlinders.Mul(sumOutputAssetTagBlinders, numOfInputs)
 		assetSum := new(privacy.Scalar).Sub(sumInputAssetTagBlinders, sumOutputAssetTagBlinders)
+		firstCommitmentToZeroRecomputed := new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], assetSum)
+		secondCommitmentToZeroRecomputed := new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], sumRand)
+		if len(commitmentsToZero) != 2 {
+			return fmt.Errorf("Error : need exactly 2 points for MLSAG double-checking")
+		}
+		match1 := privacy.IsPointEqual(firstCommitmentToZeroRecomputed, commitmentsToZero[0])
+		match2 := privacy.IsPointEqual(secondCommitmentToZeroRecomputed, commitmentsToZero[1])
+		if !match1 || !match2 {
+			return fmt.Errorf("Error : asset tag sum or commitment sum mismatch, %v, %v", match1, match2)
+		}
+
 		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
 
 		sig, err := sag.PartialSignConfidentialAsset(hashedMessage, firstC, assetSum, sumRand)
@@ -522,8 +544,19 @@ func (tx *Tx) provePRV(params *ExtendedParams) ([]privacy.PlainCoin, []uint64, [
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
 	var senderKeySet incognitokey.KeySet
-	_ = senderKeySet.InitFromPrivateKey(&params.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var err error
+	if len(params.SenderSK[:]) == privacy.Ed25519KeySize {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	for _, payInf := range params.PaymentInfo {
 		temp, _ := payInf.To()
 		c, _, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))

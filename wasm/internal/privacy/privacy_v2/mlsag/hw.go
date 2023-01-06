@@ -151,7 +151,7 @@ func (ml *Mlsag) PartialSignConfidentialAsset(message []byte, cseed []byte, sumA
 	copy(message32byte[:], message)
 
 	r := ml.generateMlsagPublicChallenges()
-	c, err := ml.calcCFromSeed(message32byte, cseed, r)
+	c, err := ml.calcCCAFromSeed(message32byte, cseed, r)
 	if err != nil {
 		return nil, err
 	}
