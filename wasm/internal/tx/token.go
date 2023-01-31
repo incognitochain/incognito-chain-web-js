@@ -292,8 +292,19 @@ func (tx *Tx) proveCA(params_compat *TxParams, params_token *TokenParamsReader) 
 	var isBurning bool = false
 	var tid common.Hash = *params_compat.TokenID
 	var senderKeySet incognitokey.KeySet
-	_ = senderKeySet.InitFromPrivateKey(params_compat.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var skb []byte = *params_compat.SenderSK
+	if len(skb) == privacy.Ed25519KeySize {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(params_compat.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(skb[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return false, nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _, inf := range params_compat.PaymentInfo {
 		c, sharedSecret, seal, err := privacy.NewCoinCA(privacy.NewCoinParams().From(inf, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer), &tid)
@@ -336,12 +347,18 @@ func (tx *Tx) signCA(inp []privacy.PlainCoin, inputIndexes []uint64, out []*priv
 		ringSize = 1
 	}
 
-	// Generate Ring
-	piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
-	if piErr != nil {
-		return piErr
+	var pi int
+	useHw, firstC, pi, err := UseHwSigner(params_compat, 1)
+	if err != nil {
+		return err
 	}
-	var pi int = int(piBig.Int64())
+	if !useHw {
+		piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
+		if piErr != nil {
+			return piErr
+		}
+		pi = int(piBig.Int64())
+	}
 	shardID := common.GetShardIDFromLastByte(tx.pubKeyLastByteSender)
 	ring, indexes, commitmentsToZero, err := generateMlsagRingCA(inp, inputIndexes, out, params_token, pi, shardID, ringSize)
 	if err != nil {
@@ -356,26 +373,107 @@ func (tx *Tx) signCA(inp []privacy.PlainCoin, inputIndexes []uint64, out []*priv
 		return err
 	}
 
-	// Set sigPrivKey
-	privKeysMlsag, err := createPrivKeyMlsagCA(inp, out, outputSharedSecrets, params_compat, shardID, commitmentsToZero)
-	if err != nil {
-		return err
-	}
-	sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
-	sk, err := privacy.ArrayScalarToBytes(&privKeysMlsag)
-	if err != nil {
-		return err
-	}
-	tx.sigPrivKey = sk
+	if useHw {
+		var temp []byte = *params_compat.SenderSK
+		privOTA := temp[3*privacy.Ed25519KeySize : 4*privacy.Ed25519KeySize]
+		numOfInputs := new(privacy.Scalar).FromUint64(uint64(len(inp)))
+		numOfOutputs := new(privacy.Scalar).FromUint64(uint64(len(out)))
+		sumInputAssetTagBlinders := new(privacy.Scalar).FromUint64(0)
+		sumOutputAssetTagBlinders := new(privacy.Scalar).FromUint64(0)
+		rehashed := privacy.HashToPoint(params_compat.TokenID[:])
+		sumRand := new(privacy.Scalar).FromUint64(0)
+		for _, in := range inp {
+			inputCoin_specific, ok := in.(*privacy.CoinV2)
+			if !ok || inputCoin_specific.GetAssetTag() == nil {
+				return fmt.Errorf("Cannot cast a coin as v2-CA")
+			}
+			isUnblinded := privacy.IsPointEqual(rehashed, inputCoin_specific.GetAssetTag())
+			if isUnblinded {
+			}
 
-	// Set Signature
-	mlsagSignature, err := sag.SignConfidentialAsset(hashedMessage)
-	if err != nil {
-		return err
+			sharedSecret := new(privacy.Point).Identity()
+			bl := new(privacy.Scalar).FromUint64(0)
+			if !isUnblinded {
+				sharedSecret, err = inputCoin_specific.RecomputeSharedFromOTAKey(privOTA)
+				if err != nil {
+					return err
+				}
+				// _, _, indexForShard, err := inputCoin_specific.GetTxRandomDetail()
+				// if err != nil {
+				// 	return nil, err
+				// }
+				bl, err = privacy.ComputeAssetTagBlinder(sharedSecret)
+				if err != nil {
+					return err
+				}
+			}
+
+			v := inputCoin_specific.GetAmount()
+			effectiveRCom := new(privacy.Scalar).Mul(bl, v)
+			effectiveRCom.Add(effectiveRCom, inputCoin_specific.GetRandomness())
+
+			sumInputAssetTagBlinders.Add(sumInputAssetTagBlinders, bl)
+			sumRand.Add(sumRand, effectiveRCom)
+		}
+		for i, oc := range out {
+			if oc.GetAssetTag() == nil {
+				return fmt.Errorf("Cannot cast a coin as v2-CA")
+			}
+			// lengths between 0 and len(outputCoins) were rejected before
+			bl := new(privacy.Scalar).FromUint64(0)
+			isUnblinded := privacy.IsPointEqual(rehashed, oc.GetAssetTag())
+			if isUnblinded {
+			} else {
+				var err error
+				bl, err = privacy.ComputeAssetTagBlinder(outputSharedSecrets[i])
+				if err != nil {
+					return err
+				}
+			}
+			v := oc.GetAmount()
+			effectiveRCom := new(privacy.Scalar).Mul(bl, v)
+			effectiveRCom.Add(effectiveRCom, oc.GetRandomness())
+			sumOutputAssetTagBlinders.Add(sumOutputAssetTagBlinders, bl)
+			sumRand.Sub(sumRand, effectiveRCom)
+		}
+
+		sumInputAssetTagBlinders.Mul(sumInputAssetTagBlinders, numOfOutputs)
+		sumOutputAssetTagBlinders.Mul(sumOutputAssetTagBlinders, numOfInputs)
+		assetSum := new(privacy.Scalar).Sub(sumInputAssetTagBlinders, sumOutputAssetTagBlinders)
+		firstCommitmentToZeroRecomputed := new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], assetSum)
+		secondCommitmentToZeroRecomputed := new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], sumRand)
+		if len(commitmentsToZero) != 2 {
+			return fmt.Errorf("Error : need exactly 2 points for MLSAG double-checking")
+		}
+		match1 := privacy.IsPointEqual(firstCommitmentToZeroRecomputed, commitmentsToZero[0])
+		match2 := privacy.IsPointEqual(secondCommitmentToZeroRecomputed, commitmentsToZero[1])
+		if !match1 || !match2 {
+			return fmt.Errorf("Error : asset tag sum or commitment sum mismatch, %v, %v", match1, match2)
+		}
+
+		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
+
+		sig, err := sag.PartialSignConfidentialAsset(hashedMessage, firstC, assetSum, sumRand)
+		if err != nil {
+			return err
+		}
+		tx.Sig, err = sig.ToBytes()
+	} else {
+		privKeysMlsag, err := createPrivKeyMlsagCA(inp, out, outputSharedSecrets, params_compat, shardID, commitmentsToZero)
+		if err != nil {
+			return err
+		}
+		sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
+
+		// Set Signature
+		mlsagSignature, err := sag.SignConfidentialAsset(hashedMessage)
+		if err != nil {
+			return err
+		}
+		// inputCoins already hold keyImage so set to nil to reduce size
+		mlsagSignature.SetKeyImages(nil)
+		tx.Sig, err = mlsagSignature.ToBytes()
 	}
-	// inputCoins already hold keyImage so set to nil to reduce size
-	mlsagSignature.SetKeyImages(nil)
-	tx.Sig, err = mlsagSignature.ToBytes()
 
 	return err
 }
@@ -392,6 +490,7 @@ func (tx *Tx) proveToken(params *ExtendedParams) (bool, *privacy.SenderSeal, err
 	// paying fee using pToken is not supported
 	feeToken := uint64(0)
 	params_compat := NewTxParams(temp.SenderKey, temp.TokenParams.Receiver, temp.TokenParams.TokenInput, feeToken, temp.HasPrivacyToken, &tid, nil, temp.Info)
+	params_compat.Kvargs = params.Kvargs
 
 	// Init tx and params (tx and params will be changed)
 	if err := tx.initializeTxAndParams(params_compat, &params.TokenParams.TokenPaymentInfo); err != nil {
@@ -445,8 +544,19 @@ func (tx *Tx) provePRV(params *ExtendedParams) ([]privacy.PlainCoin, []uint64, [
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
 	var senderKeySet incognitokey.KeySet
-	_ = senderKeySet.InitFromPrivateKey(&params.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var err error
+	if len(params.SenderSK[:]) == privacy.Ed25519KeySize {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	for _, payInf := range params.PaymentInfo {
 		temp, _ := payInf.To()
 		c, _, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))

@@ -42,6 +42,7 @@ const aliasConfig = {
     alias: {
       "@lib": path.resolve(__dirname, "lib"),
       "@privacy-wasm": path.resolve(__dirname, "privacy.wasm"),
+      "@ledgerhq/devices": "@ledgerhq/devices/lib-es",
     },
   },
 };
@@ -123,7 +124,12 @@ module.exports = (env, argv) => {
         },
       }, {
         test: /\.wasm$/,
-        loader: 'wasm-loader'
+        loader: 'file-loader',
+        options: {
+          name: "privacy.wasm",
+          outputPath: "",
+          emitFile: false
+        }
       }, ],
     },
     ...(isProduction ? prodConfig : devConfig),

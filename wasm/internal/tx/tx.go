@@ -219,13 +219,24 @@ func (tx *Tx) prove(params *ExtendedParams) (*privacy.SenderSeal, error) {
 	var outputCoins []*privacy.CoinV2
 	var pInfos []*privacy.PaymentInfo
 	var senderKeySet incognitokey.KeySet
-	senderKeySet.InitFromPrivateKey(&params.SenderSK)
-	b := senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
+	var b byte
+	var err error
+	if len(params.SenderSK[:]) == privacy.Ed25519KeySize {
+		// read raw private key
+		senderKeySet.InitFromPrivateKey(&params.SenderSK)
+	} else {
+		// read raw payment address instead
+		err = senderKeySet.PaymentAddress.SetBytes(params.SenderSK[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return nil, err
+		}
+	}
+	b = senderKeySet.PaymentAddress.Pk[len(senderKeySet.PaymentAddress.Pk)-1]
 	// currently support returning the 1st SenderSeal only
 	var senderSealToExport *privacy.SenderSeal = nil
 	for _, payInf := range params.PaymentInfo {
 		temp, _ := payInf.To()
-		c, seal, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(common.GetShardIDFromLastByte(b)), privacy.CoinPrivacyTypeTransfer))
+		c, seal, err := privacy.NewCoinFromPaymentInfo(privacy.NewCoinParams().From(temp, int(b), privacy.CoinPrivacyTypeTransfer))
 		if senderSealToExport == nil {
 			senderSealToExport = seal
 		}
@@ -264,12 +275,18 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 		ringSize = 1
 	}
 
-	// Generate Ring
-	piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
-	if piErr != nil {
-		return piErr
+	var pi int
+	useHw, firstC, pi, err := UseHwSigner(params, 0)
+	if err != nil {
+		return err
 	}
-	var pi int = int(piBig.Int64())
+	if !useHw {
+		piBig, piErr := RandBigIntMaxRange(big.NewInt(int64(ringSize)))
+		if piErr != nil {
+			return piErr
+		}
+		pi = int(piBig.Int64())
+	}
 	shardID := common.GetShardIDFromLastByte(tx.pubKeyLastByteSender)
 	ring, indexes, commitmentToZero, err := generateMlsagRing(inp, inputIndexes, out, params, pi, shardID, ringSize)
 	if err != nil {
@@ -284,26 +301,37 @@ func (tx *Tx) sign(inp []privacy.PlainCoin, inputIndexes []uint64, out []*privac
 		return err
 	}
 
-	// Set sigPrivKey
-	privKeysMlsag, err := createPrivKeyMlsag(inp, out, &params.SenderSK, commitmentToZero)
-	if err != nil {
-		return err
-	}
-	sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
-	sk, err := privacy.ArrayScalarToBytes(&privKeysMlsag)
-	if err != nil {
-		return err
-	}
-	tx.sigPrivKey = sk
+	if useHw {
+		sumRand := new(privacy.Scalar).FromUint64(0)
+		for _, in := range inp {
+			sumRand.Add(sumRand, in.GetRandomness())
+		}
+		for _, out := range out {
+			sumRand.Sub(sumRand, out.GetRandomness())
+		}
+		sag := mlsag.NewMlsagFromInputCoins(inp, ring, pi)
 
-	// Set Signature
-	mlsagSignature, err := sag.Sign(hashedMessage)
-	if err != nil {
-		return err
+		sig, err := sag.PartialSign(hashedMessage, firstC, sumRand)
+		if err != nil {
+			return err
+		}
+		tx.Sig, err = sig.ToBytes()
+	} else {
+		privKeysMlsag, err := createPrivKeyMlsag(inp, out, &params.SenderSK, commitmentToZero)
+		if err != nil {
+			return err
+		}
+		sag := mlsag.NewMlsag(privKeysMlsag, ring, pi)
+
+		// Set Signature
+		mlsagSignature, err := sag.Sign(hashedMessage)
+		if err != nil {
+			return err
+		}
+		// inputCoins already hold keyImage so set to nil to reduce size
+		mlsagSignature.SetKeyImages(nil)
+		tx.Sig, err = mlsagSignature.ToBytes()
 	}
-	// inputCoins already hold keyImage so set to nil to reduce size
-	mlsagSignature.SetKeyImages(nil)
-	tx.Sig, err = mlsagSignature.ToBytes()
 
 	return err
 }
@@ -326,10 +354,21 @@ func (tx *Tx) Create(params *ExtendedParams, theirTime int64) (*privacy.SenderSe
 
 func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]PaymentReader) error {
 	var err error
+	var senderPaymentAddress privacy.PaymentAddress
 	// Get Keyset from param
-	skBytes := *params_compat.SenderSK
-	senderPaymentAddress := privacy.GeneratePaymentAddress(skBytes)
-	tx.sigPrivKey = skBytes
+	skb := (*params_compat.SenderSK)[:]
+	if len(skb) == privacy.Ed25519KeySize {
+		senderPaymentAddress = privacy.GeneratePaymentAddress(skb)
+	} else if len(skb) == 4*privacy.Ed25519KeySize {
+		err = senderPaymentAddress.SetBytes(skb[:3*privacy.Ed25519KeySize])
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("invalid tx key format")
+	}
+	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
+	// tx.sigPrivKey = skBytes
 	// Tx: initialize some values
 	// non-zero means it was set before
 	if tx.LockTime == 0 {
@@ -339,7 +378,7 @@ func (tx *Tx) initializeTxAndParams(params_compat *TxParams, paymentsPtr *[]Paym
 	// normal type indicator
 	tx.Type = TxNormalType
 	tx.Metadata = params_compat.Metadata
-	tx.pubKeyLastByteSender = common.GetShardIDFromLastByte(senderPaymentAddress.Pk[len(senderPaymentAddress.Pk)-1])
+
 	// we don't support version 1
 	tx.Version = 2
 	tx.Info = params_compat.Info

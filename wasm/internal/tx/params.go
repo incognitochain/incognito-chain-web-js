@@ -40,6 +40,8 @@ type ExtendedParams struct {
 	TokenParams *TokenParamsReader `json:"TokenParams,omitempty"`
 }
 
+func (p *ExtendedParams) GetKvargs() map[string]interface{} { return p.Kvargs }
+
 func (params *ExtendedParams) GetInputCoins() ([]privacy.PlainCoin, []uint64, error) {
 	var resultCoins []privacy.PlainCoin
 	var resultIndexes []uint64
@@ -192,6 +194,30 @@ func (params *ExtendedParams) GetTxTokenParams() (*TxTokenParams, error) {
 		nil
 }
 
+type keyValueParams interface {
+	GetKvargs() map[string]interface{}
+}
+
+func UseHwSigner(params keyValueParams, i int) (bool, []byte, int, error) {
+	if params.GetKvargs() == nil {
+		return false, nil, -1, nil
+	}
+	raw, err := json.Marshal(params.GetKvargs())
+	var holder struct {
+		Cseed [][]byte `json:"cseed"`
+		Pi    []uint   `json:"pi"`
+	}
+	err = json.Unmarshal(raw, &holder)
+	if err != nil {
+		return false, nil, -1, nil
+	}
+	if len(holder.Cseed) != len(holder.Pi) || i >= len(holder.Cseed) {
+		return false, nil, -1, fmt.Errorf("invalid params for using hardware device")
+	}
+
+	return true, holder.Cseed[i], int(holder.Pi[i]), nil
+}
+
 // ----- structs from chain code -----
 type TxParams struct {
 	SenderSK    *privacy.PrivateKey
@@ -202,7 +228,10 @@ type TxParams struct {
 	TokenID     *common.Hash
 	Metadata    metadata.Metadata
 	Info        []byte
+	Kvargs      map[string]interface{}
 }
+
+func (p *TxParams) GetKvargs() map[string]interface{} { return p.Kvargs }
 
 func NewTxParams(sk *privacy.PrivateKey, pInfos []*privacy.PaymentInfo, inputs []privacy.PlainCoin, fee uint64, isPriv bool, tokenID *common.Hash, md metadata.Metadata, info []byte) *TxParams {
 	if info == nil {

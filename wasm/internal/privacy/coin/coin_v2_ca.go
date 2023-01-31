@@ -54,6 +54,16 @@ func (coin *CoinV2) RecomputeSharedSecret(privateKey []byte) (*operation.Point,e
 	return sharedSecret, nil
 }
 
+func (coin *CoinV2) RecomputeSharedFromOTAKey(privOTA []byte) (*operation.Point,error){
+	sk := new(operation.Scalar).FromBytesS(privOTA)
+	sharedOTARandomPoint, err := coin.GetTxRandom().GetTxOTARandomPoint()
+	if err != nil {
+		return nil, errors.New("Cannot retrieve tx random detail")
+	}
+	sharedSecret := new(operation.Point).ScalarMult(sharedOTARandomPoint, sk)
+	return sharedSecret, nil
+}
+
 func (coin *CoinV2) ValidateAssetTag(sharedSecret *operation.Point, tokenID *common.Hash) (bool, error){
 	if coin.GetAssetTag()==nil{
 		if tokenID==nil || *tokenID==common.PRVCoinID{

@@ -157,16 +157,34 @@ func CreateConvertTx(args string, num int64) (string, error) {
 func NewKeySetFromPrivate(skStr string) (string, error) {
 	var err error
 	skHolder := struct {
-		PrivateKey []byte `json:"PrivateKey"`
+		PrivateKey     []byte `json:"PrivateKey,omitempty"`
+		ViewKey        []byte `json:"ViewKey,omitempty"`
+		OTAKey         []byte `json:"OTAKey,omitempty"`
+		PaymentAddress string
 	}{}
 	err = json.Unmarshal([]byte(skStr), &skHolder)
 	if err != nil {
 		return "", fmt.Errorf("cannot unmarshal params %s - %v", skStr, err)
 	}
+
 	ks := &incognitokey.KeySet{}
-	err = ks.InitFromPrivateKeyByte(skHolder.PrivateKey)
-	if err != nil {
-		return "", fmt.Errorf("init-key error - %v", err)
+	if len(skHolder.PrivateKey) == 32 {
+		err := ks.InitFromPrivateKeyByte(skHolder.PrivateKey)
+		if err != nil {
+			return "", fmt.Errorf("init-key error - %v", err)
+		}
+	} else {
+		tempKw, err := wallet.Base58CheckDeserialize(skHolder.PaymentAddress)
+		if err != nil {
+			return "", err
+		}
+		ks = &tempKw.KeySet
+		ks.OTAKey.SetPublicSpend(ks.PaymentAddress.Pk)
+		ks.OTAKey.SetOTASecretKey(skHolder.OTAKey)
+		ks.ReadonlyKey.Pk = ks.PaymentAddress.Pk
+		if len(skHolder.ViewKey) == privacy.Ed25519KeySize {
+			ks.ReadonlyKey.Rk = skHolder.ViewKey
+		}
 	}
 	txJson, err := json.Marshal(ks)
 	if err != nil {
@@ -562,7 +580,7 @@ func SetConfigs(args string) (bool, error) {
 	}
 	err := json.Unmarshal(raw, &cfg)
 	if err != nil {
-		return false, fmt.Errorf("cannot unmarshal configs %s - %v", cfg, err)
+		return false, fmt.Errorf("cannot unmarshal configs %s - %v", args, err)
 	}
 	common.MaxShardNumber = cfg.MaxShardNumber
 	common.AllowBase58EncodedCoins = cfg.AllowBase58EncodedCoins
@@ -674,4 +692,33 @@ func CreateOTAReceiverWithCfg(args string) (string, error) {
 		return "", err
 	}
 	return recv.String()
+}
+
+func PrepareParseKeyImage(args string) (string, error) {
+	raw := []byte(args)
+	var holder struct {
+		OtaSecretKey []byte
+		Coin         transaction.CoinData
+	}
+	err := json.Unmarshal(raw, &holder)
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal prepareParseKeyImage-params %s - %v", string(raw), err)
+	}
+
+	c, _, err := holder.Coin.ToCoin()
+	if err != nil {
+		return "", fmt.Errorf("cannot unmarshal prepareParseKeyImage-coin %s - %v", string(raw), err)
+	}
+	_, txOTARandomPoint, index, err := c.GetTxRandomDetail()
+	if err != nil {
+		return "", fmt.Errorf("invalid coin")
+	}
+	otasc := (&privacy.Scalar{}).FromBytesS(holder.OtaSecretKey)
+	rK := new(privacy.Point).ScalarMult(txOTARandomPoint, otasc)
+
+	H := privacy.HashToScalar(append(rK.ToBytesS(), common.Uint32ToBytes(index)...))
+	holder.Coin.SharedConcealRandom = H.ToBytesS()
+
+	resJson, _ := json.Marshal(holder.Coin)
+	return string(resJson), nil
 }
