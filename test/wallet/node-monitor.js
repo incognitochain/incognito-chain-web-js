@@ -238,6 +238,25 @@ async function CreateAndSendUnstake(accounts) {
         })
 }
 
+async function GetBalance(accounts) {
+    const logs =[]
+    const tasks = accounts.map(async (account) => {
+        const { accountSender, name } = account;
+        const prvBalance = await accountSender.getBalance({
+            tokenID: PRV_ID,
+            version: PRIVACY_VERSION
+        });
+        logs.push({
+            name,
+            amount: prvBalance / 1e9
+        })
+    })
+    await Promise.all(tasks);
+    logs.forEach(log => {
+        console.log(`${log.name}: ${log.amount}`)
+    })
+}
+
 async function ActionsWithNode(accounts) {
     const readline = require('readline').createInterface({
         input: process.stdin,
@@ -251,7 +270,8 @@ async function ActionsWithNode(accounts) {
     console.log('2: Stake your node');
     console.log('3: Send to main account');
     console.log('4: Unstake all nodes');
-    console.log('5: Cancel')
+    console.log('5: Get funds');
+    console.log('6: Cancel');
     console.log('\n========================\n')
     readline.question(
         ``,
@@ -274,6 +294,11 @@ async function ActionsWithNode(accounts) {
                 case '4':
                     readline.close()
                     fn = CreateAndSendUnstake;
+                    params = accounts;
+                    break;
+                case '5':
+                    readline.close()
+                    fn = GetBalance;
                     params = accounts;
                     break;
                 default:
