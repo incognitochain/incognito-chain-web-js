@@ -177,21 +177,27 @@ async function CreateAndSendToMainAccount(accounts) {
                         tokenID: PRV_ID,
                         version: PRIVACY_VERSION
                     });
-                    const transferAmount = new bn(prvBalance).sub(new bn(FeePerTx * 2)).toString();
-                    const prvPayments = [{
-                        PaymentAddress: MAIN_ADDRESS,
-                        Amount: transferAmount,
-                    }]
-                    const tx = await accountSender.createAndSendNativeToken({
-                        transfer: {
-                            prvPayments,
-                            fee: FeePerTx
-                        }
-                    });
-                    logs.push({
-                        name,
-                        tx
-                    })
+                    if (prvBalance > 10 * 1e9) {
+                        const transferAmount = new bn(prvBalance).sub(new bn(1e9)).toString();
+                        const prvPayments = [{
+                            PaymentAddress: MAIN_ADDRESS,
+                            Amount: transferAmount,
+                        }]
+                        const tx = await accountSender.createAndSendNativeToken({
+                            transfer: {
+                                prvPayments,
+                                fee: FeePerTx
+                            },
+                            extra: {
+                                txType: 7,
+                                version: PRIVACY_VERSION,
+                            }
+                        });
+                        logs.push({
+                            name,
+                            tx: tx.txhash || tx.txId
+                        })
+                    }
                 }
             }
             if (logs.length > 0) {
