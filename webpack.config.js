@@ -144,7 +144,7 @@ module.exports = (env, argv) => {
     },
     output: {
       path: path.resolve(__dirname, "build/web"),
-      publicPath: "/",
+      publicPath: "/assets/",
       library: "wallet",
       libraryTarget: "umd",
     },
@@ -162,7 +162,8 @@ module.exports = (env, argv) => {
         use: [{
           loader: "worker-loader",
           options: {
-            publicPath: "/"
+            publicPath: "/assets/",
+            filename: "worker.js",
           }
         }, {
           loader: "babel-loader",
@@ -197,6 +198,7 @@ module.exports = (env, argv) => {
         options: {
           name: "privacy.wasm",
           outputPath: "",
+          publicPath: '/assets/',
           emitFile: false
         }
       }, ],
