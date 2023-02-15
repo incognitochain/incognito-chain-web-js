@@ -1,6 +1,7 @@
 var path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 const webpack = require("webpack");
+const ThreadsPlugin = require('threads-plugin');
 
 const optimization = {
   minimize: true,
@@ -76,7 +77,7 @@ module.exports = (env, argv) => {
           presets: ["@babel/preset-env"],
           ignore: [/wasm_exec|sjcl/],
         },
-      }, ],
+      },],
     },
     plugins: [
       new webpack.optimize.LimitChunkCountPlugin({
@@ -97,6 +98,7 @@ module.exports = (env, argv) => {
       filename: "[name].js",
       library: "",
       libraryTarget: "umd",
+      chunkFilename: "wallet.js",
     },
     target: "node",
     module: {
@@ -130,10 +132,23 @@ module.exports = (env, argv) => {
           outputPath: "",
           emitFile: false
         }
-      }, ],
+      },],
     },
+    plugins: [
+      new ThreadsPlugin(),
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1,
+      }),
+    ],
     ...(isProduction ? prodConfig : devConfig),
-    ...aliasConfig,
+    resolve: {
+      alias: {
+        "@lib/wasm": path.resolve(__dirname, "lib/wasm-node"),
+        "@lib": path.resolve(__dirname, "lib"),
+        "@privacy-wasm": path.resolve(__dirname, "privacy.wasm"),
+        "@ledgerhq/devices": "@ledgerhq/devices/lib-es",
+      },
+    },
   };
 
   const webCfg = {
@@ -147,6 +162,7 @@ module.exports = (env, argv) => {
       publicPath: "/assets/",
       library: "wallet",
       libraryTarget: "umd",
+      chunkFilename: "wallet.js",
     },
     target: "web",
     module: {
@@ -158,27 +174,6 @@ module.exports = (env, argv) => {
         type: "json"
       }],
       rules: [{
-        test: /\.worker\.js$/i,
-        use: [{
-          loader: "worker-loader",
-          options: {
-            publicPath: "/assets/",
-            filename: "worker.js",
-          }
-        }, {
-          loader: "babel-loader",
-          options: {
-            plugins: ["lodash", "@babel/plugin-proposal-class-properties", "@babel/plugin-transform-runtime"],
-            presets: [
-              ["@babel/preset-env", {
-                useBuiltIns: "entry",
-                corejs: "3.10.2"
-              }],
-            ],
-            ignore: [/wasm_exec|sjcl/],
-          },
-        }, ],
-      }, {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: "babel-loader",
@@ -201,9 +196,12 @@ module.exports = (env, argv) => {
           publicPath: '/assets/',
           emitFile: false
         }
-      }, ],
+      },],
     },
     plugins: [
+      new ThreadsPlugin({
+        globalObject: 'self',
+      }),
       new webpack.optimize.LimitChunkCountPlugin({
         maxChunks: 1,
       }),
@@ -211,5 +209,5 @@ module.exports = (env, argv) => {
     ...(isProduction ? prodConfig : devConfig),
     ...aliasConfig,
   };
-  return [cfg, nodeCfg, webCfg];
+  return [nodeCfg, webCfg];
 };
