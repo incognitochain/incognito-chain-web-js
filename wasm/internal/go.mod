@@ -12,9 +12,5 @@ require (
 	github.com/olivere/elastic v6.2.35+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd // indirect
-	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
-	cloud.google.com/go v0.51.0
+	golang.org/x/crypto v0.1.0
 )
