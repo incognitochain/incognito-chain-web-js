@@ -91,6 +91,7 @@ declare module "incognito-chain-web-js" {
   let init: function;
   let CCC: 1;
   let DDD: number;
+  let PHAT: any;
 
   export {
     Wallet,
@@ -184,5 +185,6 @@ declare module "incognito-chain-web-js" {
     BBB,
     CCC,
     DDD,
+    PHAT,
   };
 }
