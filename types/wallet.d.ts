@@ -1,8 +1,10 @@
-const AAA: 1;
-const BBB: number;
+// Type definitions for resolve
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// TypeScript Version: 3.7
 
-declare module "incognito-chain-web-js" {
-  let Wallet: any;
+declare module "incognito-chain-web-js/types/wallet" {
+  import { Wallet } from "incognito-chain-web-js/types/wallet-type";
+
   let Account: any;
   let DefaultStorage: any;
   let TxHistoryInfo: any;
@@ -181,10 +183,9 @@ declare module "incognito-chain-web-js" {
     createNewCoins,
     getBurningAddress,
     init,
-    AAA,
-    BBB,
-    CCC,
-    DDD,
-    PHAT,
   };
+}
+
+declare module "incognito-chain-web-js/lib/wallet" {
+  export * from "incognito-chain-web-js/types/wallet";
 }
