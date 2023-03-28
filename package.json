@@ -4,7 +4,7 @@
   "description": "Constant-chain Javascript API",
   "main": "build-node/inc.js",
   "module": "build/web/wallet.js",
-  "typings": "lib/wallet-web.d.ts",
+  "typings": "types/index.d.ts",
   "scripts": {
     "start": "node --experimental-repl-await -r ./inc.config",
     "start:dev": "yarn test-account && yarn build",
