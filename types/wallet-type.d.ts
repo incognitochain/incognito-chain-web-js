@@ -3,9 +3,7 @@
 // TypeScript Version: 3.7
 
 declare module "incognito-chain-web-js/types/wallet-type" {
-  abstract class Object {}
-
-  interface Method {}
+  import { Method } from "incognito-chain-web-js/types/global";
 
   type MasterAccountType = any;
   type SeedType = any;

@@ -4,6 +4,7 @@
 
 declare module "incognito-chain-web-js/types/wallet" {
   import { Wallet as WalletType } from "incognito-chain-web-js/types/wallet-type";
+  import { Account as AccountType } from "incognito-chain-web-js/types/account";
 
   let Wallet: any;
   let Account: any;
@@ -181,6 +182,7 @@ declare module "incognito-chain-web-js/types/wallet" {
     getBurningAddress,
     init,
     WalletType,
+    AccountType,
   };
 }
 

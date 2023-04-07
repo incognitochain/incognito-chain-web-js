@@ -6,6 +6,7 @@
 
 /// <reference path="wallet.d.ts" />
 /// <reference path="account.d.ts" />
+/// <reference path="constants.d.ts" />
 /// ...
 
 // This is not single module. There are many module included by reference directives.
@@ -14,4 +15,10 @@ declare module "incognito-chain-web-js" {
   export * from "incognito-chain-web-js/types/global";
   export * from "incognito-chain-web-js/types/wallet";
   export * from "incognito-chain-web-js/types/account";
+  export * from "incognito-chain-web-js/types/common";
+  export * from "incognito-chain-web-js/types/constants";
+
+  // ....
+  // ....
+  // ....
 }

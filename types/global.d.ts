@@ -6,6 +6,7 @@ Warning: all of these interfaces are empty. If you want type definitions for var
 */
 
 declare module "incognito-chain-web-js/types/global" {
+  // Don't override it, it will be used to extend in the future!
   interface Action {}
   interface Event {}
   interface Method {}
