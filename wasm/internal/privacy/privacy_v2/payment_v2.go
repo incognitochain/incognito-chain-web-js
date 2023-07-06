@@ -4,11 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	// "fmt"
-	"incognito-chain/privacy/proof/agg_interface"
-	"incognito-chain/key/wallet"
-	// "strconv"
 
+	"incognito-chain/key/wallet"
+	"incognito-chain/privacy/proof/agg_interface"
 	"incognito-chain/common"
 	"incognito-chain/privacy/coin"
 	errhandler "incognito-chain/privacy/errorhandler"
@@ -22,6 +20,8 @@ type PaymentProofV2 struct {
 	aggregatedRangeProof *bulletproofs.AggregatedRangeProof
 	inputCoins           []coin.PlainCoin
 	outputCoins          []*coin.CoinV2
+	// mapping from string to coinv2
+
 }
 
 func (proof *PaymentProofV2) SetVersion() { proof.Version = 2 }
