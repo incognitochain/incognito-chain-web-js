@@ -105,6 +105,8 @@ const (
 	Pdexv3WithdrawStakingRewardRequestMeta  = 306
 	Pdexv3WithdrawStakingRewardResponseMeta = 307
 
+	InscribeRequestMeta = 363
+
 	// portal
 	PortalCustodianDepositMeta                  = 100
 	PortalRequestPortingMeta                    = 101

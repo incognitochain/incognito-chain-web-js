@@ -5,6 +5,7 @@ import (
 
 	metadataBridge "incognito-chain/metadata/bridge"
 	metadataCommon "incognito-chain/metadata/common"
+	metadataIns "incognito-chain/metadata/inscriptions"
 	metadataPdexv3 "incognito-chain/metadata/pdexv3"
 
 	"github.com/pkg/errors"
@@ -149,6 +150,8 @@ func ParseMetadata(raw json.RawMessage) (Metadata, error) {
 		md = &metadataBridge.UnshieldResponse{}
 	case metadataCommon.BurnForCallRequestMeta:
 		md = &metadataBridge.BurnForCallRequest{}
+	case metadataCommon.InscribeRequestMeta:
+		md = &metadataIns.InscribeRequest{}
 	default:
 		return nil, errors.Errorf("Could not parse metadata with type: %d", theType)
 	}
