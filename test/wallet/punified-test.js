@@ -71,7 +71,7 @@ async function setup() {
   console.log("setShardNumber: ", setShardNumber);
   await setShardNumber(2);
   account1PrivateKeyStr =
-    "";
+    "112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or";
   account1 = new AccountWallet(Wallet);
   account1.setRPCCoinServices(rpcCoinService);
   account1.setRPCClient(rpcClient);
@@ -81,10 +81,10 @@ async function setup() {
   account1PaymentAddressStr =
     account1.key.base58CheckSerialize(PaymentAddressType);
   // await account1.submitKeyAndSync([PRVIDSTR, tokenID, secondTokenID]);
-//   receiverPaymentAddrStr =
-//     "12shR6fDe7ZcprYn6rjLwiLcL7oJRiek66ozzYu3B3rBxYXkqJeZYj6ZWeYy4qR4UHgaztdGYQ9TgHEueRXN7VExNRGB5t4auo3jTgXVBiLJmnTL5LzqmTXezhwmQvyrRjCbED5xVWf4ETHbRCSP";
-//   receiverPaymentAddrStr2 =
-//     "12sm28usKxzw8HuwGiEojZZLWgvDinAkmZ3NvBNRQLuPrf5LXNLXVXiu4VBCMVDrDm97qjLrgFck3P36UTSWfqNX1PBP9PBD78Cpa95em8vcnjQrnwDNi8EdkdkSA6CWcs4oFatQYze7ETHAUBKH";
+  //   receiverPaymentAddrStr =
+  //     "12shR6fDe7ZcprYn6rjLwiLcL7oJRiek66ozzYu3B3rBxYXkqJeZYj6ZWeYy4qR4UHgaztdGYQ9TgHEueRXN7VExNRGB5t4auo3jTgXVBiLJmnTL5LzqmTXezhwmQvyrRjCbED5xVWf4ETHbRCSP";
+  //   receiverPaymentAddrStr2 =
+  //     "12sm28usKxzw8HuwGiEojZZLWgvDinAkmZ3NvBNRQLuPrf5LXNLXVXiu4VBCMVDrDm97qjLrgFck3P36UTSWfqNX1PBP9PBD78Cpa95em8vcnjQrnwDNi8EdkdkSA6CWcs4oFatQYze7ETHAUBKH";
 }
 
 async function TestConvertPUnifiedToken() {
@@ -96,18 +96,18 @@ async function TestConvertPUnifiedToken() {
   // let networkID = 3;
 
   try {
-    let result = await account1.createAndSendConvertUnifiedTokenRequestTx (
+    let result = await account1.createAndSendConvertUnifiedTokenRequestTx(
       {
-        transfer: {fee, tokenID},
+        transfer: { fee, tokenID },
         extra: {
-            pUnifiedTokenID,
-            convertAmount,
-            version: 2,
+          pUnifiedTokenID,
+          convertAmount,
+          version: 2,
         },
       }
     );
     console.log("result: ", result);
-  } catch(e) {
+  } catch (e) {
     console.log("error: ", e);
   }
 }
@@ -134,25 +134,25 @@ async function TestUnshieldPUnifiedToken() {
   ];
 
   let burningInfos = [{
-    incTokenID: incTokenID, 
-    burningAmount: unshieldAmount, 
-    expectedAmount: 1000, 
+    incTokenID: incTokenID,
+    burningAmount: unshieldAmount,
+    expectedAmount: 1000,
     remoteAddress: remoteAddress
   }];
 
   try {
-    let result = await account1.createAndSendBurnUnifiedTokenRequestTx (
+    let result = await account1.createAndSendBurnUnifiedTokenRequestTx(
       {
-        transfer: {fee, tokenID: unshieldingTokenID, prvPayments, tokenPayments},
+        transfer: { fee, tokenID: unshieldingTokenID, prvPayments, tokenPayments },
         extra: {
-            burningInfos: burningInfos,
-            txHashHandler: null,
-            version: 2,
+          burningInfos: burningInfos,
+          txHashHandler: null,
+          version: 2,
         },
       }
     );
     console.log("result: ", result);
-  } catch(e) {
+  } catch (e) {
     console.log("error: ", e);
   }
 }
@@ -166,8 +166,8 @@ async function TestCreateAndSendBurningPegPRVRequestTx() {
   let paymentTokenID = "d88840264322db699177328ee5901f42fb78d7b4958b791bd03ca87fa2390f4b";
   let tokenPayments = [
     {
-    "paymentAddress": "12svfkP6w5UDJDSCwqH978PvqiqBxKmUnA9em9yAYWYJVRv7wuXY1qhhYpPAm4BDz2mLbFrRmdK3yRhnTqJCZXKHUmoi7NV83HCH2YFpctHNaDdkSiQshsjw2UFUuwdEvcidgaKmF3VJpY5f8RdN", 
-    "amount": 1000
+      "paymentAddress": "12svfkP6w5UDJDSCwqH978PvqiqBxKmUnA9em9yAYWYJVRv7wuXY1qhhYpPAm4BDz2mLbFrRmdK3yRhnTqJCZXKHUmoi7NV83HCH2YFpctHNaDdkSiQshsjw2UFUuwdEvcidgaKmF3VJpY5f8RdN",
+      "amount": 1000
     }
   ];
   let prvPayments = [
@@ -178,30 +178,70 @@ async function TestCreateAndSendBurningPegPRVRequestTx() {
   ];
 
   try {
-    let result = await account1.createAndSendBurningPegPRVRequestTx (
+    let result = await account1.createAndSendBurningPegPRVRequestTx(
       {
-        transfer: {fee, prvPayments, tokenPayments, paymentTokenID},
+        transfer: { fee, prvPayments, tokenPayments, paymentTokenID },
         extra: {
-            txHashHandler: null,
-            version: 2,
-            burningType: BurningPRVRequestMeta,
-            burnAmount: unshieldAmount,
-            remoteAddress: remoteAddress,
+          txHashHandler: null,
+          version: 2,
+          burningType: BurningPRVRequestMeta,
+          burnAmount: unshieldAmount,
+          remoteAddress: remoteAddress,
         },
       }
     );
     console.log("result: ", result);
-  } catch(e) {
+  } catch (e) {
+    console.log("error: ", e);
+  }
+}
+
+
+async function TestCreateAndSendInscribeRequestTx() {
+  const BurningPRVRequestMeta = 338;
+  let fee = 1e8;
+  //todo
+  let unshieldAmount = 3000;
+  let remoteAddress = '0xF91cEe2DE943733e338891Ef602c962eF4D7Eb81';
+  let paymentTokenID = "d88840264322db699177328ee5901f42fb78d7b4958b791bd03ca87fa2390f4b";
+  let tokenPayments = [
+    {
+      "paymentAddress": "12svfkP6w5UDJDSCwqH978PvqiqBxKmUnA9em9yAYWYJVRv7wuXY1qhhYpPAm4BDz2mLbFrRmdK3yRhnTqJCZXKHUmoi7NV83HCH2YFpctHNaDdkSiQshsjw2UFUuwdEvcidgaKmF3VJpY5f8RdN",
+      "amount": 1000
+    }
+  ];
+  let prvPayments = [
+    // {
+    // // "paymentAddress": "12se7yYqc4dwhyBa9iud3b3jXqN9gGVBMcGx6ToFiyZDPo7wNV6GDL18Qb47rrnHQzQPrBFaUERkNTZno72F1Q9uY3cHhRW16xXTn5L5XAWhmq7HYjfBr1fvuP9Zb1it1HCuT9miC8qkxHa3521w", 
+    // // "amount": 100
+    // }
+  ];
+
+  let dataobj = { a: 1, b: 2, c: 3 };
+
+  try {
+    let result = await account1.createAndSendInscribeRequestTx(
+      {
+        transfer: {},
+        extra: {
+          txHashHandler: null,
+          version: 2,
+          data: JSON.stringify(dataobj),
+        },
+      }
+    );
+    console.log("result: ", result);
+  } catch (e) {
     console.log("error: ", e);
   }
 }
 
 async function RunPUnifiedTokenTests() {
-    await setup();
+  await setup();
 
-    // TestConvertPUnifiedToken();
-    // TestUnshieldPUnifiedToken();
-    TestCreateAndSendBurningPegPRVRequestTx();
+  // TestConvertPUnifiedToken();
+  // TestUnshieldPUnifiedToken();
+  TestCreateAndSendInscribeRequestTx();
 }
 
 RunPUnifiedTokenTests()

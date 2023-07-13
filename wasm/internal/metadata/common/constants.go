@@ -244,6 +244,10 @@ const (
 	IssuingNearResponseMeta = 336
 	BurningNearRequestMeta  = 337
 	BurningNearConfirmMeta  = 163
+
+	// privacy inscriptions
+	InscribeRequestMeta  = 363
+	InscribeResponseMeta = 364
 )
 
 var minerCreatedMetaTypes = []int{
@@ -281,6 +285,7 @@ var minerCreatedMetaTypes = []int{
 	BridgeAggConvertTokenToUnifiedTokenResponseMeta,
 	IssuingUnifiedTokenResponseMeta,
 	BurningUnifiedTokenResponseMeta,
+	InscribeResponseMeta,
 }
 
 // Special rules for shardID: stored as 2nd param of instruction of BeaconBlock

@@ -49,6 +49,8 @@ declare module "incognito-chain-web-js" {
    let PortalV4ShieldingResponseMeta: any;
    let PortalV4UnshieldRequestMeta: any;
    let PortalV4UnshieldingResponseMeta: any;
+   let InscribeRequestMeta: any;
+   let InscribeResponseMeta: any;
    let hybridEncryption: any;
    let hybridDecryption: any;
    let encryptMessageOutCoin: any;
@@ -138,6 +140,8 @@ declare module "incognito-chain-web-js" {
       PortalV4ShieldingResponseMeta,
       PortalV4UnshieldRequestMeta,
       PortalV4UnshieldingResponseMeta,
+      InscribeRequestMeta,
+      InscribeResponseMeta,
       hybridEncryption,
       hybridDecryption,
       encryptMessageOutCoin,

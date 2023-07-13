@@ -203,4 +203,7 @@ const (
 	BurningUnifiedTokenRequestMeta                  = metadataCommon.BurningUnifiedTokenRequestMeta
 	BurningUnifiedTokenResponseMeta                 = metadataCommon.BurningUnifiedTokenResponseMeta
 	BridgeAggAddTokenMeta                           = metadataCommon.BridgeAggAddTokenMeta
+
+	// privacy inscriprions
+	InscribeRequestMeta = metadataCommon.InscribeRequestMeta
 )
