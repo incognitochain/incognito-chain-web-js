@@ -18,19 +18,16 @@ const MAINNET_BTC_ID = "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e618
 
 // const rpcClient = "https://lb-fullnode.incognito.org/fullnode";
 //  new RpcClient("https://mainnet.incognito.org/fullnode");
-const rpcClient = "https://testnet.incognito.org/fullnode";
-// const rpcClient = "http://51.161.117.193:11334";
-// const rpcClient = new RpcClient("https://dev-test-node.incognito.org");
-// const rpcClient = new RpcClient("http://54.39.158.106:9334");
-// const rpcClient = new RpcClient("http://139.162.55.124:8334");   // dev-net
-// const rpcClient = "https://testnet1.incognito.org/fullnode"; //testnet1
-// "http://139.162.55.124:8334";
+// const rpcClient = "https://testnet.incognito.org/fullnode";
+const rpcClient = "http://localhost:9334";
+
 
 const stagingServices = "https://api-coinservice-staging.incognito.org";
 
 const rpcCoinService =
   // "https://api-coinservice.incognito.org"; //mainnet
-  stagingServices; //testnet
+  // stagingServices; //testnet
+  rpcClient;
 // "https://api-coinservice-staging2.incognito.org"; // testnet1
 // "http://51.161.119.66:9009"; //dev-test-coin-service
 // const rpcTxService = `${stagingServices}/txservice`;
@@ -69,7 +66,7 @@ async function setup() {
     "Anon"
   );
   console.log("setShardNumber: ", setShardNumber);
-  await setShardNumber(2);
+  await setShardNumber(1);
   account1PrivateKeyStr =
     "112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or";
   account1 = new AccountWallet(Wallet);
@@ -217,7 +214,7 @@ async function TestCreateAndSendInscribeRequestTx() {
     // }
   ];
 
-  let dataobj = { a: 1, b: 2, c: 3 };
+  let dataobj = { a: "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" };
 
   try {
     let result = await account1.createAndSendInscribeRequestTx(
@@ -241,7 +238,7 @@ async function RunPUnifiedTokenTests() {
 
   // TestConvertPUnifiedToken();
   // TestUnshieldPUnifiedToken();
-  TestCreateAndSendInscribeRequestTx();
+  await TestCreateAndSendInscribeRequestTx();
 }
 
 RunPUnifiedTokenTests()

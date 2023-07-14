@@ -13,6 +13,7 @@ import (
 	"incognito-chain/common/base58"
 	"incognito-chain/key/incognitokey"
 	"incognito-chain/key/wallet"
+	"incognito-chain/metadata"
 	metadataCommon "incognito-chain/metadata/common"
 	"incognito-chain/privacy"
 )
@@ -32,10 +33,39 @@ func RandBigIntMaxRange(max *big.Int) (*big.Int, error) {
 }
 
 type EstimateTxSizeParam struct {
-	NumInputCoins            int                     `json:"NumInputs"`
-	NumPayments              int                     `json:"NumPayments"`
-	Metadata                 metadataCommon.Metadata `json:"Metadata"`
-	PrivacyCustomTokenParams *TokenParamsReader      `json:"TokenParams"`
+	NumInputCoins            int                `json:"NumInputs"`
+	NumPayments              int                `json:"NumPayments"`
+	Metadata                 metadata.Metadata  `json:"Metadata"`
+	PrivacyCustomTokenParams *TokenParamsReader `json:"TokenParams"`
+}
+
+func (p *EstimateTxSizeParam) UnmarshalJSON(data []byte) error {
+	type Tmp struct {
+		NumInputCoins            int                `json:"NumInputs"`
+		NumPayments              int                `json:"NumPayments"`
+		Metadata                 json.RawMessage    `json:"Metadata"`
+		PrivacyCustomTokenParams *TokenParamsReader `json:"TokenParams"`
+	}
+
+	resTmp := Tmp{}
+	err := json.Unmarshal(data, &resTmp)
+	if err != nil {
+		return err
+	}
+
+	var md metadata.Metadata
+	if resTmp.Metadata != nil {
+		md, err = metadata.ParseMetadata(resTmp.Metadata)
+		if err != nil {
+			return err
+		}
+	}
+
+	p.NumInputCoins = resTmp.NumInputCoins
+	p.NumPayments = resTmp.NumPayments
+	p.Metadata = md
+	p.PrivacyCustomTokenParams = resTmp.PrivacyCustomTokenParams
+	return nil
 }
 
 func toB64Len(numOfBytes uint64) uint64 {
@@ -348,7 +378,7 @@ func GetTokenID(c *privacy.CoinV2, keySet *incognitokey.KeySet, rawAssetTags map
 	}
 
 	// must take valid coin & keySet
-	_, txOTARandomPoint, _, _ :=  c.GetTxRandomDetail()
+	_, txOTARandomPoint, _, _ := c.GetTxRandomDetail()
 	sharedSecret := new(privacy.Point).ScalarMult(txOTARandomPoint, keySet.OTAKey.GetOTASecretKey())
 	blinder := privacy.HashToScalar(append(sharedSecret.ToBytesS(), []byte("assettag")...))
 	rawAssetTag := new(privacy.Point).Sub(t, new(privacy.Point).ScalarMult(privacy.PedCom.G[privacy.PedersenRandomnessIndex], blinder))
