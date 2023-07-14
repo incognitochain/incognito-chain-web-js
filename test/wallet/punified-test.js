@@ -10,7 +10,12 @@ const {
   isOldPaymentAddress,
   VerifierTx,
   setShardNumber,
+  StatelessTransactor,
+  RpcClient,
 } = require("../../");
+// const { StatelessTransactor } = require("../../")
+// const { StatelessTransactor } = require("@lib/tx/stateless");
+// const { RpcClient } = require("@lib/wallet");
 const { PaymentAddressType, BurningPRVBEP20RequestMeta } = constants;
 
 const TESTNET_BTC_ID = "4584d5e9b2fc0337dfb17f4b5bb025e5b82c38cfa4f54e8a3d4fcdd03954ff82";
@@ -24,19 +29,19 @@ const rpcClient = "http://localhost:9334";
 
 const stagingServices = "https://api-coinservice-staging.incognito.org";
 
-const rpcCoinService =
-  // "https://api-coinservice.incognito.org"; //mainnet
-  // stagingServices; //testnet
-  rpcClient;
+// const rpcCoinService =
+//   // "https://api-coinservice.incognito.org"; //mainnet
+//   // stagingServices; //testnet
+//   rpcClient;
 // "https://api-coinservice-staging2.incognito.org"; // testnet1
 // "http://51.161.119.66:9009"; //dev-test-coin-service
 // const rpcTxService = `${stagingServices}/txservice`;
-const rpcTxService = "https://api-coinservice-staging.incognito.org/txservice";
+// const rpcTxService = "https://api-coinservice-staging.incognito.org/txservice";
 //  "https://api-coinservice.incognito.org/txservice"; mainnet
 // "https://api-coinservice-staging.incognito.org/txservice";
 //  "https://api-coinservice-staging2.incognito.org/txservice"; // testnet1
 //  "http://51.161.119.66:8001"; //dev-test-coin-service
-const rpcRequestService = `${stagingServices}/airdrop-service`;
+// const rpcRequestService = `${stagingServices}/airdrop-service`;
 // "https://api-coinservice.incognito.org/airdrop-service"; // mainnet
 // "http://51.161.119.66:4000"; //testnet
 // "http://51.161.119.66:6000"; // testnet-1
@@ -51,6 +56,7 @@ let wallet;
 let account1PrivateKeyStr;
 let account1;
 let account1PaymentAddressStr;
+let stateLess;
 
 const PRVID =
   "0000000000000000000000000000000000000000000000000000000000000004";
@@ -67,13 +73,14 @@ async function setup() {
   );
   console.log("setShardNumber: ", setShardNumber);
   await setShardNumber(1);
+  // TODO: fill the private key
   account1PrivateKeyStr =
-    "112t8roafGgHL1rhAP9632Yef3sx5k8xgp8cwK4MCJsCL1UWcxXvpzg97N4dwvcD735iKf31Q2ZgrAvKfVjeSUEvnzKJyyJD3GqqSZdxN4or";
+    "";
   account1 = new AccountWallet(Wallet);
-  account1.setRPCCoinServices(rpcCoinService);
+  // account1.setRPCCoinServices(rpcCoinService);
   account1.setRPCClient(rpcClient);
-  account1.setRPCTxServices(rpcTxService);
-  account1.setRPCRequestServices(rpcRequestService);
+  // account1.setRPCTxServices(rpcTxService);
+  // account1.setRPCRequestServices(rpcRequestService);
   await account1.setKey(account1PrivateKeyStr);
   account1PaymentAddressStr =
     account1.key.base58CheckSerialize(PaymentAddressType);
@@ -82,6 +89,14 @@ async function setup() {
   //     "12shR6fDe7ZcprYn6rjLwiLcL7oJRiek66ozzYu3B3rBxYXkqJeZYj6ZWeYy4qR4UHgaztdGYQ9TgHEueRXN7VExNRGB5t4auo3jTgXVBiLJmnTL5LzqmTXezhwmQvyrRjCbED5xVWf4ETHbRCSP";
   //   receiverPaymentAddrStr2 =
   //     "12sm28usKxzw8HuwGiEojZZLWgvDinAkmZ3NvBNRQLuPrf5LXNLXVXiu4VBCMVDrDm97qjLrgFck3P36UTSWfqNX1PBP9PBD78Cpa95em8vcnjQrnwDNi8EdkdkSA6CWcs4oFatQYze7ETHAUBKH";
+
+  let w = new Wallet();
+  let rpc = new RpcClient(rpcClient);
+  console.log("StatelessTransactor: ", StatelessTransactor);
+  console.log("Account: ", AccountWallet);
+  stateLess = new StatelessTransactor({ rpc });
+  stateLess.init(rpcClient);
+  stateLess.setKey(account1PrivateKeyStr);
 }
 
 async function TestConvertPUnifiedToken() {
@@ -217,7 +232,7 @@ async function TestCreateAndSendInscribeRequestTx() {
   let dataobj = { a: "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" };
 
   try {
-    let result = await account1.createAndSendInscribeRequestTx(
+    let result = await stateLess.createAndSendInscribeRequestTx(
       {
         transfer: {},
         extra: {
