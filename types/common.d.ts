@@ -47,6 +47,7 @@ declare module "incognito-chain-web-js/types/common" {
     CoinDetailsEncrypted?: string;
     SNDerivator?: string;
     AssetTag?: string;
+    RawAssetTag?: string;
     TokenID?: string;
   };
 
