@@ -280,7 +280,11 @@ func DecryptCoinList(paramStr string) (string, error) {
 				resultCoin.TokenID = temp.CoinList[i].TokenID
 			} else {
 				// find tokenID using the token list
-				resultCoin.TokenID = transaction.GetTokenID(c, &tempKw.KeySet, rawAssetTags)
+				var rawAssetTag *privacy.Point
+				resultCoin.TokenID, rawAssetTag = transaction.GetTokenID(c, &tempKw.KeySet, rawAssetTags)
+				if rawAssetTag != nil {
+					resultCoin.RawAssetTag = rawAssetTag.ToBytesS()
+				}
 			}
 			resultCoin.Index = temp.CoinList[i].Index
 			resultCoins = append(resultCoins, resultCoin)
